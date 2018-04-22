@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "start": "node generate.js"
+  },
+  "dependencies": {
+    "gm": "^1.23.1",
+    "sync-request": "^6.0.0"
+  }
+}
