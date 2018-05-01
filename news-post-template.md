@@ -1,14 +1,14 @@
 ---
 layout: post
-title: "% TITLE %"
-date: % DATE % % TIME % +0000
+title: "%TITLE%"
+date: %DATE% %TIME% +0000
 ---
 
-% HEADER %
+%HEADER%
 
 [![](/wiki/shared/news/banners/project-loved.jpg)](https://osu.ppy.sh/community/forums/120)
 
-% INTRO %
+%INTRO%
 
 ### Navigation
 
@@ -19,38 +19,38 @@ date: % DATE % % TIME % +0000
 
 ## <a name="osu" id="osu"></a>osu!
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/% VIDEO osu %?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-osu%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 ---
 
-% BEATMAPS osu %
+%BEATMAPS-osu%
 
 ## <a name="osutaiko" id="osutaiko"></a>osu!taiko
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/% VIDEO taiko %?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-taiko%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 ---
 
-% BEATMAPS taiko %
+%BEATMAPS-taiko%
 
 ## <a name="osucatch" id="osucatch"></a>osu!catch
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/% VIDEO catch %?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-catch%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 ---
 
-% BEATMAPS catch %
+%BEATMAPS-catch%
 
 ## <a name="osumania" id="osumania"></a>osu!mania
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/% VIDEO mania %?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-mania%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 ---
 
-% BEATMAPS mania %
+%BEATMAPS-mania%
 
 ---
 
-% OUTRO %
+%OUTRO%
 
 —Project Loved
