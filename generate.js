@@ -21,18 +21,18 @@ function getUserLink(name) {
   if (userLinks[name]) {
     return userLinks[name];
   }
-  
+
   console.log(`Fetching user ID of /u/${name}...`);
 
   var result = rq('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
-  
+
   if (result.statusCode == 302) {
     var link = result.headers['location'];
-    
+
     userLinks[name] = link;
     return link;
   }
-  
+
   throw `User not found: ${name}`;
 }
 
@@ -41,18 +41,18 @@ function getBeatmapSetLink(beatmapId) {
   if (beatmapSetLinks[beatmapId]) {
     return beatmapSetLinks[beatmapId];
   }
-  
+
   console.log(`Fetching beatmap set ID of /b/${beatmapId}...`);
 
   var result = rq('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
-  
+
   if (result.statusCode == 302) {
     var link = result.headers['location'].split('#')[0];
-    
+
     beatmapSetLinks[beatmapId] = link;
     return link;
   }
-  
+
   throw `Beatmap not found: ${beatmapId}`;
 }
 
@@ -61,7 +61,7 @@ function textFromTemplate(template, vars) {
     template = template.replace(new RegExp(`%${key}(?:\-(\\w+))?%`, 'gmi'), (match, p1) =>
       p1 ? vars[key][p1] : vars[key]);
   });
-  
+
   return template;
 }
 
@@ -106,9 +106,9 @@ MODES.forEach(function (mode) {
 
   spreadsheetLines.forEach(function (line, index) {
     var values = line.split('\t');
-    
+
     var mapSplit = values[1].split(' - ', 2);
-    
+
     imageMap[values[0]] = [
       mapSplit[0],
       mapSplit[1],
@@ -120,14 +120,14 @@ MODES.forEach(function (mode) {
 
 images.forEach(function (image) {
   var id = image.split('.')[0];
-  
+
   console.log(`./config/${image}`);
-  
+
   gm(`./config/${image}`)
     .gravity('North')
-    
+
     .draw('image Over 0,0 0,0 ./overlay.png')
-    
+
     .font(`./${config.image.title.font}.ttf`)
     .fontSize(config.image.title.size)
     .compose('Multiply')
@@ -137,7 +137,7 @@ images.forEach(function (image) {
     .compose('Over')
     .fill('#FFF')
     .drawText(config.image.title.x, config.image.title.y, imageMap[id][1])
-    
+
     .font(`./${config.image.artist.font}.ttf`)
     .fontSize(config.image.artist.size)
     .compose('Multiply')
@@ -147,13 +147,13 @@ images.forEach(function (image) {
     .compose('Over')
     .fill('#FFF')
     .drawText(config.image.artist.x, config.image.artist.y, imageMap[id][0])
-    
+
     /*.font(`./${config.image.creator.font}.ttf`)
     .fontSize(config.image.creator.size)
     .drawText(config.image.creator.x, config.image.creator.y, 'text')*/
-    
+
     .draw(`image Over 0,0 0,0 ./overlay-banner-${config.image.template}.png`)
-    
+
     .write(`./output/images/${imageMap[id][3]}/${imageMap[id][2]}.jpg`, function () {});
 });
 
@@ -165,10 +165,10 @@ var beatmapsSections = {};
 MODES.forEach(function (mode) {
   var spreadsheetLines = spreadsheets[mode].split('\n');
   var postBeatmaps = [];
-  
+
   spreadsheetLines.forEach(function (line, index) {
     var values = line.split('\t');
-    
+
     postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
       'DATE': config.date,
       'TITLE_LOWER': titleLowercase,
@@ -184,7 +184,7 @@ MODES.forEach(function (mode) {
       'DESCRIPTION': useAsciiMarks(osuModernLinks(convertToMarkdown(values[5])))
     }));
   });
-  
+
   beatmapsSections[mode] = postBeatmaps.join('\n\n');
 });
 
