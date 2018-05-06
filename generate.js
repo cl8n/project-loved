@@ -153,6 +153,10 @@ MODES.forEach(function (mode) {
   var postBeatmaps = [];
 
   spreadsheetLines.forEach(function (line, index) {
+    if (!line.replace(/\s/g, '').length) {
+      return;
+    }
+
     var values = line.split('\t');
 
     // TODO: this logic is duplicated in generate-image.sh
