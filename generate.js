@@ -134,7 +134,7 @@ images.forEach(function (image) {
     `./config/${image}`,
     `"${escapeDoubleQuotes(imageMap[id][1])}"`,
     `"${escapeDoubleQuotes(imageMap[id][0])}"`,
-    `./output/images/${imageMap[id][3]}/${imageMap[id][2]}.jpg`
+    `./temp/${imageMap[id][3]}/${imageMap[id][2]}.jpg`
   ].concat(imageMap[id][4].split(',').map(x => `"${x}"`)), {shell: true});
 
   process.on('close', function (code) {
