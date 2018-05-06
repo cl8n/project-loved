@@ -207,4 +207,4 @@ fs.writeFileSync(`./output/${config.date}-${titleLowercase}.md`, textFromTemplat
   'VIDEO': config.videos,
   'BEATMAPS': beatmapsSections,
   'OUTRO': newsPostOutro,
-}));
+}) + '\n');
