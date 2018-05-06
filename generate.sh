@@ -5,6 +5,8 @@ mkdir -p './output'
 
 npm start
 
+shopt -s nullglob
+
 echo 'Minimizing JPEG size...'
 for mode in 'osu' 'taiko' 'catch' 'mania'; do
   mkdir -p "./output/images/$mode"
@@ -20,7 +22,6 @@ for mode in 'osu' 'taiko' 'catch' 'mania'; do
   done
 done
 
-shopt -s nullglob
 images=('./output/images/'**/*'.jpg')
 echo "Minimized ${#images[@]} images"
 shopt -u nullglob
