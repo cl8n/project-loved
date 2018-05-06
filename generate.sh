@@ -1,12 +1,5 @@
 #!/bin/sh
 
-if [ ! -a './jpeg-recompress'* ]; then
-  echo 'Missing jpeg-recompress binary. Please download it from' \
-       '> https://github.com/danielgtaylor/jpeg-archive/releases' \
-       'and place it in this folder.'
-  exit 1
-fi
-
 mkdir -p './temp'
 mkdir -p './output'
 
