@@ -109,8 +109,11 @@ MODES.forEach(function (mode) {
   var spreadsheetLines = spreadsheets[mode].split('\n');
 
   spreadsheetLines.forEach(function (line, index) {
-    var values = line.split('\t');
+    if (!line.replace(/\s/g, '').length) {
+      return;
+    }
 
+    var values = line.split('\t');
     var mapSplit = values[1].split(' - ', 2);
 
     imageMap[values[0]] = [
