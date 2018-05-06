@@ -79,7 +79,8 @@ function osuModernLinks(text) {
     .replace(/https\:\/\/osu.ppy.sh\/s\//gmi, 'https://osu.ppy.sh/beatmapsets/')
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9]+)/gmi, 'https://osu.ppy.sh/users/$1')
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/gmi, (match, p1) => getUserLink(p1))
-    .replace(/https\:\/\/osu.ppy.sh\/b\/([0-9]+)/gmi, (match, p1) => getBeatmapSetLink(p1));
+    .replace(/https\:\/\/osu.ppy.sh\/b\/([0-9]+)/gmi, (match, p1) => getBeatmapSetLink(p1))
+    .replace(/https\:\/\/osu.ppy.sh\/forum\/t\/([0-9]+)/gmi, 'https://osu.ppy.sh/community/forums/topics/$1');
 }
 
 function convertToMarkdown(bbcode) {
