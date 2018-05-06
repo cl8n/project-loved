@@ -103,7 +103,7 @@ console.log('Generating images...');
 
 var images = fs.readdirSync('./config').filter(x => fs.statSync(path.join('./config', x)).isFile() && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
-var imageMap = {};
+var imageMap = [];
 
 MODES.forEach(function (mode) {
   var spreadsheetLines = spreadsheets[mode].split('\n');
@@ -154,16 +154,32 @@ MODES.forEach(function (mode) {
   spreadsheetLines.forEach(function (line, index) {
     var values = line.split('\t');
 
+    // TODO: this logic is duplicated in generate-image.sh
+
+    var creators = values[3].split(',');
+    var creatorsMd = `[${creators[0]}](https://osu.ppy.sh/users/${values[2]})`;
+
+    for (var i = 1; i < creators.length; i++) {
+      if (i == creators.length - 1) {
+        if (creators[i] == 'et al.') {
+          creatorsMd += ' et al.';
+        } else {
+          creatorsMd += ` and ${creators[i]}`;
+        }
+      } else {
+        creatorsMd += `, ${creators[i]}`;
+      }
+    }
+
     postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
       'DATE': config.date,
       'TITLE_LOWER': titleLowercase,
       'MODE': mode,
-      'IMAGE': '', //images[mode][index],
+      'IMAGE': `${imageMap[id][2]}.jpg`,
       // 'TOPIC_ID': '',
       'BEATMAP': values[1],
       'BEATMAP_ID': values[0],
-      'CREATOR': values[3],
-      'CREATOR_ID': values[2],
+      'CREATORS_MD': creatorsMd,
       'CAPTAIN': values[4],
       'CAPTAIN_LINK': getUserLink(values[4]),
       'DESCRIPTION': useAsciiMarks(osuModernLinks(convertToMarkdown(values[5])))

@@ -1,6 +1,6 @@
 [![](/wiki/shared/news/%DATE%-%TITLE_LOWER%/%MODE%/%IMAGE%)](https://osu.ppy.sh/community/forums/topics/%TOPIC_ID%)
 
-[%BEATMAP%](https://osu.ppy.sh/beatmapsets/%BEATMAP_ID%) by [%CREATOR%](https://osu.ppy.sh/users/%CREATOR_ID%)  
+[%BEATMAP%](https://osu.ppy.sh/beatmapsets/%BEATMAP_ID%) by %CREATORS_MD%  
 *written by [%CAPTAIN%](%CAPTAIN_LINK%)*
 
 %DESCRIPTION%
