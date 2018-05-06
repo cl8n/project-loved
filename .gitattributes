@@ -1,7 +1,8 @@
 * text=auto
 
-*.md           text eol=lf
-*.md.example   text eol=lf
-*.sh           text eol=lf
-.gitattributes text eol=lf
-.gitignore     text eol=lf
+*.md              text eol=lf
+*.md.example      text eol=lf
+*.sh              text eol=lf
+.gitattributes    text eol=lf
+.gitignore        text eol=lf
+package-lock.json text eol=lf

@@ -1,5 +1,4 @@
 var fs = require('fs');
-var gm = require('gm');
 var rq = require('sync-request');
 var path = require('path');
 
@@ -123,38 +122,6 @@ images.forEach(function (image) {
 
   console.log(`./config/${image}`);
 
-  gm(`./config/${image}`)
-    .gravity('North')
-
-    .draw('image Over 0,0 0,0 ./overlay.png')
-
-    .font(`./${config.image.title.font}.ttf`)
-    .fontSize(config.image.title.size)
-    .compose('Multiply')
-    .fill(config.image.shadow.color)
-    .drawText(config.image.title.x, config.image.title.y + config.image.shadow.offset, imageMap[id][1])
-    .blur(config.image.shadow.size)
-    .compose('Over')
-    .fill('#FFF')
-    .drawText(config.image.title.x, config.image.title.y, imageMap[id][1])
-
-    .font(`./${config.image.artist.font}.ttf`)
-    .fontSize(config.image.artist.size)
-    .compose('Multiply')
-    .fill(config.image.shadow.color)
-    .drawText(config.image.artist.x, config.image.artist.y + config.image.shadow.offset, imageMap[id][0])
-    .blur(config.image.shadow.size)
-    .compose('Over')
-    .fill('#FFF')
-    .drawText(config.image.artist.x, config.image.artist.y, imageMap[id][0])
-
-    /*.font(`./${config.image.creator.font}.ttf`)
-    .fontSize(config.image.creator.size)
-    .drawText(config.image.creator.x, config.image.creator.y, 'text')*/
-
-    .draw(`image Over 0,0 0,0 ./overlay-banner-${config.image.template}.png`)
-
-    .write(`./output/images/${imageMap[id][3]}/${imageMap[id][2]}.jpg`, function () {});
 });
 
 console.log('Generating news post...');
