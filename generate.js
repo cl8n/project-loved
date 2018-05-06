@@ -92,6 +92,10 @@ function convertToMarkdown(bbcode) {
     .replace(/\[color\=.+?\]((?:.|\n)+?)\[\/color\]/gmi, '$1')
     .replace(/\[url=(.+?)\]((?:.|\n)+?)\[\/url\]/gmi,'[$2]($1)')
 
+    // escapes
+    .replace(/\*/gm, '\\*')
+    .replace(/_/gm, '\\_')
+
     // osu!-specific
     .replace(/\[profile\]((?:.|\n)+?)\[\/profile\]/gmi, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
@@ -162,17 +166,17 @@ MODES.forEach(function (mode) {
     // TODO: this logic is duplicated in generate-image.sh
 
     var creators = values[3].split(',');
-    var creatorsMd = `[${creators[0]}](https://osu.ppy.sh/users/${values[2]})`;
+    var creatorsMd = `[${convertToMarkdown(creators[0])}](https://osu.ppy.sh/users/${values[2]})`;
 
     for (var i = 1; i < creators.length; i++) {
       if (i == creators.length - 1) {
         if (creators[i] == 'et al.') {
           creatorsMd += ' et al.';
         } else {
-          creatorsMd += ` and ${creators[i]}`;
+          creatorsMd += ` and ${convertToMarkdown(creators[i])}`;
         }
       } else {
-        creatorsMd += `, ${creators[i]}`;
+        creatorsMd += `, ${convertToMarkdown(creators[i])}`;
       }
     }
 
@@ -182,10 +186,10 @@ MODES.forEach(function (mode) {
       'MODE': mode,
       'IMAGE': `${imageMap[values[0]][2]}.jpg`,
       // 'TOPIC_ID': '',
-      'BEATMAP': values[1],
+      'BEATMAP': convertToMarkdown(values[1]),
       'BEATMAP_ID': values[0],
       'CREATORS_MD': creatorsMd,
-      'CAPTAIN': values[4],
+      'CAPTAIN': convertToMarkdown(values[4]),
       'CAPTAIN_LINK': getUserLink(values[4]),
       'DESCRIPTION': useAsciiMarks(osuModernLinks(convertToMarkdown(values[5])))
     }));
