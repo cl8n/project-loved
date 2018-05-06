@@ -101,7 +101,7 @@ function escapeDoubleQuotes(text) {
 
 console.log('Generating images...');
 
-var images = fs.readdirSync('./config').filter(x => fs.statSync(path.join('./config', x)).isFile() && path.extname(x) === '.png');
+var images = fs.readdirSync('./config').filter(x => fs.statSync(path.join('./config', x)).isFile() && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
 var imageMap = {};
 
