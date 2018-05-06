@@ -62,7 +62,7 @@ function textFromTemplate(template, vars) {
       p1 ? vars[key][p1] : vars[key]);
   });
 
-  return template;
+  return template.trim();
 }
 
 function useAsciiMarks(text) {
