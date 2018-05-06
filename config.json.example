@@ -7,35 +7,5 @@
     "taiko": "XXXXXXXXXXX",
     "catch": "XXXXXXXXXXX",
     "mania": "XXXXXXXXXXX"
-  },
-
-  "image": {
-    "width": 1000,
-    "height": 400,
-    "template": "light",
-    "shadow": {
-      "offset": 2,
-      "size": 4,
-      "color": "#00000080"
-    },
-    "title": {
-      "x": 500,
-      "y": 293,
-      "size": 30,
-      "font": "Exo2-SemiBoldItalic"
-    },
-    "artist": {
-      "x": 500,
-      "y": 323,
-      "size": 20,
-      "font": "Exo2-SemiBoldItalic"
-    },
-    "creator": {
-      "x": 500,
-      "y": 354,
-      "size": 14,
-      "font": "Exo2-Regular",
-      "fontEm": "Exo2-SemiBold"
-    }
   }
 }
