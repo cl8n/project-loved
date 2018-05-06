@@ -1,6 +1,7 @@
 const fs = require('fs');
 const request = require('sync-request');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
@@ -94,6 +95,10 @@ function convertToMarkdown(bbcode) {
     .replace(/\[profile\]((?:.|\n)+?)\[\/profile\]/gmi, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
 
+function escapeDoubleQuotes(text) {
+  return text.toString().replace(/"/g, '\\"');
+}
+
 console.log('Generating images...');
 
 var images = fs.readdirSync('./config').filter(x => fs.statSync(path.join('./config', x)).isFile() && path.extname(x) === '.png');
@@ -112,7 +117,8 @@ MODES.forEach(function (mode) {
       mapSplit[0],
       mapSplit[1],
       mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      mode
+      mode,
+      values[3]
     ];
   });
 });
@@ -120,8 +126,17 @@ MODES.forEach(function (mode) {
 images.forEach(function (image) {
   var id = image.split('.')[0];
 
-  console.log(`./config/${image}`);
+  const process = spawn('sh', [
+    './generate-image.sh',
+    `./config/${image}`,
+    `"${escapeDoubleQuotes(imageMap[id][1])}"`,
+    `"${escapeDoubleQuotes(imageMap[id][0])}"`,
+    `./output/images/${imageMap[id][3]}/${imageMap[id][2]}.jpg`
+  ].concat(imageMap[id][4].split(',').map(x => `"${x}"`)), {shell: true});
 
+  process.on('close', function (code) {
+    console.log((code === 0 ? "Generated " : "Failed to generate ") + `${imageMap[id][2]}.jpg`);
+  });
 });
 
 console.log('Generating news post...');
