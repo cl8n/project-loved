@@ -180,7 +180,7 @@ MODES.forEach(function (mode) {
       'DATE': config.date,
       'TITLE_LOWER': titleLowercase,
       'MODE': mode,
-      'IMAGE': `${imageMap[id][2]}.jpg`,
+      'IMAGE': `${imageMap[values[0]][2]}.jpg`,
       // 'TOPIC_ID': '',
       'BEATMAP': values[1],
       'BEATMAP_ID': values[0],
