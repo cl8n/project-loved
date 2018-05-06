@@ -1,6 +1,6 @@
-var fs = require('fs');
-var rq = require('sync-request');
-var path = require('path');
+const fs = require('fs');
+const request = require('sync-request');
+const path = require('path');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
@@ -23,7 +23,7 @@ function getUserLink(name) {
 
   console.log(`Fetching user ID of /u/${name}...`);
 
-  var result = rq('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
+  var result = request('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
 
   if (result.statusCode == 302) {
     var link = result.headers['location'];
@@ -43,7 +43,7 @@ function getBeatmapSetLink(beatmapId) {
 
   console.log(`Fetching beatmap set ID of /b/${beatmapId}...`);
 
-  var result = rq('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
+  var result = request('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
 
   if (result.statusCode == 302) {
     var link = result.headers['location'].split('#')[0];
