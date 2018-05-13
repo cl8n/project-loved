@@ -1,4 +1,5 @@
+config/
 node_modules/
 output/
 temp/
-config/
+jpeg-recompress*
