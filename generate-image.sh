@@ -28,8 +28,8 @@ fi
 
 pango+='</span>'
 
-magick "$1" overlay.png \
-  -gravity center -fill white -background none \
+magick "$1" -gravity center -resize "$size^" -crop $size+0+0 +repage \
+  overlay.png -fill white -background none \
   \( pango:"$pango" -extent $size -repage +0+157 \) \
   -background black -size $size -gravity north \
   \( +clone -shadow $shadow \) +swap \
