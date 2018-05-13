@@ -173,10 +173,10 @@ MODES.forEach(function (mode) {
         if (creators[i] == 'et al.') {
           creatorsMd += ' et al.';
         } else {
-          creatorsMd += ` and ${convertToMarkdown(creators[i])}`;
+          creatorsMd += ` and [${convertToMarkdown(creators[i])}](${getUserLink(creators[i])})`;
         }
       } else {
-        creatorsMd += `, ${convertToMarkdown(creators[i])}`;
+        creatorsMd += `, [${convertToMarkdown(creators[i])}](${getUserLink(creators[i])})`;
       }
     }
 
