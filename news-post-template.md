@@ -53,4 +53,4 @@ date: %DATE% %TIME% +0000
 
 %OUTRO%
 
-—Project Loved
+—the Project Loved team
