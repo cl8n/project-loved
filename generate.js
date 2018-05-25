@@ -70,11 +70,9 @@ function textFromTemplate(template, vars) {
 
 function useAsciiMarks(text) {
   return text
-    .replace('‘', "'")
-    .replace('’', "'")
-    .replace('“', '"')
-    .replace('”', '"')
-    .replace('…', '...');
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/…/g, '...');
 }
 
 function osuModernLinks(text) {
