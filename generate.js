@@ -10,9 +10,9 @@ console.log('Loading configuration files...');
 var config = require('./config/config.json');
 var newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 var newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
-var newsPostHeader = fs.readFileSync('./config/news-post-header.md').toString();
-var newsPostIntro = fs.readFileSync('./config/news-post-intro.md').toString();
-var newsPostOutro = fs.readFileSync('./config/news-post-outro.md').toString();
+var newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
+var newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
+var newsPostOutro = textFromTemplate(fs.readFileSync('./config/news-post-outro.md').toString());
 var spreadsheets = {};
 MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
 
@@ -56,7 +56,7 @@ function getBeatmapSetLink(beatmapId) {
   throw `Beatmap not found: ${beatmapId}`;
 }
 
-function textFromTemplate(template, vars) {
+function textFromTemplate(template, vars = {}) {
   template = template.replace(/%#IF (\w+)%\n(.+?)\n%#ENDIF%\n/gs,
     (match, key, content) => vars[key] ? content + '\n' : '');
 
