@@ -57,8 +57,8 @@ function getBeatmapSetLink(beatmapId) {
 }
 
 function textFromTemplate(template, vars) {
-  template = template.replace(/%#IF (\w+)%\n(.+)\n%#ENDIF%/gmi,
-    (match, key, content) => vars[key] ? content : '');
+  template = template.replace(/%#IF (\w+)%\n(.+?)\n%#ENDIF%\n/gs,
+    (match, key, content) => vars[key] ? content + '\n' : '');
 
   Object.keys(vars).forEach(function (key) {
     template = template.replace(new RegExp(`%${key}(?:\-(\\w+))?%`, 'gmi'),
