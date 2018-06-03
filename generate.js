@@ -208,6 +208,7 @@ fs.writeFileSync(`./output/${config.date}-${titleLowercase}.md`, textFromTemplat
   'HEADER': newsPostHeader,
   'INTRO': newsPostIntro,
   'VIDEO': config.videos,
+  'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
   'BEATMAPS': beatmapsSections,
   'OUTRO': newsPostOutro,
 }) + '\n');
