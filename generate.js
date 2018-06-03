@@ -61,7 +61,7 @@ function textFromTemplate(template, vars = {}) {
     (match, key, content) => vars[key] ? content + '\n' : '');
 
   Object.keys(vars).forEach(function (key) {
-    template = template.replace(new RegExp(`%${key}(?:\-(\\w+))?%`, 'gmi'),
+    template = template.replace(new RegExp(`%${key}(?:-(\\w+))?%`, 'gmi'),
 	  (match, p1) => p1 ? vars[key][p1] : vars[key]);
   });
 
@@ -77,28 +77,30 @@ function useAsciiMarks(text) {
 
 function osuModernLinks(text) {
   return text.toString()
-    .replace(/https\:\/\/osu.ppy.sh\/s\//gmi, 'https://osu.ppy.sh/beatmapsets/')
-    .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9]+)/gmi, 'https://osu.ppy.sh/users/$1')
-    .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/gmi, (match, p1) => getUserLink(p1))
-    .replace(/https\:\/\/osu.ppy.sh\/b\/([0-9]+)/gmi, (match, p1) => getBeatmapSetLink(p1))
-    .replace(/https\:\/\/osu.ppy.sh\/forum\/t\/([0-9]+)/gmi, 'https://osu.ppy.sh/community/forums/topics/$1');
+    .replace(/https\:\/\/osu.ppy.sh\/s\//g, 'https://osu.ppy.sh/beatmapsets/')
+    .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9]+)/g, 'https://osu.ppy.sh/users/$1')
+    .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/g, (match, p1) => getUserLink(p1))
+    .replace(/https\:\/\/osu.ppy.sh\/b\/([0-9]+)/g, (match, p1) => getBeatmapSetLink(p1))
+    .replace(/https\:\/\/osu.ppy.sh\/forum\/t\/([0-9]+)/g, 'https://osu.ppy.sh/community/forums/topics/$1');
 }
 
 function convertToMarkdown(bbcode) {
   return bbcode.toString()
-    .replace(/\[b\]((?:.|\n)+?)\[\/b\]/gmi, '**$1**')
-    .replace(/\[\i\]((?:.|\n)+?)\[\/\i\]/gmi, '*$1*')
-    .replace(/\[\u\]((?:.|\n)+?)\[\/\u\]/gmi, '$1')
-    .replace(/\[s\]((?:.|\n)+?)\[\/s\]/gmi, '~~ $1~~')
-    .replace(/\[color\=.+?\]((?:.|\n)+?)\[\/color\]/gmi, '$1')
-    .replace(/\[url=(.+?)\]((?:.|\n)+?)\[\/url\]/gmi,'[$2]($1)')
 
     // escapes
-    .replace(/\*/gm, '\\*')
-    .replace(/_/gm, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/_/g, '\\_')
 
-    // osu!-specific
-    .replace(/\[profile\]((?:.|\n)+?)\[\/profile\]/gmi, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
+    // general bbcode
+    .replace(/\[b\](.+?)\[\/b\]/gs, '**$1**')
+    .replace(/\[\i\](.+?)\[\/\i\]/gs, '*$1*')
+    .replace(/\[\u\](.+?)\[\/\u\]/gs, '$1')
+    .replace(/\[s\](.+?)\[\/s\]/gs, '~~ $1~~')
+    .replace(/\[color\=.+?\](.+?)\[\/color\]/gs, '$1')
+    .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs,'[$2]($1)')
+
+    // osu!-specific bbcode
+    .replace(/\[profile\](.+?)\[\/profile\]/gs, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
 
 function escapeDoubleQuotes(text) {
