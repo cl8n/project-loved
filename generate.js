@@ -12,7 +12,6 @@ var newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 var newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
 var newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 var newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
-var newsPostOutro = textFromTemplate(fs.readFileSync('./config/news-post-outro.md').toString());
 var spreadsheets = {};
 MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
 
@@ -209,6 +208,5 @@ fs.writeFileSync(`./output/${config.date}-${titleLowercase}.md`, textFromTemplat
   'INTRO': newsPostIntro,
   'VIDEO': config.videos,
   'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
-  'BEATMAPS': beatmapsSections,
-  'OUTRO': newsPostOutro,
+  'BEATMAPS': beatmapsSections
 }) + '\n');
