@@ -1,7 +1,7 @@
 const fs = require('fs');
-const request = require('sync-request');
 const path = require('path');
-const { spawn } = require('child_process');
+const puppeteer = require('puppeteer');
+const request = require('sync-request');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
@@ -14,6 +14,57 @@ var newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header
 var newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
 var spreadsheets = {};
 MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
+
+console.log('Launching puppeteer')
+
+const browserPromise = puppeteer.launch();
+
+async function generateImage(
+  browser,
+  backgroundImage,
+  title,
+  artist,
+  creators,
+  outputImage
+) {
+  const page = await browser.newPage();
+
+  await page.setViewport({
+    width: 1000,
+    height: 400
+  });
+  await page.goto(`file://${__dirname.replace(/\\/g, '/')}/image-template/index.html`);
+
+  await Promise.all([
+    page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
+    page.$eval('#title', (el, title) => el.innerHTML = title, title),
+    page.$eval('#artist', (el, artist) => el.innerHTML = artist, artist),
+    page.$eval('#creator', function (el, creators) {
+      let line = `mapped by <b>${creators[0]}</b>`;
+
+      for (let i = 1; i < creators.length; i++) {
+        if (i === creators.length - 1) {
+          if (creators[i] === 'et al.') {
+            line += ' et al.';
+          } else {
+            line += ` and <b>${creators[i]}</b>`;
+          }
+        } else {
+          line += `, <b>${creators[i]}</b>`;
+        }
+      }
+
+      el.innerHTML = line;
+    }, creators)
+  ]);
+
+  await page.screenshot({
+    path: outputImage,
+    quality: 100
+  });
+
+  await page.close();
+}
 
 var userLinks = {};
 function getUserLink(name) {
@@ -108,9 +159,7 @@ function escapeDoubleQuotes(text) {
 
 console.log('Generating images...');
 
-var images = fs.readdirSync('./config').filter(x => fs.statSync(path.join('./config', x)).isFile() && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
-
-var imageMap = [];
+var imageMap = {};
 
 MODES.forEach(function (mode) {
   var spreadsheetLines = spreadsheets[mode].split('\n');
@@ -123,31 +172,44 @@ MODES.forEach(function (mode) {
     var values = line.split('\t');
     var mapSplit = values[1].split(' - ', 2);
 
-    imageMap[values[0]] = [
-      mapSplit[0],
-      mapSplit[1],
-      mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      mode,
-      values[3]
-    ];
+    imageMap[values[0]] = {
+      artist: mapSplit[0],
+      title: mapSplit[1],
+      filename: mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      mode: mode,
+      creators: values[3].split(',')
+    };
   });
 });
 
-images.forEach(function (image) {
-  var id = image.split('.')[0];
+var images = fs.readdirSync('./config')
+  .filter(x => fs.statSync(path.join('./config', x)).isFile()
+            && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
-  const process = spawn('sh', [
-    './generate-image.sh',
-    `./config/${image}`,
-    `"${escapeDoubleQuotes(imageMap[id][1])}"`,
-    `"${escapeDoubleQuotes(imageMap[id][0])}"`,
-    `./temp/${imageMap[id][3]}/${imageMap[id][2]}.jpg`
-  ].concat(imageMap[id][4].split(',').map(x => `"${x}"`)), {shell: true});
+browserPromise
+  .then(function (browser) {
+    images.forEach(function (image) {
+      var id = image.split('.')[0];
 
-  process.on('close', function (code) {
-    console.log((code === 0 ? "Generated " : "Failed to generate ") + `${imageMap[id][2]}.jpg`);
+      let beatmap = imageMap[id];
+
+      if (beatmap === undefined) {
+        console.log(`Could not find beatmapset with ID ${id}; skipping`);
+        return;
+      }
+
+      generateImage(
+        browser,
+        `file://${__dirname.replace(/\\/g, '/')}/config/${image}`,
+        beatmap.title,
+        beatmap.artist,
+        beatmap.creators,
+        `./temp/${beatmap.mode}/${beatmap.filename}.jpg`
+      )
+        .then(() => console.log(`Generated ${beatmap.filename}.jpg successfully`))
+        .catch(() => console.log(`Failed to generate ${beatmap.filename}.jpg`));
+    })
   });
-});
 
 console.log('Generating news post...');
 
