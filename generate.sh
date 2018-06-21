@@ -5,7 +5,7 @@ for mode in 'osu' 'taiko' 'catch' 'mania'; do
   mkdir -p "./output/images/$mode"
 done
 
-npm start
+node generate.js
 
 shopt -s nullglob
 
