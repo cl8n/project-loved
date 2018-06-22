@@ -175,7 +175,7 @@ MODES.forEach(function (mode) {
     imageMap[values[0]] = {
       artist: mapSplit[0],
       title: mapSplit[1],
-      filename: mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      filename: `${mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-')}.jpg`,
       mode: mode,
       creators: values[3].split(',')
     };
@@ -204,10 +204,10 @@ browserPromise
         beatmap.title,
         beatmap.artist,
         beatmap.creators,
-        `./temp/${beatmap.mode}/${beatmap.filename}.jpg`
+        `./temp/${beatmap.mode}/${beatmap.filename}`
       )
-        .then(() => console.log(`Generated ${beatmap.filename}.jpg successfully`))
-        .catch(() => console.log(`Failed to generate ${beatmap.filename}.jpg`));
+        .then(() => console.log(`Generated ${beatmap.filename} successfully`))
+        .catch(() => console.log(`Failed to generate ${beatmap.filename}`));
     })
   });
 
@@ -248,7 +248,7 @@ MODES.forEach(function (mode) {
       'DATE': config.date,
       'TITLE_LOWER': titleLowercase,
       'MODE': mode,
-      'IMAGE': `${imageMap[values[0]][2]}.jpg`,
+      'IMAGE': imageMap[values[0]].filename,
       // 'TOPIC_ID': '',
       'BEATMAP': convertToMarkdown(values[1]),
       'BEATMAP_ID': values[0],
