@@ -7,12 +7,12 @@ const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
 console.log('Loading configuration files...');
 
-var config = require('./config/config.json');
-var newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
-var newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
-var newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
-var newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
-var spreadsheets = {};
+const config = require('./config/config.json');
+const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
+const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
+const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
+const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
+const spreadsheets = {};
 MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
 
 console.log('Launching puppeteer')
@@ -66,7 +66,7 @@ async function generateImage(
   await page.close();
 }
 
-var userLinks = {};
+const userLinks = {};
 function getUserLink(name) {
   if (userLinks[name]) {
     return userLinks[name];
@@ -74,10 +74,10 @@ function getUserLink(name) {
 
   console.log(`Fetching user ID of /u/${name}...`);
 
-  var result = request('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
+  const result = request('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
 
   if (result.statusCode == 302) {
-    var link = result.headers['location'];
+    const link = result.headers['location'];
 
     userLinks[name] = link;
     return link;
@@ -86,7 +86,7 @@ function getUserLink(name) {
   throw `User not found: ${name}`;
 }
 
-var beatmapSetLinks = {};
+const beatmapSetLinks = {};
 function getBeatmapSetLink(beatmapId) {
   if (beatmapSetLinks[beatmapId]) {
     return beatmapSetLinks[beatmapId];
@@ -94,10 +94,10 @@ function getBeatmapSetLink(beatmapId) {
 
   console.log(`Fetching beatmap set ID of /b/${beatmapId}...`);
 
-  var result = request('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
+  const result = request('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
 
   if (result.statusCode == 302) {
-    var link = result.headers['location'].split('#')[0];
+    const link = result.headers['location'].split('#')[0];
 
     beatmapSetLinks[beatmapId] = link;
     return link;
@@ -159,18 +159,18 @@ function escapeDoubleQuotes(text) {
 
 console.log('Generating images...');
 
-var imageMap = {};
+const imageMap = {};
 
 MODES.forEach(function (mode) {
-  var spreadsheetLines = spreadsheets[mode].split('\n');
+  const spreadsheetLines = spreadsheets[mode].split('\n');
 
   spreadsheetLines.forEach(function (line, index) {
     if (!line.replace(/\s/g, '').length) {
       return;
     }
 
-    var values = line.split('\t');
-    var mapSplit = values[1].split(' - ', 2);
+    const values = line.split('\t');
+    const mapSplit = values[1].split(' - ', 2);
 
     imageMap[values[0]] = {
       artist: mapSplit[0],
@@ -182,14 +182,14 @@ MODES.forEach(function (mode) {
   });
 });
 
-var images = fs.readdirSync('./config')
+const images = fs.readdirSync('./config')
   .filter(x => fs.statSync(path.join('./config', x)).isFile()
             && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
 browserPromise
   .then(function (browser) {
     images.forEach(function (image) {
-      var id = image.split('.')[0];
+      const id = image.split('.')[0];
 
       let beatmap = imageMap[id];
 
@@ -213,26 +213,26 @@ browserPromise
 
 console.log('Generating news post...');
 
-var titleLowercase = config.title.toLowerCase().replace(/\W+/g, '-');
-var beatmapsSections = {};
+const titleLowercase = config.title.toLowerCase().replace(/\W+/g, '-');
+const beatmapsSections = {};
 
 MODES.forEach(function (mode) {
-  var spreadsheetLines = spreadsheets[mode].split('\n');
-  var postBeatmaps = [];
+  const spreadsheetLines = spreadsheets[mode].split('\n');
+  const postBeatmaps = [];
 
   spreadsheetLines.forEach(function (line, index) {
     if (!line.replace(/\s/g, '').length) {
       return;
     }
 
-    var values = line.split('\t');
+    const values = line.split('\t');
 
     // TODO: this logic is duplicated in generate-image.sh
 
-    var creators = values[3].split(',');
-    var creatorsMd = `[${convertToMarkdown(creators[0])}](https://osu.ppy.sh/users/${values[2]})`;
+    const creators = values[3].split(',');
+    let creatorsMd = `[${convertToMarkdown(creators[0])}](https://osu.ppy.sh/users/${values[2]})`;
 
-    for (var i = 1; i < creators.length; i++) {
+    for (let i = 1; i < creators.length; i++) {
       if (i == creators.length - 1) {
         if (creators[i] == 'et al.') {
           creatorsMd += ' et al.';
