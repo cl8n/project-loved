@@ -131,7 +131,7 @@ function osuModernLinks(text) {
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9]+)/g, 'https://osu.ppy.sh/users/$1')
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/g, (match, p1) => getUserLink(p1))
     .replace(/https\:\/\/osu.ppy.sh\/b\/([0-9]+)/g, (match, p1) => getBeatmapSetLink(p1))
-    .replace(/https\:\/\/osu.ppy.sh\/forum\/t\/([0-9]+)/g, 'https://osu.ppy.sh/community/forums/topics/$1');
+    .replace(/https\:\/\/osu.ppy.sh\/forum\/t\//g, 'https://osu.ppy.sh/community/forums/topics/');
 }
 
 function convertToMarkdown(bbcode) {
@@ -145,12 +145,12 @@ function convertToMarkdown(bbcode) {
     .replace(/\[b\](.+?)\[\/b\]/gs, '**$1**')
     .replace(/\[\i\](.+?)\[\/\i\]/gs, '*$1*')
     .replace(/\[\u\](.+?)\[\/\u\]/gs, '$1')
-    .replace(/\[s\](.+?)\[\/s\]/gs, '~~ $1~~')
+    .replace(/\[s\](.+?)\[\/s\]/gs, '~~$1~~')
     .replace(/\[color\=.+?\](.+?)\[\/color\]/gs, '$1')
-    .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs,'[$2]($1)')
+    .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs, '[$2]($1)')
 
     // osu!-specific bbcode
-    .replace(/\[profile\](.+?)\[\/profile\]/gs, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
+    .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
 
 function escapeDoubleQuotes(text) {
