@@ -151,10 +151,34 @@ function escapeDoubleQuotes(text) {
   return text.toString().replace(/"/g, '\\"');
 }
 
+function mkdirTreeSync(dir) {
+  if (fs.existsSync(dir)) {
+    return;
+  }
+
+  try {
+    fs.mkdirSync(dir);
+  } catch (error) {
+    if (error.errno === -4058) {
+      mkdirTreeSync(path.dirname(dir));
+      mkdirTreeSync(dir);
+    } else {
+      console.log(error.errno);
+      throw error;
+    }
+  }
+}
+
+mkdirTreeSync('./output/news');
+
+const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 
 const imageMap = {};
 
 MODES.forEach(function (mode) {
+  mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
+  mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
+
   const spreadsheetLines = spreadsheets[mode].split('\n');
 
   spreadsheetLines.forEach(function (line, index) {
@@ -198,7 +222,7 @@ const images = fs.readdirSync('./config')
       beatmap.title,
       beatmap.artist,
       beatmap.creators,
-      `./temp/${beatmap.mode}/${beatmap.filename}`
+      `./temp/${newsFolder}/${beatmap.mode}/${beatmap.filename}`
     );
 
     promise.then(() => console.log(`Generated ${beatmap.filename}`),
@@ -217,7 +241,6 @@ const images = fs.readdirSync('./config')
 
 console.log('Generating news post');
 
-const titleLowercase = config.title.toLowerCase().replace(/\W+/g, '-');
 const beatmapsSections = {};
 
 MODES.forEach(function (mode) {
@@ -250,7 +273,7 @@ MODES.forEach(function (mode) {
 
     postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
       'DATE': config.date,
-      'TITLE_LOWER': titleLowercase,
+      'FOLDER': newsFolder,
       'MODE': mode,
       'IMAGE': imageMap[values[0]].filename,
       // 'TOPIC_ID': '',
@@ -266,7 +289,7 @@ MODES.forEach(function (mode) {
   beatmapsSections[mode] = postBeatmaps.join('\n\n');
 });
 
-fs.writeFileSync(`./output/${config.date}-${titleLowercase}.md`, textFromTemplate(newsPostTemplate, {
+fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
   'TITLE': config.title,
   'DATE': config.date,
   'TIME': config.time,

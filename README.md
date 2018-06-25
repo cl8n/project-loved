@@ -16,6 +16,7 @@ To generate a post, you'll need to:
 - [Get images for each of the maps](#getting-background-images)
 - [Modify the config files](#config-files)
 - Run `generate.sh`
+- [Move the generated files to the osu! wiki](#moving-to-the-osu!-wiki)
 
 #### Getting background images
 
@@ -32,3 +33,7 @@ Aside from the images, there are seven config files.
 The two markdown files can be edited to change the content of the beginning of the post. The header is the first paragraph before the Project Loved banner (this will be shown as the preview on-site), and the intro is the part after the banner.
 
 The four spreadsheet files are meant to include values from the Project Loved planning spreadsheet. For each mode, copy cells A2:F and paste the content into the file.
+
+#### Moving to the osu! wiki
+
+After the program runs, you'll have a new folder named `output` that contains the news post along with the Project Loved beatmap images. Drag/move the contents of this folder into your local [osu-wiki](https://github.com/ppy/osu-wiki) repository, and all of the files will be in the right place.
