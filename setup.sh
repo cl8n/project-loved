@@ -1,5 +1,7 @@
 #!/bin/sh
 
+npm install
+
 mkdir -p 'config'
 
 cp './config.json.example' './config/config.json'
