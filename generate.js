@@ -13,6 +13,22 @@ const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro
 const spreadsheets = {};
 MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
 
+function osuApiRequestSync(endpoint, params) {
+  let url = `https://osu.ppy.sh/api/${endpoint}?k=${config.osuApiKey}`;
+
+  Object.keys(params).forEach(function (key) {
+    url += `&${key}=${params[key]}`;
+  });
+
+  const response = request('GET', url);
+
+  if (response.statusCode === 401) {
+    throw 'Invalid osu!api key';
+  }
+
+  return JSON.parse(response.getBody());
+}
+
 async function generateImage(
   browser,
   backgroundImage,
@@ -68,16 +84,16 @@ function getUserLink(name) {
 
   console.log(`Fetching user ID of "${name}"`);
 
-  const result = request('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
+  const user = osuApiRequestSync('get_user', {
+    u: name,
+    type: 'string'
+  });
 
-  if (result.statusCode == 302) {
-    const link = result.headers['location'];
-
-    userLinks[name] = link;
-    return link;
+  if (!user.length) {
+    throw `User not found: ${name}`;
   }
 
-  throw `User not found: ${name}`;
+  return userLinks[name] = `https://osu.ppy.sh/users/${user[0].user_id}`;
 }
 
 const beatmapSetLinks = {};
@@ -88,16 +104,13 @@ function getBeatmapSetLink(beatmapId) {
 
   console.log(`Fetching beatmap set ID of #${beatmapId}`);
 
-  const result = request('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
+  const beatmap = osuApiRequestSync('get_beatmaps', { b: beatmapId });
 
-  if (result.statusCode == 302) {
-    const link = result.headers['location'].split('#')[0];
-
-    beatmapSetLinks[beatmapId] = link;
-    return link;
+  if (!beatmap.length) {
+    throw `Beatmap not found: ${beatmapId}`;
   }
 
-  throw `Beatmap not found: ${beatmapId}`;
+  return beatmapSetLinks[beatmapId] = `https://osu.ppy.sh/beatmapsets/${beatmap[0].beatmapset_id}`;
 }
 
 function textFromTemplate(template, vars = {}) {
