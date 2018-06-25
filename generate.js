@@ -76,7 +76,13 @@ async function generateImage(
   await page.close();
 }
 
-const userLinks = {};
+let userLinks;
+if (fs.existsSync('./storage/user-links.json')) {
+  userLinks = require('./storage/user-links.json');
+} else {
+  userLinks = {};
+}
+
 function getUserLink(name) {
   if (userLinks[name]) {
     return userLinks[name];
@@ -96,7 +102,13 @@ function getUserLink(name) {
   return userLinks[name] = `https://osu.ppy.sh/users/${user[0].user_id}`;
 }
 
-const beatmapSetLinks = {};
+let beatmapSetLinks;
+if (fs.existsSync('./storage/beatmapset-links.json')) {
+  beatmapSetLinks = require('./storage/beatmapset-links.json');
+} else {
+  beatmapSetLinks = {};
+}
+
 function getBeatmapSetLink(beatmapId) {
   if (beatmapSetLinks[beatmapId]) {
     return beatmapSetLinks[beatmapId];
@@ -312,3 +324,6 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
   'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
   'BEATMAPS': beatmapsSections
 }) + '\n');
+
+fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks));
+fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks));

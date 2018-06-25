@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mkdir -p './storage'
+
 node generate.js
 
 shopt -s nullglob
