@@ -11,11 +11,17 @@ for image in './temp/'*/*/*'.jpg'; do
     --method smallfry \
     --accurate \
     --strip \
+    --no-copy \
     --quiet \
     "$image" \
     "${image/temp/'output/wiki/shared/news'}"
 
-  echo "Minimized `basename "$image"`"
+  if [ $? -eq 0 ]; then
+    echo "Minimized `basename "$image"`"
+  else
+    cp "$image" "${image/temp/'output/wiki/shared/news'}"
+    echo "Failed to minimize `basename "$image"`. Copied original to output folder"
+  fi
 done
 
 shopt -u nullglob
