@@ -15,10 +15,6 @@ const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro
 const spreadsheets = {};
 MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
 
-console.log('Launching puppeteer')
-
-const browserPromise = puppeteer.launch();
-
 async function generateImage(
   browser,
   backgroundImage,
@@ -186,30 +182,36 @@ const images = fs.readdirSync('./config')
   .filter(x => fs.statSync(path.join('./config', x)).isFile()
             && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
-browserPromise
-  .then(function (browser) {
-    images.forEach(function (image) {
-      const id = image.split('.')[0];
+(async function () {  
+  const browser = await puppeteer.launch();
+  const imagePromises = [];
 
-      let beatmap = imageMap[id];
+  images.forEach(function (image) {
+    const id = image.split('.')[0];
+    const beatmap = imageMap[id];
 
-      if (beatmap === undefined) {
-        console.log(`Could not find beatmapset with ID ${id}; skipping`);
-        return;
-      }
+    if (beatmap === undefined) {
+      console.log(`Could not find beatmapset with ID ${id}; skipping`);
+      return;
+    }
 
-      generateImage(
-        browser,
-        `file://${__dirname.replace(/\\/g, '/')}/config/${image}`,
-        beatmap.title,
-        beatmap.artist,
-        beatmap.creators,
-        `./temp/${beatmap.mode}/${beatmap.filename}`
-      )
-        .then(() => console.log(`Generated ${beatmap.filename} successfully`))
-        .catch(() => console.log(`Failed to generate ${beatmap.filename}`));
-    })
+    const promise = generateImage(
+      browser,
+      `file://${__dirname.replace(/\\/g, '/')}/config/${image}`,
+      beatmap.title,
+      beatmap.artist,
+      beatmap.creators,
+      `./temp/${beatmap.mode}/${beatmap.filename}`
+    );
+
+    promise.then(() => console.log(`Generated ${beatmap.filename} successfully`));
+    promise.catch(() => console.log(`Failed to generate ${beatmap.filename}`));
+
+    imagePromises.push(promise);
   });
+
+  Promise.all(imagePromises).then(() => browser.close());
+})();
 
 console.log('Generating news post...');
 
