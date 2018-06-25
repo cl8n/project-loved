@@ -204,13 +204,18 @@ const images = fs.readdirSync('./config')
       `./temp/${beatmap.mode}/${beatmap.filename}`
     );
 
-    promise.then(() => console.log(`Generated ${beatmap.filename} successfully`));
-    promise.catch(() => console.log(`Failed to generate ${beatmap.filename}`));
+    promise.then(() => console.log(`Generated ${beatmap.filename} successfully`),
+                 () => console.log(`Failed to generate ${beatmap.filename}`));
 
     imagePromises.push(promise);
   });
 
-  Promise.all(imagePromises).then(() => browser.close());
+  // Each promise is mapped to catch and return errors so that Promise.all()
+  // does not resolve until all of the promises are resolved, regardless of
+  // if any fail. This is important because we don't want the browser to close
+  // while new pages are still being opened.
+  Promise.all(imagePromises.map(p => p.catch(e => e)))
+    .then(() => browser.close(), () => browser.close());
 })();
 
 console.log('Generating news post...');
