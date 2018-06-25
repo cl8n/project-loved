@@ -5,8 +5,6 @@ const request = require('sync-request');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
-console.log('Loading configuration files...');
-
 const config = require('./config/config.json');
 const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
@@ -68,7 +66,7 @@ function getUserLink(name) {
     return userLinks[name];
   }
 
-  console.log(`Fetching user ID of /u/${name}...`);
+  console.log(`Fetching user ID of "${name}"`);
 
   const result = request('GET', `https://osu.ppy.sh/users/${name}`, {'followRedirects': false});
 
@@ -88,7 +86,7 @@ function getBeatmapSetLink(beatmapId) {
     return beatmapSetLinks[beatmapId];
   }
 
-  console.log(`Fetching beatmap set ID of /b/${beatmapId}...`);
+  console.log(`Fetching beatmap set ID of #${beatmapId}`);
 
   const result = request('GET', `https://osu.ppy.sh/beatmaps/${beatmapId}`, {'followRedirects': false});
 
@@ -153,7 +151,6 @@ function escapeDoubleQuotes(text) {
   return text.toString().replace(/"/g, '\\"');
 }
 
-console.log('Generating images...');
 
 const imageMap = {};
 
@@ -204,7 +201,7 @@ const images = fs.readdirSync('./config')
       `./temp/${beatmap.mode}/${beatmap.filename}`
     );
 
-    promise.then(() => console.log(`Generated ${beatmap.filename} successfully`),
+    promise.then(() => console.log(`Generated ${beatmap.filename}`),
                  () => console.log(`Failed to generate ${beatmap.filename}`));
 
     imagePromises.push(promise);
@@ -218,7 +215,7 @@ const images = fs.readdirSync('./config')
     .then(() => browser.close(), () => browser.close());
 })();
 
-console.log('Generating news post...');
+console.log('Generating news post');
 
 const titleLowercase = config.title.toLowerCase().replace(/\W+/g, '-');
 const beatmapsSections = {};

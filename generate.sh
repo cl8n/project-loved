@@ -9,7 +9,6 @@ node generate.js
 
 shopt -s nullglob
 
-echo 'Minimizing JPEG size...'
 for mode in 'osu' 'taiko' 'catch' 'mania'; do
   for image in "./temp/$mode/"*'.jpg'; do
     ./jpeg-recompress \
@@ -22,8 +21,6 @@ for mode in 'osu' 'taiko' 'catch' 'mania'; do
   done
 done
 
-images=('./output/images/'**/*'.jpg')
-echo "Minimized ${#images[@]} images"
 shopt -u nullglob
 
 rm -rf './temp'
