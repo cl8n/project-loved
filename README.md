@@ -16,7 +16,7 @@ To generate a post, you'll need to:
 - [Get images for each of the maps](#getting-background-images)
 - [Modify the config files](#config-files)
 - Run `generate.sh`
-- [Move the generated files to the osu! wiki](#moving-to-the-osu!-wiki)
+- [Move the generated files to the osu! wiki](#moving-to-the-osu-wiki)
 
 #### Getting background images
 
