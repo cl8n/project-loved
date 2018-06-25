@@ -279,8 +279,6 @@ MODES.forEach(function (mode) {
 
     const values = line.split('\t');
 
-    // TODO: this logic is duplicated in generate-image.sh
-
     const creators = values[3].split(',');
     let creatorsMd = `[${convertToMarkdown(creators[0])}](https://osu.ppy.sh/users/${values[2]})`;
 
