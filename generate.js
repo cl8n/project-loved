@@ -171,7 +171,7 @@ MODES.forEach(function (mode) {
     imageMap[values[0]] = {
       artist: mapSplit[0],
       title: mapSplit[1],
-      filename: `${mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-')}.jpg`,
+      filename: `${mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^\-|\-$/g, '')}.jpg`,
       mode: mode,
       creators: values[3].split(',')
     };
