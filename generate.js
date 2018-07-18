@@ -323,5 +323,5 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
   'BEATMAPS': beatmapsSections
 }) + '\n');
 
-fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks));
-fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks));
+fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));
+fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks, null, 4));
