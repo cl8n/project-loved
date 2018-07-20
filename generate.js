@@ -137,11 +137,22 @@ function textFromTemplate(template, vars = {}) {
   return template.trim();
 }
 
-function useAsciiMarks(text) {
+function fixCommonMistakes(text) {
   return text
+
+    // "smart" characters
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
-    .replace(/…/g, '...');
+    .replace(/…/g, '...')
+    .replace(/½/g, '1/2')
+    .replace(/⅓/g, '1/3')
+    .replace(/¼/g, '1/4')
+    .replace(/⅙/g, '1/6')
+    .replace(/⅛/g, '1/8')
+
+    // acronym consistency
+    .replace(/(\d+) ?k\s/gi, '$1K')
+    .replace(/(\d+) ?bpm/gi, '$1 BPM');
 }
 
 function osuModernLinks(text) {
@@ -305,7 +316,7 @@ MODES.forEach(function (mode) {
       'CREATORS_MD': creatorsMd,
       'CAPTAIN': convertToMarkdown(values[4]),
       'CAPTAIN_LINK': getUserLink(values[4]),
-      'DESCRIPTION': useAsciiMarks(osuModernLinks(convertToMarkdown(values[5])))
+      'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(values[5])))
     }));
   });
 
