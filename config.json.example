@@ -1,12 +1,19 @@
 {
+  "captains": {
+    "osu": [],
+    "taiko": [],
+    "catch": [],
+    "mania": []
+  },
   "date": "1970-01-01",
   "osuApiKey": "",
   "time": "00:00:00",
   "title": "Project Loved: Week of January 1st",
   "videos": {
-    "osu": "XXXXXXXXXXX",
-    "taiko": "XXXXXXXXXXX",
-    "catch": "XXXXXXXXXXX",
-    "mania": "XXXXXXXXXXX"
+    "intro": "",
+    "osu": "",
+    "taiko": "",
+    "catch": "",
+    "mania": ""
   }
 }

@@ -126,15 +126,13 @@ function getBeatmapSetLink(beatmapId) {
 }
 
 function textFromTemplate(template, vars = {}) {
-  template = template.replace(/%#IF (\w+)%\n(.+?)\n%#ENDIF%\n/gs,
-    (match, key, content) => vars[key] ? content + '\n' : '');
+  return template
+    .replace(/<\?(.+?)\?>/gs, function (_, script) {
+      let result = eval(script);
 
-  Object.keys(vars).forEach(function (key) {
-    template = template.replace(new RegExp(`%${key}(?:-(\\w+))?%`, 'gmi'),
-	  (match, p1) => p1 ? vars[key][p1] : vars[key]);
-  });
-
-  return template.trim();
+      return result === undefined || result === null ? '' : result;
+    })
+    .trim();
 }
 
 function fixCommonMistakes(text) {
@@ -187,6 +185,28 @@ function escapeDoubleQuotes(text) {
   return text.toString().replace(/"/g, '\\"');
 }
 
+function joinList(array) {
+  if (array.length === 0) {
+    throw 'Invalid array';
+  }
+
+  let line = array[0];
+
+  for (let i = 1; i < array.length; i++) {
+    if (i === array.length - 1) {
+      if (array[i] === 'et al.') {
+        line += ' et al.';
+      } else {
+        line += ` and ${array[i]}`;
+      }
+    } else {
+      line += `, ${array[i]}`;
+    }
+  }
+
+  return line;
+}
+
 function mkdirTreeSync(dir) {
   if (fs.existsSync(dir)) {
     return;
@@ -199,7 +219,6 @@ function mkdirTreeSync(dir) {
       mkdirTreeSync(path.dirname(dir));
       mkdirTreeSync(dir);
     } else {
-      console.log(error.errno);
       throw error;
     }
   }
@@ -210,6 +229,7 @@ mkdirTreeSync('./output/news');
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 
 const imageMap = {};
+const consistentCaptains = {};
 
 MODES.forEach(function (mode) {
   mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
@@ -224,6 +244,12 @@ MODES.forEach(function (mode) {
 
     const values = line.split('\t');
     const mapSplit = values[1].split(' - ', 2);
+
+    if (consistentCaptains[mode] === undefined) {
+      consistentCaptains[mode] = values[4];
+    } else if (consistentCaptains[mode] != values[4]) {
+      consistentCaptains[mode] = null;
+    }
 
     imageMap[values[0]] = {
       artist: mapSplit[0],
@@ -316,11 +342,14 @@ MODES.forEach(function (mode) {
       'CREATORS_MD': creatorsMd,
       'CAPTAIN': convertToMarkdown(values[4]),
       'CAPTAIN_LINK': getUserLink(values[4]),
+      'CONSISTENT_CAPTAIN': consistentCaptains[mode],
       'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(values[5])))
     }));
   });
 
   beatmapsSections[mode] = postBeatmaps.join('\n\n');
+
+  config.captains[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
 });
 
 fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
@@ -331,7 +360,9 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
   'INTRO': newsPostIntro,
   'VIDEO': config.videos,
   'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
-  'BEATMAPS': beatmapsSections
+  'BEATMAPS': beatmapsSections,
+  'CONSISTENT_CAPTAINS': consistentCaptains,
+  'ALL_CAPTAINS': config.captains
 }) + '\n');
 
 fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));

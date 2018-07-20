@@ -1,14 +1,19 @@
 ---
 layout: post
-title: "%TITLE%"
-date: %DATE% %TIME% +0000
+title: "<? vars.TITLE ?>"
+date: <? vars.DATE ?> <? vars.TIME ?> +0000
 ---
 
-%HEADER%
+<? vars.HEADER ?>
 
 [![](/wiki/shared/news/banners/project-loved.jpg)](https://osu.ppy.sh/community/forums/120)
 
-%INTRO%
+<? vars.INTRO ?><?
+if (vars.VIDEO.intro) {
+`
+
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.intro}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+} ?>
 
 ### Navigation
 
@@ -17,45 +22,69 @@ date: %DATE% %TIME% +0000
 - [osu!catch](#osucatch)
 - [osu!mania](#osumania)
 
-## <a name="osu" id="osu"></a>osu!
-%#IF INCLUDE_VIDEO%
+## <a name="osu" id="osu"></a>osu!<?
+if (vars.VIDEO.osu) {
+`
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-osu%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.osu}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+} ?>
 
----
-%#ENDIF%
-
-%BEATMAPS-osu%
-
-## <a name="osutaiko" id="osutaiko"></a>osu!taiko
-%#IF INCLUDE_VIDEO%
-
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-taiko%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+osu! Loved candidates were chosen by <? vars.ALL_CAPTAINS.osu ?>!<?
+if (vars.CONSISTENT_CAPTAINS.osu) {
+` This week, all osu! beatmap descriptions were written by [${vars.CONSISTENT_CAPTAINS.osu}](${getUserLink(vars.CONSISTENT_CAPTAINS.osu)}).`
+} ?>
 
 ---
-%#ENDIF%
 
-%BEATMAPS-taiko%
+<? vars.BEATMAPS.osu ?>
 
-## <a name="osucatch" id="osucatch"></a>osu!catch
-%#IF INCLUDE_VIDEO%
+## <a name="osutaiko" id="osutaiko"></a>osu!taiko<?
+if (vars.VIDEO.taiko) {
+`
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-catch%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.taiko}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+} ?>
 
----
-%#ENDIF%
-
-%BEATMAPS-catch%
-
-## <a name="osumania" id="osumania"></a>osu!mania
-%#IF INCLUDE_VIDEO%
-
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/%VIDEO-mania%?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+osu!taiko Loved candidates were chosen by <? vars.ALL_CAPTAINS.taiko ?>!<?
+if (vars.CONSISTENT_CAPTAINS.taiko) {
+` This week, all osu!taiko beatmap descriptions were written by [${vars.CONSISTENT_CAPTAINS.taiko}](${getUserLink(vars.CONSISTENT_CAPTAINS.taiko)}).`
+} ?>
 
 ---
-%#ENDIF%
 
-%BEATMAPS-mania%
+<? vars.BEATMAPS.taiko ?>
+
+## <a name="osucatch" id="osucatch"></a>osu!catch<?
+if (vars.VIDEO.catch) {
+`
+
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.catch}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+} ?>
+
+osu!catch Loved candidates were chosen by <? vars.ALL_CAPTAINS.catch ?>!<?
+if (vars.CONSISTENT_CAPTAINS.catch) {
+` This week, all osu!catch beatmap descriptions were written by [${vars.CONSISTENT_CAPTAINS.catch}](${getUserLink(vars.CONSISTENT_CAPTAINS.catch)}).`
+} ?>
+
+---
+
+<? vars.BEATMAPS.catch ?>
+
+## <a name="osumania" id="osumania"></a>osu!mania<?
+if (vars.VIDEO.mania) {
+`
+
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.mania}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+} ?>
+
+osu!mania Loved candidates were chosen by <? vars.ALL_CAPTAINS.mania ?>!<?
+if (vars.CONSISTENT_CAPTAINS.mania) {
+` This week, all osu!mania beatmap descriptions were written by [${vars.CONSISTENT_CAPTAINS.mania}](${getUserLink(vars.CONSISTENT_CAPTAINS.mania)}).`
+} ?>
+
+---
+
+<? vars.BEATMAPS.mania ?>
 
 ---
 
