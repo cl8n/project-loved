@@ -149,7 +149,7 @@ function fixCommonMistakes(text) {
     .replace(/⅛/g, '1/8')
 
     // acronym consistency
-    .replace(/(\d+) ?k\s/gi, '$1K')
+    .replace(/(\d+) ?k(?<=\s)/gi, '$1K')
     .replace(/(\d+) ?bpm/gi, '$1 BPM');
 }
 
