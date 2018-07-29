@@ -88,7 +88,7 @@ function getUserLink(name) {
     return userLinks[name];
   }
 
-  console.log(`Fetching user ID of "${name}"`);
+  console.log(`Fetching user ID of ${name}`);
 
   const user = osuApiRequestSync('get_user', {
     u: name,
