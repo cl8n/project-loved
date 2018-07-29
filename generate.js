@@ -47,8 +47,8 @@ async function generateImage(
 
   await Promise.all([
     page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
-    page.$eval('#title', (el, title) => el.innerHTML = title, title),
-    page.$eval('#artist', (el, artist) => el.innerHTML = artist, artist),
+    page.$eval('#title', (el, title) => el.innerHTML = title, escapeHtml(title)),
+    page.$eval('#artist', (el, artist) => el.innerHTML = artist, escapeHtml(artist)),
     page.$eval('#creator', function (el, creators) {
       let line = `mapped by <b>${creators[0]}</b>`;
 
@@ -183,6 +183,15 @@ function convertToMarkdown(bbcode) {
 
 function escapeDoubleQuotes(text) {
   return text.toString().replace(/"/g, '\\"');
+}
+
+function escapeHtml(text) {
+  return text.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function joinList(array) {
