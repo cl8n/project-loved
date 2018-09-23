@@ -1,13 +1,13 @@
 {
   "captains": {
-    "osu": [],
-    "taiko": [],
-    "catch": [],
-    "mania": []
+    "osu": ["Toy", "DigitalHypno"],
+    "taiko": ["Backfire", "-Kazu-", "iceOC"],
+    "catch": ["Zak", "Ascendance", "Sartan", "Tenshichan"],
+    "mania": ["Kamikaze", "_underjoy", "aitor98", "Pope Gadget", "stupud man", "TheToaphster"]
   },
   "date": "1970-01-01",
   "osuApiKey": "",
-  "time": "00:00:00",
+  "time": "21:00:00",
   "title": "Project Loved: Week of January 1st",
   "videos": {
     "intro": "",
