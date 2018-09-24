@@ -254,7 +254,13 @@ MODES.forEach(function (mode) {
     }
 
     const values = line.split('\t');
-    const mapSplit = values[1].split(' - ', 2);
+    const mapSplit = values[1].split(' - ');
+
+    if (mapSplit.length > 2) {
+      let mapSplitCopy = [...mapSplit];
+      mapSplitCopy.shift();
+      mapSplit[1] = mapSplitCopy.join(' - ');
+    }
 
     if (consistentCaptains[mode] === undefined) {
       consistentCaptains[mode] = values[4];
