@@ -166,6 +166,7 @@ function convertToMarkdown(bbcode) {
   return bbcode.toString()
 
     // escapes
+    .replace(/\\/g, '\\\\')
     .replace(/\*/g, '\\*')
     .replace(/_/g, '\\_')
 
