@@ -177,6 +177,7 @@ function convertToMarkdown(bbcode) {
     .replace(/\[s\](.+?)\[\/s\]/gs, '~~$1~~')
     .replace(/\[color\=.+?\](.+?)\[\/color\]/gs, '$1')
     .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs, '[$2]($1)')
+    .replace(/\[quote(?:=".+?")?\](.+?)\[\/quote\]/gs, '> $1')
 
     // osu!-specific bbcode
     .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
