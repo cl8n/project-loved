@@ -10,8 +10,8 @@ const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
-const spreadsheets = {};
-MODES.forEach(mode => spreadsheets[mode] = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`).toString());
+
+const LovedSpreadsheet = require('./loved-spreadsheet.js');
 
 function osuApiRequestSync(endpoint, params) {
   let url = `https://osu.ppy.sh/api/${endpoint}?k=${config.osuApiKey}`;
@@ -239,44 +239,12 @@ mkdirTreeSync('./output/news');
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 
-const imageMap = {};
-const consistentCaptains = {};
-
 MODES.forEach(function (mode) {
   mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
   mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
-
-  const spreadsheetLines = spreadsheets[mode].split('\n');
-
-  spreadsheetLines.forEach(function (line, index) {
-    if (!line.replace(/\s/g, '').length) {
-      return;
-    }
-
-    const values = line.split('\t');
-    const mapSplit = values[1].split(' - ');
-
-    if (mapSplit.length > 2) {
-      let mapSplitCopy = [...mapSplit];
-      mapSplitCopy.shift();
-      mapSplit[1] = mapSplitCopy.join(' - ');
-    }
-
-    if (consistentCaptains[mode] === undefined) {
-      consistentCaptains[mode] = values[4];
-    } else if (consistentCaptains[mode] != values[4]) {
-      consistentCaptains[mode] = null;
-    }
-
-    imageMap[values[0]] = {
-      artist: mapSplit[0],
-      title: mapSplit[1],
-      filename: `${mapSplit[1].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^\-|\-$/g, '')}.jpg`,
-      mode: mode,
-      creators: values[3].split(',')
-    };
-  });
 });
+
+const beatmaps = LovedSpreadsheet.readSheets();
 
 const images = fs.readdirSync('./config')
   .filter(x => fs.statSync(path.join('./config', x)).isFile()
@@ -288,7 +256,7 @@ const images = fs.readdirSync('./config')
 
   images.forEach(function (image) {
     const id = image.split('.')[0];
-    const beatmap = imageMap[id];
+    const beatmap = beatmaps[id];
 
     if (beatmap === undefined) {
       console.log(`Could not find beatmapset with ID ${id}; skipping`);
@@ -323,28 +291,24 @@ console.log('Generating news post');
 const beatmapsSections = {};
 
 MODES.forEach(function (mode) {
-  const spreadsheetLines = spreadsheets[mode].split('\n');
   const postBeatmaps = [];
 
-  spreadsheetLines.forEach(function (line, index) {
-    if (!line.replace(/\s/g, '').length) {
-      return;
-    }
+  const modeBeatmaps = Object.values(beatmaps)
+    .filter(bm => bm.mode === mode)
+    .sort((a, b) => a.position - b.position);
 
-    const values = line.split('\t');
+  for (let beatmap of modeBeatmaps) {
+    let creatorsMd = `[${convertToMarkdown(beatmap.creators[0])}](https://osu.ppy.sh/users/${beatmap.creatorId})`;
 
-    const creators = values[3].split(',');
-    let creatorsMd = `[${convertToMarkdown(creators[0])}](https://osu.ppy.sh/users/${values[2]})`;
-
-    for (let i = 1; i < creators.length; i++) {
-      if (i == creators.length - 1) {
-        if (creators[i] == 'et al.') {
+    for (let i = 1; i < beatmap.creators.length; i++) {
+      if (i == beatmap.creators.length - 1) {
+        if (beatmap.creators[i] == 'et al.') {
           creatorsMd += ' et al.';
         } else {
-          creatorsMd += ` and [${convertToMarkdown(creators[i])}](${getUserLink(creators[i])})`;
+          creatorsMd += ` and [${convertToMarkdown(beatmap.creators[i])}](${getUserLink(beatmap.creators[i])})`;
         }
       } else {
-        creatorsMd += `, [${convertToMarkdown(creators[i])}](${getUserLink(creators[i])})`;
+        creatorsMd += `, [${convertToMarkdown(beatmap.creators[i])}](${getUserLink(beatmap.creators[i])})`;
       }
     }
 
@@ -352,18 +316,18 @@ MODES.forEach(function (mode) {
       'DATE': config.date,
       'FOLDER': newsFolder,
       'MODE': mode,
-      'IMAGE': imageMap[values[0]].filename,
       'LINK_MODE': mode.replace('catch', 'fruits'),
+      'IMAGE': beatmap.filename,
       // 'TOPIC_ID': '',
-      'BEATMAP': convertToMarkdown(values[1]),
-      'BEATMAP_ID': values[0],
+      'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
+      'BEATMAP_ID': beatmap.id,
       'CREATORS_MD': creatorsMd,
-      'CAPTAIN': convertToMarkdown(values[4]),
-      'CAPTAIN_LINK': getUserLink(values[4]),
-      'CONSISTENT_CAPTAIN': consistentCaptains[mode],
-      'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(values[5])))
+      'CAPTAIN': convertToMarkdown(beatmap.captain),
+      'CAPTAIN_LINK': getUserLink(beatmap.captain),
+      'CONSISTENT_CAPTAIN': LovedSpreadsheet.singleCaptain(mode),
+      'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
     }));
-  });
+  }
 
   beatmapsSections[mode] = postBeatmaps.join('\n\n');
 
@@ -379,7 +343,15 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
   'VIDEO': config.videos,
   'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
   'BEATMAPS': beatmapsSections,
-  'CONSISTENT_CAPTAINS': consistentCaptains,
+  'CONSISTENT_CAPTAINS': (function () {
+    const captains = {};
+
+    for (let mode of MODES) {
+      captains[mode] = LovedSpreadsheet.singleCaptain(mode);
+    }
+
+    return captains;
+  })(),
   'ALL_CAPTAINS': config.captains
 }) + '\n');
 
