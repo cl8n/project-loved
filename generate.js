@@ -353,6 +353,7 @@ MODES.forEach(function (mode) {
       'FOLDER': newsFolder,
       'MODE': mode,
       'IMAGE': imageMap[values[0]].filename,
+      'LINK_MODE': mode.replace('catch', 'fruits'),
       // 'TOPIC_ID': '',
       'BEATMAP': convertToMarkdown(values[1]),
       'BEATMAP_ID': values[0],
