@@ -12,7 +12,7 @@ date: <? vars.DATE ?> <? vars.TIME ?> +0000
 if (vars.VIDEO.intro) {
 `
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.intro}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO.intro}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 } ?>
 
 ### Navigation
@@ -26,7 +26,7 @@ if (vars.VIDEO.intro) {
 if (vars.VIDEO.osu) {
 `
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.osu}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO.osu}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 } ?>
 
 osu! Loved candidates were chosen by <? vars.ALL_CAPTAINS.osu ?>!<?
@@ -42,7 +42,7 @@ if (vars.CONSISTENT_CAPTAINS.osu) {
 if (vars.VIDEO.taiko) {
 `
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.taiko}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO.taiko}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 } ?>
 
 osu!taiko Loved candidates were chosen by <? vars.ALL_CAPTAINS.taiko ?>!<?
@@ -58,7 +58,7 @@ if (vars.CONSISTENT_CAPTAINS.taiko) {
 if (vars.VIDEO.catch) {
 `
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.catch}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO.catch}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 } ?>
 
 osu!catch Loved candidates were chosen by <? vars.ALL_CAPTAINS.catch ?>!<?
@@ -74,7 +74,7 @@ if (vars.CONSISTENT_CAPTAINS.catch) {
 if (vars.VIDEO.mania) {
 `
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/${vars.VIDEO.mania}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO.mania}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 } ?>
 
 osu!mania Loved candidates were chosen by <? vars.ALL_CAPTAINS.mania ?>!<?
