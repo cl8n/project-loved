@@ -352,7 +352,8 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
 
     return captains;
   })(),
-  'ALL_CAPTAINS': config.captains
+  'ALL_CAPTAINS': config.captains,
+  'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
 }) + '\n');
 
 fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));

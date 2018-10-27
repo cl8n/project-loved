@@ -1,11 +1,12 @@
 {
   "captains": {
-    "osu": ["Toy", "DigitalHypno"],
-    "taiko": ["Backfire", "-Kazu-", "iceOC"],
-    "catch": ["Zak", "Ascendance", "Sartan", "Tenshichan"],
-    "mania": ["Kamikaze", "_underjoy", "aitor98", "Pope Gadget", "stupud man", "TheToaphster"]
+    "osu": ["BeasttrollMC", "Bubbleman", "DigitalHypno", "SoraRoxas01", "waywern2012"],
+    "taiko": ["-[ ix Ishida xi ]-", "-Kazu-", "Backfire", "iceOC", "nyanmi-1828"],
+    "catch": ["Ascendance", "Sartan", "Tenshichan", "Zak"],
+    "mania": ["_underjoy", "aitor98", "Kamikaze", "Pope Gadget", "stupud man", "TheToaphster"]
   },
   "date": "1970-01-01",
+  "helpers": ["clayton", "Ephemeral", "Noffy", "Toy"],
   "osuApiKey": "",
   "time": "21:00:00",
   "title": "Project Loved: Week of January 1st",
