@@ -1,9 +1,9 @@
 {
   "captains": {
-    "osu": ["BeasttrollMC", "Bubbleman", "DigitalHypno", "SoraRoxas01", "waywern2012"],
+    "osu": ["BeasttrollMC", "Bubbleman", "DigitalHypno", "fartownik", "SoraRoxas01", "waywern2012"],
     "taiko": ["-[ ix Ishida xi ]-", "-Kazu-", "Backfire", "iceOC", "nyanmi-1828"],
     "catch": ["Ascendance", "Sartan", "Tenshichan", "Zak"],
-    "mania": ["_underjoy", "aitor98", "Kamikaze", "Pope Gadget", "stupud man", "TheToaphster"]
+    "mania": ["_underjoy", "aitor98", "Kamikaze", "Lenfried-", "Pope Gadget", "stupud man", "TheToaphster"]
   },
   "date": "1970-01-01",
   "helpers": ["clayton", "Ephemeral", "Noffy", "Toy"],
