@@ -226,7 +226,7 @@ function mkdirTreeSync(dir) {
   try {
     fs.mkdirSync(dir);
   } catch (error) {
-    if (error.errno === -4058) {
+    if (error.code === 'ENOENT') {
       mkdirTreeSync(path.dirname(dir));
       mkdirTreeSync(dir);
     } else {
