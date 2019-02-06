@@ -29,7 +29,7 @@ exports.readSheets = function () {
                 creatorId: matches[4],
                 creators: matches[5].split(','),
                 captain: matches[6],
-                description: matches[7]
+                description: matches[7].replace(/\\n/g, '\n\n')
             };
 
             data = data.slice(matches[0].length);
