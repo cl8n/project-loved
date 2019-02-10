@@ -78,7 +78,7 @@ if (vars.VIDEO.mania) {
 } ?>
 
 osu!mania Loved candidates were chosen by <? vars.ALL_CAPTAINS.mania ?>!<?
-if (vars.CONSISTENT_CAPTAINS.mania) {
+if (vars.CONSISTENT_CAPTAINS.mania && vars.CONSISTENT_CAPTAINS.mania !== 'Captain') {
 ` This week, all osu!mania beatmap descriptions were written by [${vars.CONSISTENT_CAPTAINS.mania}](${getUserLink(vars.CONSISTENT_CAPTAINS.mania)}).`
 } ?>
 
