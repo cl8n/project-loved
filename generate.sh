@@ -2,7 +2,7 @@
 
 mkdir -p './storage'
 
-node generate.js
+node generate.js "$@"
 
 shopt -s nullglob
 

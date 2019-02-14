@@ -13,6 +13,9 @@ const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro
 
 const LovedSpreadsheet = require('./loved-spreadsheet.js');
 
+const generateImages = process.argv.includes('--images', 2);
+const generateThreads = process.argv.includes('--threads', 2);
+
 function osuApiRequestSync(endpoint, params) {
   let url = `https://osu.ppy.sh/api/${endpoint}?k=${config.osuApiKey}`;
 
@@ -238,53 +241,56 @@ function mkdirTreeSync(dir) {
 mkdirTreeSync('./output/news');
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
-
-MODES.forEach(function (mode) {
-  mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
-  mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
-});
-
 const beatmaps = LovedSpreadsheet.readSheets();
 
-const images = fs.readdirSync('./config')
-  .filter(x => fs.statSync(path.join('./config', x)).isFile()
-            && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
+if (generateImages) {
+  console.log('Generating images');
 
-(async function () {  
-  const browser = await puppeteer.launch();
-  const imagePromises = [];
-
-  images.forEach(function (image) {
-    const id = image.split('.')[0];
-    const beatmap = beatmaps[id];
-
-    if (beatmap === undefined) {
-      console.log(`Could not find beatmapset with ID ${id}; skipping`);
-      return;
-    }
-
-    const promise = generateImage(
-      browser,
-      `file://${__dirname.replace(/\\/g, '/')}/config/${image}`,
-      beatmap.title,
-      beatmap.artist,
-      beatmap.creators,
-      `./temp/${newsFolder}/${beatmap.mode}/${beatmap.filename}`
-    );
-
-    promise.then(() => console.log(`Generated ${beatmap.filename}`),
-                 () => console.log(`Failed to generate ${beatmap.filename}`));
-
-    imagePromises.push(promise);
+  MODES.forEach(function (mode) {
+    mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
+    mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
   });
 
-  // Each promise is mapped to catch and return errors so that Promise.all()
-  // does not resolve until all of the promises are resolved, regardless of
-  // if any fail. This is important because we don't want the browser to close
-  // while new pages are still being opened.
-  Promise.all(imagePromises.map(p => p.catch(e => e)))
-    .then(() => browser.close(), () => browser.close());
-})();
+  const images = fs.readdirSync('./config')
+    .filter(x => fs.statSync(path.join('./config', x)).isFile()
+              && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
+
+  (async function () {
+    const browser = await puppeteer.launch();
+    const imagePromises = [];
+
+    images.forEach(function (image) {
+      const id = image.split('.')[0];
+      const beatmap = beatmaps[id];
+
+      if (beatmap === undefined) {
+        console.log(`Could not find beatmapset with ID ${id}; skipping`);
+        return;
+      }
+
+      const promise = generateImage(
+        browser,
+        `file://${__dirname.replace(/\\/g, '/')}/config/${image}`,
+        beatmap.title,
+        beatmap.artist,
+        beatmap.creators,
+        `./temp/${newsFolder}/${beatmap.mode}/${beatmap.filename}`
+      );
+
+      promise.then(() => console.log(`Generated ${beatmap.filename}`),
+                  () => console.log(`Failed to generate ${beatmap.filename}`));
+
+      imagePromises.push(promise);
+    });
+
+    // Each promise is mapped to catch and return errors so that Promise.all()
+    // does not resolve until all of the promises are resolved, regardless of
+    // if any fail. This is important because we don't want the browser to close
+    // while new pages are still being opened.
+    Promise.all(imagePromises.map(p => p.catch(e => e)))
+      .then(() => browser.close(), () => browser.close());
+  })();
+}
 
 console.log('Generating news post');
 
