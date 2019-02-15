@@ -52,23 +52,7 @@ async function generateImage(
     page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
     page.$eval('#title', (el, title) => el.innerHTML = title, escapeHtml(title)),
     page.$eval('#artist', (el, artist) => el.innerHTML = artist, escapeHtml(artist)),
-    page.$eval('#creator', function (el, creators) {
-      let line = `mapped by <b>${creators[0]}</b>`;
-
-      for (let i = 1; i < creators.length; i++) {
-        if (i === creators.length - 1) {
-          if (creators[i] === 'et al.') {
-            line += ' et al.';
-          } else {
-            line += ` and <b>${creators[i]}</b>`;
-          }
-        } else {
-          line += `, <b>${creators[i]}</b>`;
-        }
-      }
-
-      el.innerHTML = line;
-    }, creators)
+    page.$eval('#creator', (el, creators) => el.innerHTML = 'mapped by ' + joinList(creators.map((name) => `<b>${name}</b>`)), creators)
   ]);
 
   await page.screenshot({
@@ -208,7 +192,7 @@ function joinList(array) {
 
   for (let i = 1; i < array.length; i++) {
     if (i === array.length - 1) {
-      if (array[i] === 'et al.') {
+      if (array[i].includes('et al.')) {
         line += ' et al.';
       } else {
         line += ` and ${array[i]}`;
@@ -304,20 +288,6 @@ MODES.forEach(function (mode) {
     .sort((a, b) => a.position - b.position);
 
   for (let beatmap of modeBeatmaps) {
-    let creatorsMd = `[${convertToMarkdown(beatmap.creators[0])}](https://osu.ppy.sh/users/${beatmap.creatorId})`;
-
-    for (let i = 1; i < beatmap.creators.length; i++) {
-      if (i == beatmap.creators.length - 1) {
-        if (beatmap.creators[i] == 'et al.') {
-          creatorsMd += ' et al.';
-        } else {
-          creatorsMd += ` and [${convertToMarkdown(beatmap.creators[i])}](${getUserLink(beatmap.creators[i])})`;
-        }
-      } else {
-        creatorsMd += `, [${convertToMarkdown(beatmap.creators[i])}](${getUserLink(beatmap.creators[i])})`;
-      }
-    }
-
     postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
       'DATE': config.date,
       'FOLDER': newsFolder,
@@ -327,7 +297,7 @@ MODES.forEach(function (mode) {
       // 'TOPIC_ID': '',
       'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
       'BEATMAP_ID': beatmap.id,
-      'CREATORS_MD': creatorsMd,
+      'CREATORS_MD': joinList(beatmap.creators.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
       'CAPTAIN': convertToMarkdown(beatmap.captain),
       'CAPTAIN_LINK': getUserLink(beatmap.captain),
       'CONSISTENT_CAPTAIN': LovedSpreadsheet.singleCaptain(mode),
