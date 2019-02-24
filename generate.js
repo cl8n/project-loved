@@ -6,12 +6,16 @@ const request = require('sync-request');
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
 const config = require('./config/config.json');
+const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toString();
+const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
 const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
+const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').toString();
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
 
 const LovedSpreadsheet = require('./loved-spreadsheet.js');
+const Forum = require('./forum.js');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateThreads = process.argv.includes('--threads', 2);
@@ -52,23 +56,7 @@ async function generateImage(
     page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
     page.$eval('#title', (el, title) => el.innerHTML = title, escapeHtml(title)),
     page.$eval('#artist', (el, artist) => el.innerHTML = artist, escapeHtml(artist)),
-    page.$eval('#creator', function (el, creators) {
-      let line = `mapped by <b>${creators[0]}</b>`;
-
-      for (let i = 1; i < creators.length; i++) {
-        if (i === creators.length - 1) {
-          if (creators[i] === 'et al.') {
-            line += ' et al.';
-          } else {
-            line += ` and <b>${creators[i]}</b>`;
-          }
-        } else {
-          line += `, <b>${creators[i]}</b>`;
-        }
-      }
-
-      el.innerHTML = line;
-    }, creators)
+    page.$eval('#creator', (el, creatorsList) => el.innerHTML = `mapped by ${creatorsList}`, joinList(creators.map((name) => `<b>${name}</b>`)))
   ]);
 
   await page.screenshot({
@@ -77,6 +65,19 @@ async function generateImage(
   });
 
   await page.close();
+}
+
+function fullModeName(mode) {
+  switch (mode) {
+    case 'osu':
+      return 'osu!standard';
+    case 'taiko':
+      return 'osu!taiko';
+    case 'catch':
+      return 'osu!catch';
+    case 'mania':
+      return 'osu!mania';
+  }
 }
 
 let userLinks;
@@ -126,6 +127,13 @@ function getBeatmapSetLink(beatmapId) {
   }
 
   return beatmapSetLinks[beatmapId] = `https://osu.ppy.sh/beatmapsets/${beatmap[0].beatmapset_id}`;
+}
+
+let threadIds;
+if (fs.existsSync('./storage/thread-ids.json')) {
+  threadIds = require('./storage/thread-ids.json');
+} else {
+  threadIds = {};
 }
 
 function textFromTemplate(template, vars = {}) {
@@ -186,10 +194,6 @@ function convertToMarkdown(bbcode) {
     .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
 
-function escapeDoubleQuotes(text) {
-  return text.toString().replace(/"/g, '\\"');
-}
-
 function escapeHtml(text) {
   return text.toString()
     .replace(/&/g, '&amp;')
@@ -208,7 +212,7 @@ function joinList(array) {
 
   for (let i = 1; i < array.length; i++) {
     if (i === array.length - 1) {
-      if (array[i] === 'et al.') {
+      if (array[i].includes('et al.')) {
         line += ' et al.';
       } else {
         line += ` and ${array[i]}`;
@@ -243,6 +247,10 @@ mkdirTreeSync('./output/news');
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 const beatmaps = LovedSpreadsheet.readSheets();
 
+const images = fs.readdirSync('./config')
+  .filter(x => fs.statSync(path.join('./config', x)).isFile()
+          && (path.extname(x).match(/\.?(png|jpg|jpeg)/) !== null));
+
 if (generateImages) {
   console.log('Generating images');
 
@@ -250,10 +258,6 @@ if (generateImages) {
     mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
     mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
   });
-
-  const images = fs.readdirSync('./config')
-    .filter(x => fs.statSync(path.join('./config', x)).isFile()
-              && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
   (async function () {
     const browser = await puppeteer.launch();
@@ -292,9 +296,92 @@ if (generateImages) {
   })();
 }
 
+if (generateThreads) {
+  console.log('Posting threads');
+
+  for (let mode of MODES.reverse()) {
+    const modeBeatmaps = Object.values(beatmaps)
+      .filter(bm => bm.mode === mode)
+      .sort((a, b) => a.position - b.position)
+      .reverse();
+    const posts = {};
+    const mainPostTitle = `[${fullModeName(mode)}] ${config.title}`;
+    const mainPostBeatmaps = [];
+
+    for (let beatmap of modeBeatmaps) {
+      let postTitle = `[${fullModeName(mode)}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
+
+      if (postTitle.length > 100) {
+        const longerMeta = beatmap.title.length > beatmap.artist.length ? beatmap.title : beatmap.artist;
+
+        postTitle = postTitle.replace(longerMeta, longerMeta.slice(0, longerMeta.length - postTitle.length + 100 - 4) + ' ...');
+      }
+
+      const postContent = textFromTemplate(votingThreadTemplate, {
+        MAIN_THREAD_TITLE: mainPostTitle,
+        BEATMAPSET_ID: beatmap.id,
+        BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
+        CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+        CAPTAIN_LINK: `[url=${getUserLink(beatmap.captain)}]${beatmap.captain}[/url]`,
+        DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description))
+      });
+
+      const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
+
+      let coverFile = images.find(x => x.split('.')[0] === beatmap.id.toString());
+      coverFile = `${__dirname.replace(/\\/g, '/')}/config/${coverFile}`;
+
+      Forum.storeTopicCover(coverFile, function (coverId) {
+        Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle, function (topicId) {
+          threadIds[beatmap.id] = topicId;
+
+          mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
+            BEATMAPSET_ID: beatmap.id,
+            BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
+            CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+            THREAD_ID: topicId
+          }));
+
+          Forum.findFirstPostId(topicId, function (postId) {
+            posts[beatmap.id] = {
+              id: postId,
+              content: postContent,
+              linksToMainTopic: false
+            };
+
+            if (Object.keys(posts).length === modeBeatmaps.length) {
+              const mainPostContent = textFromTemplate(mainThreadTemplate, {
+                GOOGLE_FORM: mode === 'mania' ? config.googleForm.mania : config.googleForm.main,
+                GOOGLE_SHEET: mode === 'mania' ? config.googleSheet.mania : config.googleSheet.main,
+                RESULTS_POST: config.resultsPost[mode],
+                THRESHOLD: config.threshold[mode],
+                CAPTAINS: joinList(config.captains[mode].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
+                BEATMAPS: mainPostBeatmaps.join('\n\n')
+              });
+
+              Forum.storeTopic(mainPostTitle, mainPostContent, function (topicId) {
+                for (let beatmap of modeBeatmaps) {
+                  Forum.updatePost(
+                    posts[beatmap.id].id,
+                    posts[beatmap.id].content.replace('MAIN_TOPIC_ID', topicId),
+                    function (success) {
+                      posts[beatmap.id].linksToMainTopic = success;
+                    }
+                  );
+                }
+              });
+            }
+          });
+        });
+      });
+    }
+  }
+}
+
 console.log('Generating news post');
 
 const beatmapsSections = {};
+const captainMarkdown = {};
 
 MODES.forEach(function (mode) {
   const postBeatmaps = [];
@@ -304,30 +391,16 @@ MODES.forEach(function (mode) {
     .sort((a, b) => a.position - b.position);
 
   for (let beatmap of modeBeatmaps) {
-    let creatorsMd = `[${convertToMarkdown(beatmap.creators[0])}](https://osu.ppy.sh/users/${beatmap.creatorId})`;
-
-    for (let i = 1; i < beatmap.creators.length; i++) {
-      if (i == beatmap.creators.length - 1) {
-        if (beatmap.creators[i] == 'et al.') {
-          creatorsMd += ' et al.';
-        } else {
-          creatorsMd += ` and [${convertToMarkdown(beatmap.creators[i])}](${getUserLink(beatmap.creators[i])})`;
-        }
-      } else {
-        creatorsMd += `, [${convertToMarkdown(beatmap.creators[i])}](${getUserLink(beatmap.creators[i])})`;
-      }
-    }
-
     postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
       'DATE': config.date,
       'FOLDER': newsFolder,
       'MODE': mode,
       'LINK_MODE': mode.replace('catch', 'fruits'),
       'IMAGE': beatmap.filename,
-      // 'TOPIC_ID': '',
+      'TOPIC_ID': threadIds[beatmap.id],
       'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
       'BEATMAP_ID': beatmap.id,
-      'CREATORS_MD': creatorsMd,
+      'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
       'CAPTAIN': convertToMarkdown(beatmap.captain),
       'CAPTAIN_LINK': getUserLink(beatmap.captain),
       'CONSISTENT_CAPTAIN': LovedSpreadsheet.singleCaptain(mode),
@@ -337,7 +410,7 @@ MODES.forEach(function (mode) {
 
   beatmapsSections[mode] = postBeatmaps.join('\n\n');
 
-  config.captains[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
+  captainMarkdown[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
 });
 
 fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
@@ -358,9 +431,10 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
 
     return captains;
   })(),
-  'ALL_CAPTAINS': config.captains,
+  'ALL_CAPTAINS': captainMarkdown,
   'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
 }) + '\n');
 
 fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));
 fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks, null, 4));
+fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));

@@ -2,6 +2,7 @@
   "private": true,
   "dependencies": {
     "puppeteer": "^1.5.0",
+    "request": "^2.88.0",
     "sync-request": "^6.0.0"
   }
 }
