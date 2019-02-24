@@ -170,10 +170,6 @@ function convertToMarkdown(bbcode) {
     .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
 
-function escapeDoubleQuotes(text) {
-  return text.toString().replace(/"/g, '\\"');
-}
-
 function escapeHtml(text) {
   return text.toString()
     .replace(/&/g, '&amp;')
@@ -227,6 +223,10 @@ mkdirTreeSync('./output/news');
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 const beatmaps = LovedSpreadsheet.readSheets();
 
+const images = fs.readdirSync('./config')
+  .filter(x => fs.statSync(path.join('./config', x)).isFile()
+          && (path.extname(x).match(/\.?(png|jpg|jpeg)/) !== null));
+
 if (generateImages) {
   console.log('Generating images');
 
@@ -234,10 +234,6 @@ if (generateImages) {
     mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
     mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
   });
-
-  const images = fs.readdirSync('./config')
-    .filter(x => fs.statSync(path.join('./config', x)).isFile()
-              && (path.extname(x) === '.png' || path.extname(x) === '.jpg'));
 
   (async function () {
     const browser = await puppeteer.launch();
@@ -279,6 +275,7 @@ if (generateImages) {
 console.log('Generating news post');
 
 const beatmapsSections = {};
+const captainMarkdown = {};
 
 MODES.forEach(function (mode) {
   const postBeatmaps = [];
@@ -297,7 +294,7 @@ MODES.forEach(function (mode) {
       // 'TOPIC_ID': '',
       'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
       'BEATMAP_ID': beatmap.id,
-      'CREATORS_MD': joinList(beatmap.creators.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
+      'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
       'CAPTAIN': convertToMarkdown(beatmap.captain),
       'CAPTAIN_LINK': getUserLink(beatmap.captain),
       'CONSISTENT_CAPTAIN': LovedSpreadsheet.singleCaptain(mode),
@@ -307,7 +304,7 @@ MODES.forEach(function (mode) {
 
   beatmapsSections[mode] = postBeatmaps.join('\n\n');
 
-  config.captains[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
+  captainMarkdown[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
 });
 
 fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
@@ -328,7 +325,7 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
 
     return captains;
   })(),
-  'ALL_CAPTAINS': config.captains,
+  'ALL_CAPTAINS': captainMarkdown,
   'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
 }) + '\n');
 
