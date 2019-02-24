@@ -5,6 +5,7 @@
     "catch": ["Ascendance", "Sartan", "Tenshichan", "Wesley"],
     "mania": ["Lenfried-", "Pope Gadget", "Shoegazer", "Toaph Daddy"]
   },
+  "csrf": "",
   "date": "1970-01-01",
   "googleForm": {
     "main": "https://docs.google.com/forms/d/e/1FAIpQLSdbgHOVqMF8wQQKSdddW1JhC10ff6C7fb4JbEW7PBQTn9gAqg/viewform",
@@ -22,6 +23,7 @@
     "catch": "",
     "mania": ""
   },
+  "session": "",
   "threshold": {
     "osu": "85%",
     "taiko": "80%",

@@ -6,12 +6,16 @@ const request = require('sync-request');
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
 const config = require('./config/config.json');
+const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toString();
+const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
 const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
+const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').toString();
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
 
 const LovedSpreadsheet = require('./loved-spreadsheet.js');
+const Forum = require('./forum.js');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateThreads = process.argv.includes('--threads', 2);
@@ -63,6 +67,19 @@ async function generateImage(
   await page.close();
 }
 
+function fullModeName(mode) {
+  switch (mode) {
+    case 'osu':
+      return 'osu!standard';
+    case 'taiko':
+      return 'osu!taiko';
+    case 'catch':
+      return 'osu!catch';
+    case 'mania':
+      return 'osu!mania';
+  }
+}
+
 let userLinks;
 if (fs.existsSync('./storage/user-links.json')) {
   userLinks = require('./storage/user-links.json');
@@ -110,6 +127,13 @@ function getBeatmapSetLink(beatmapId) {
   }
 
   return beatmapSetLinks[beatmapId] = `https://osu.ppy.sh/beatmapsets/${beatmap[0].beatmapset_id}`;
+}
+
+let threadIds;
+if (fs.existsSync('./storage/thread-ids.json')) {
+  threadIds = require('./storage/thread-ids.json');
+} else {
+  threadIds = {};
 }
 
 function textFromTemplate(template, vars = {}) {
@@ -272,6 +296,88 @@ if (generateImages) {
   })();
 }
 
+if (generateThreads) {
+  console.log('Posting threads');
+
+  for (let mode of MODES.reverse()) {
+    const modeBeatmaps = Object.values(beatmaps)
+      .filter(bm => bm.mode === mode)
+      .sort((a, b) => a.position - b.position)
+      .reverse();
+    const posts = {};
+    const mainPostTitle = `[${fullModeName(mode)}] ${config.title}`;
+    const mainPostBeatmaps = [];
+
+    for (let beatmap of modeBeatmaps) {
+      let postTitle = `[${fullModeName(mode)}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
+
+      if (postTitle.length > 100) {
+        const longerMeta = beatmap.title.length > beatmap.artist.length ? beatmap.title : beatmap.artist;
+
+        postTitle = postTitle.replace(longerMeta, longerMeta.slice(0, longerMeta.length - postTitle.length + 100 - 4) + ' ...');
+      }
+
+      const postContent = textFromTemplate(votingThreadTemplate, {
+        MAIN_THREAD_TITLE: mainPostTitle,
+        BEATMAPSET_ID: beatmap.id,
+        BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
+        CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+        CAPTAIN_LINK: `[url=${getUserLink(beatmap.captain)}]${beatmap.captain}[/url]`,
+        DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description))
+      });
+
+      const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
+
+      let coverFile = images.find(x => x.split('.')[0] === beatmap.id.toString());
+      coverFile = `${__dirname.replace(/\\/g, '/')}/config/${coverFile}`;
+
+      Forum.storeTopicCover(coverFile, function (coverId) {
+        Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle, function (topicId) {
+          threadIds[beatmap.id] = topicId;
+
+          mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
+            BEATMAPSET_ID: beatmap.id,
+            BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
+            CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+            THREAD_ID: topicId
+          }));
+
+          Forum.findFirstPostId(topicId, function (postId) {
+            posts[beatmap.id] = {
+              id: postId,
+              content: postContent,
+              linksToMainTopic: false
+            };
+
+            if (Object.keys(posts).length === modeBeatmaps.length) {
+              const mainPostContent = textFromTemplate(mainThreadTemplate, {
+                GOOGLE_FORM: mode === 'mania' ? config.googleForm.mania : config.googleForm.main,
+                GOOGLE_SHEET: mode === 'mania' ? config.googleSheet.mania : config.googleSheet.main,
+                RESULTS_POST: config.resultsPost[mode],
+                THRESHOLD: config.threshold[mode],
+                CAPTAINS: joinList(config.captains[mode].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
+                BEATMAPS: mainPostBeatmaps.join('\n\n')
+              });
+
+              Forum.storeTopic(mainPostTitle, mainPostContent, function (topicId) {
+                for (let beatmap of modeBeatmaps) {
+                  Forum.updatePost(
+                    posts[beatmap.id].id,
+                    posts[beatmap.id].content.replace('MAIN_TOPIC_ID', topicId),
+                    function (success) {
+                      posts[beatmap.id].linksToMainTopic = success;
+                    }
+                  );
+                }
+              });
+            }
+          });
+        });
+      });
+    }
+  }
+}
+
 console.log('Generating news post');
 
 const beatmapsSections = {};
@@ -291,7 +397,7 @@ MODES.forEach(function (mode) {
       'MODE': mode,
       'LINK_MODE': mode.replace('catch', 'fruits'),
       'IMAGE': beatmap.filename,
-      // 'TOPIC_ID': '',
+      'TOPIC_ID': threadIds[beatmap.id],
       'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
       'BEATMAP_ID': beatmap.id,
       'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
@@ -331,3 +437,4 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
 
 fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));
 fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks, null, 4));
+fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));
