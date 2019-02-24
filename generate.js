@@ -52,7 +52,7 @@ async function generateImage(
     page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
     page.$eval('#title', (el, title) => el.innerHTML = title, escapeHtml(title)),
     page.$eval('#artist', (el, artist) => el.innerHTML = artist, escapeHtml(artist)),
-    page.$eval('#creator', (el, creators) => el.innerHTML = 'mapped by ' + joinList(creators.map((name) => `<b>${name}</b>`)), creators)
+    page.$eval('#creator', (el, creatorsList) => el.innerHTML = `mapped by ${creatorsList}`, joinList(creators.map((name) => `<b>${name}</b>`)))
   ]);
 
   await page.screenshot({
