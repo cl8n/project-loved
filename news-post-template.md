@@ -6,7 +6,7 @@ date: <? vars.DATE ?> <? vars.TIME ?> +0000
 
 <? vars.HEADER ?>
 
-[![](/wiki/shared/news/banners/project-loved.jpg)](https://osu.ppy.sh/community/forums/120)
+![](/wiki/shared/news/banners/project-loved.jpg)
 
 <? vars.INTRO ?><?
 if (vars.VIDEO.intro) {
