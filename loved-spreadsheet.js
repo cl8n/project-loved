@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
-const DESCRIPTION_REGEX = /^(\d+)\t(.+?) - (.+?)\t(\d+)\t([-_,. \[\]a-z0-9]+)\t([-_,. \[\]a-z0-9]+)\t((?:.|(?:\r|\n|\r\n){2})+?)$(?:\r|\n|\r\n)?/im;
+const DESCRIPTION_REGEX = /^(\d+)\t(.+?) - (.+?)\t([-_,. \[\]a-z0-9]+)\t([-_,. \[\]a-z0-9]+)\t((?:.|(?:\r|\n|\r\n){2})+?)$(?:\r|\n|\r\n)?/im;
 
 const beatmaps = {};
 
@@ -26,10 +26,9 @@ exports.readSheets = function () {
                 filename: `${matches[3].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^\-|\-$/g, '')}.jpg`,
                 artist: matches[2],
                 title: matches[3],
-                creatorId: matches[4],
-                creators: matches[5].split(','),
-                captain: matches[6],
-                description: matches[7].replace(/\\n/g, '\n\n')
+                creators: matches[4].split(','),
+                captain: matches[5],
+                description: matches[6].replace(/\\n/g, '\n\n')
             };
 
             data = data.slice(matches[0].length);
