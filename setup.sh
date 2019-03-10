@@ -9,5 +9,5 @@ touch ./config/news-post-header.md
 touch ./config/news-post-intro.md
 
 for mode in osu taiko catch mania; do
-    touch ./config/spreadsheet-$mode.tsv
+    touch ./config/document-$mode
 done

@@ -14,7 +14,7 @@ const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
 
-const LovedSpreadsheet = require('./loved-spreadsheet.js');
+const LovedDocument = require('./loved-document.js');
 const Forum = require('./forum.js');
 
 const generateImages = process.argv.includes('--images', 2);
@@ -245,7 +245,7 @@ function mkdirTreeSync(dir) {
 mkdirTreeSync('./output/news');
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
-const beatmaps = LovedSpreadsheet.readSheets();
+const beatmaps = LovedDocument.readDocuments();
 
 const images = fs.readdirSync('./config')
   .filter(x => fs.statSync(path.join('./config', x)).isFile()
@@ -405,7 +405,7 @@ MODES.forEach(function (mode) {
       'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
       'CAPTAIN': convertToMarkdown(beatmap.captain),
       'CAPTAIN_LINK': getUserLink(beatmap.captain),
-      'CONSISTENT_CAPTAIN': LovedSpreadsheet.singleCaptain(mode),
+      'CONSISTENT_CAPTAIN': LovedDocument.singleCaptain(mode),
       'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
     }));
   }
@@ -428,7 +428,7 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
     const captains = {};
 
     for (let mode of MODES) {
-      captains[mode] = LovedSpreadsheet.singleCaptain(mode);
+      captains[mode] = LovedDocument.singleCaptain(mode);
     }
 
     return captains;

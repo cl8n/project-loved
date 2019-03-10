@@ -1,23 +1,17 @@
-const fs = require('fs');
+const {readFileSync} = require('fs');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
-
-const DESCRIPTION_REGEX = /^(\d+)\t(.+?) - (.+?)\t([-_,. \[\]a-z0-9]+)\t([-_,. \[\]a-z0-9]+)\t((?:.|(?:\r|\n|\r\n){2})+?)$(?:\r|\n|\r\n)?/im;
+const DESCRIPTION_REGEX = /^(\d+)\t(.+?) - (.+)\t([-_,. \[\]a-z0-9]+)\t([-_. \[\]a-z0-9]+)\n((?:.|\n\\\n)+)/i;
 
 const beatmaps = {};
 
-exports.readSheets = function () {
+exports.readDocuments = function () {
     for (let mode of MODES) {
-        let data = fs.readFileSync(`./config/spreadsheet-${mode}.tsv`, 'utf8').trim();
+        let data = readFileSync(`./config/document-${mode}`, 'utf8').trim();
         let position = 0;
 
         while (data.length > 0) {
             const matches = DESCRIPTION_REGEX.exec(data);
-
-            // TODO: Should not be necessary
-            if (matches === null) {
-                break;
-            }
 
             beatmaps[matches[1]] = {
                 position: position,
@@ -28,10 +22,10 @@ exports.readSheets = function () {
                 title: matches[3],
                 creators: matches[4].split(','),
                 captain: matches[5],
-                description: matches[6].replace(/\\n/g, '\n\n')
+                description: matches[6].replace(/\n\\\n/g, '\n\n').trim()
             };
 
-            data = data.slice(matches[0].length);
+            data = data.slice(matches[0].length).trim();
             position++;
         }
     }
