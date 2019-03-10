@@ -370,6 +370,8 @@ if (generateThreads) {
                   );
                 }
               });
+
+              fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));
             }
           });
         });
@@ -437,4 +439,3 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
 
 fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));
 fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks, null, 4));
-fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));
