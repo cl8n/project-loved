@@ -1,12 +1,13 @@
+const bottleneck = require('bottleneck');
 const config = require('./config/config.json');
 const fs = require('fs');
-let request = require('request');
+let requestUnwrapped = require('request');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';
-const jar = request.jar();
+const jar = requestUnwrapped.jar();
 jar.setCookie(`XSRF-TOKEN=${config.csrf}`, OSU_SERVER);
 jar.setCookie(`osu_session=${config.session}`, OSU_SERVER);
-request = request.defaults({
+requestUnwrapped = requestUnwrapped.defaults({
     baseUrl: OSU_SERVER,
     method: 'POST',
     followRedirect: false,
@@ -15,6 +16,13 @@ request = request.defaults({
     },
     jar: jar
 });
+
+const limiter = new bottleneck({
+    maxConcurrent: 1,
+    minTime: 333
+});
+
+const request = limiter.wrap(requestUnwrapped);
 
 function idFromUrl(url) {
     return (url.match(/\/(\d+)\s*$/) || [, null])[1];
