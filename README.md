@@ -22,8 +22,6 @@ To generate a post, you'll need to:
 
 #### Getting background images
 
-*Note: You may skip this step if you don't need to generate the images*
-
 Typically, the images in each Project Loved news post are backed by the beatmap's background shown on-site. For now, those images have to be obtained manually. The images can be formatted as PNG or JPG. When saving the images, place them in the `config` folder with the beatmapset ID as their name.
 
 Because it can be a tedious process to find every background within every mapset, there is a helper script `get-images.sh` included that will search for any beatmap archives in the `config` folder and extract the background image if it can detect one. This will work for most maps, but not all.
@@ -50,9 +48,9 @@ After the program runs, you'll have a new folder named `output` that contains th
 
 This program is also capable of automatically posting to the Project Loved forum. **Make sure to only run this once per round, when all of the information is final and correct.**
 
-In addition to filling in the information need by the news posts in the [config files](#config-files), you'll need to provide a CSRF prevention token, links to the last round's results posts, and an osu! session ID in `config.json`. Contact me if you need help finding this information.
+In addition to [getting the background image for each map](#getting-background-images) and [filling in the information needed by the news posts in the config files](#config-files), you'll need to provide a CSRF prevention token, links to the last round's results posts, and an osu! session ID in `config.json`. Contact me if you need help finding this information.
 
-When running `generate.sh`, include the `--threads` option. Make sure that everything worked as intended by checking the Project Loved forum after the program finishes. If something is wrong, delete all of the posts.
+When running `generate.sh`, include the `--threads` option. Make sure that everything worked as intended by checking the Project Loved forum after the program finishes. If something is wrong, delete all of the posts and contact a moderator to move the deleted posts to a trash forum.
 
 ### Generating mapper forum messages
 
