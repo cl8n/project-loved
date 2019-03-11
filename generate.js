@@ -284,10 +284,15 @@ if (generateMessages) {
         let coverFile = images.find(x => x.split('.')[0] === beatmap.id.toString());
         coverFile = `${__dirname.replace(/\\/g, '/')}/config/${coverFile}`;
 
-        const coverId = await Forum.storeTopicCover(coverFile);
-        const topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
+        let topicId;
+        if (threadIds[beatmap.id] === undefined) {
+          const coverId = await Forum.storeTopicCover(coverFile);
+          topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
 
-        threadIds[beatmap.id] = topicId;
+          threadIds[beatmap.id] = topicId;
+        } else {
+          topicId = threadIds[beatmap.id];
+        }
 
         mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
           BEATMAPSET_ID: beatmap.id,
