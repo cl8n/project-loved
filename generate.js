@@ -382,4 +382,4 @@ if (generateMessages) {
     'ALL_CAPTAINS': captainMarkdown,
     'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
   }) + '\n');
-});
+})();
