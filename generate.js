@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
-const request = require('sync-request');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
@@ -16,26 +15,11 @@ const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro
 
 const LovedDocument = require('./loved-document.js');
 const Forum = require('./forum.js');
+const OsuApi = require('./osu-api.js');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateMessages = process.argv.includes('--messages', 2);
 const generateThreads = process.argv.includes('--threads', 2);
-
-function osuApiRequestSync(endpoint, params) {
-  let url = `https://osu.ppy.sh/api/${endpoint}?k=${config.osuApiKey}`;
-
-  Object.keys(params).forEach(function (key) {
-    url += `&${key}=${params[key]}`;
-  });
-
-  const response = request('GET', url);
-
-  if (response.statusCode === 401) {
-    throw 'Invalid osu!api key';
-  }
-
-  return JSON.parse(response.getBody());
-}
 
 async function generateImage(
   browser,
@@ -81,53 +65,10 @@ function fullModeName(mode) {
   }
 }
 
-let userLinks;
-if (fs.existsSync('./storage/user-links.json')) {
-  userLinks = require('./storage/user-links.json');
-} else {
-  userLinks = {};
-}
-
 function getUserLink(name) {
-  if (userLinks[name]) {
-    return userLinks[name];
-  }
+  const user = OsuApi.getUser(name, true);
 
-  console.log(`Fetching user ID of ${name}`);
-
-  const user = osuApiRequestSync('get_user', {
-    u: name,
-    type: 'string'
-  });
-
-  if (!user.length) {
-    throw `User not found: ${name}`;
-  }
-
-  return userLinks[name] = `https://osu.ppy.sh/users/${user[0].user_id}`;
-}
-
-let beatmapSetLinks;
-if (fs.existsSync('./storage/beatmapset-links.json')) {
-  beatmapSetLinks = require('./storage/beatmapset-links.json');
-} else {
-  beatmapSetLinks = {};
-}
-
-function getBeatmapSetLink(beatmapId) {
-  if (beatmapSetLinks[beatmapId]) {
-    return beatmapSetLinks[beatmapId];
-  }
-
-  console.log(`Fetching beatmap set ID of #${beatmapId}`);
-
-  const beatmap = osuApiRequestSync('get_beatmaps', { b: beatmapId });
-
-  if (!beatmap.length) {
-    throw `Beatmap not found: ${beatmapId}`;
-  }
-
-  return beatmapSetLinks[beatmapId] = `https://osu.ppy.sh/beatmapsets/${beatmap[0].beatmapset_id}`;
+  return `https://osu.ppy.sh/users/${user.user_id}`;
 }
 
 let threadIds;
@@ -170,7 +111,7 @@ function osuModernLinks(text) {
     .replace(/https\:\/\/osu.ppy.sh\/s\//g, 'https://osu.ppy.sh/beatmapsets/')
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9]+)/g, 'https://osu.ppy.sh/users/$1')
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/g, (match, p1) => getUserLink(p1))
-    .replace(/https\:\/\/osu.ppy.sh\/b\/([0-9]+)/g, (match, p1) => getBeatmapSetLink(p1))
+    .replace(/https\:\/\/osu.ppy.sh\/b\//g, 'https://osu.ppy.sh/beatmaps/')
     .replace(/https\:\/\/osu.ppy.sh\/forum\/t\//g, 'https://osu.ppy.sh/community/forums/topics/');
 }
 
@@ -447,6 +388,3 @@ fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemp
   'ALL_CAPTAINS': captainMarkdown,
   'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
 }) + '\n');
-
-fs.writeFileSync('./storage/user-links.json', JSON.stringify(userLinks, null, 4));
-fs.writeFileSync('./storage/beatmapset-links.json', JSON.stringify(beatmapSetLinks, null, 4));
