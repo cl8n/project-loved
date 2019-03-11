@@ -19,7 +19,7 @@ requestUnwrapped = requestUnwrapped.defaults({
 
 const limiter = new bottleneck({
     maxConcurrent: 1,
-    minTime: 333
+    minTime: 666
 });
 
 const request = limiter.wrap(requestUnwrapped);
