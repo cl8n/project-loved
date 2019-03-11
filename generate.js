@@ -310,7 +310,7 @@ if (generateMessages) {
         RESULTS_POST: config.resultsPost[mode],
         THRESHOLD: config.threshold[mode],
         CAPTAINS: joinList(config.captains[mode].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
-        BEATMAPS: mainPostBeatmaps.join('\n\n')
+        BEATMAPS: mainPostBeatmaps.reverse().join('\n\n')
       });
 
       const mainTopicId = await Forum.storeTopic(mainPostTitle, mainPostContent);
