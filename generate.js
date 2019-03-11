@@ -65,6 +65,86 @@ function fullModeName(mode) {
   }
 }
 
+function modeInt(mode) {
+  switch (mode) {
+    case 'osu':
+      return 0;
+    case 'taiko':
+      return 1;
+    case 'catch':
+      return 2;
+    case 'mania':
+      return 3;
+  }
+}
+
+function getExtraBeatmapsetInfo(beatmapset, mode) {
+  mode = modeInt(mode);
+
+  let minBpm;
+  let maxBpm;
+  let maxLength;
+  let diffs = [];
+  let minDiff;
+  let maxDiff;
+  let keyModes = [];
+
+  beatmapset.forEach(beatmap => {
+    beatmap.mode = parseInt(beatmap.mode);
+
+    if (beatmap.mode !== mode)
+      return;
+
+    beatmap.diff_size = parseInt(beatmap.diff_size);
+    beatmap.bpm = Math.round(parseFloat(beatmap.bpm));
+    beatmap.difficultyrating = parseFloat(beatmap.difficultyrating);
+    beatmap.total_length = parseInt(beatmap.total_length);
+
+    diffs.push([beatmap.diff_size, beatmap.difficultyrating]);
+
+    if (!keyModes.includes(beatmap.diff_size))
+      keyModes.push(beatmap.diff_size);
+
+    if (minBpm === undefined || beatmap.bpm < minBpm)
+      minBpm = beatmap.bpm;
+    if (maxBpm === undefined || beatmap.bpm > maxBpm)
+      maxBpm = beatmap.bpm;
+    if (maxLength === undefined || beatmap.total_length > maxLength)
+      maxLength = beatmap.total_length;
+    if (minDiff === undefined || beatmap.difficultyrating < minDiff)
+      minDiff = beatmap.difficultyrating;
+    if (maxDiff === undefined || beatmap.difficultyrating > maxDiff)
+      maxDiff = beatmap.difficultyrating;
+  });
+
+  let lengthMinutes = Math.floor(maxLength / 60);
+  let lengthSeconds = (maxLength % 60).toString().padStart(2, '0');
+
+  let info = '';
+
+  if (minBpm === maxBpm)
+    info += minBpm;
+  else
+    info += `${minBpm} - ${maxBpm}`;
+
+  info += ` BPM, ${lengthMinutes}:${lengthSeconds} | `;
+
+  if (diffs.length > 5) {
+    if (mode === 3)
+      info += keyModes.sort((a, b) => a > b).map(k => `${k}K`).join(' ') + ', ';
+
+    info += `${minDiff.toFixed(2)}★ - ${maxDiff.toFixed(2)}★`
+  } else {
+    diffs = diffs.sort((a, b) => a[1] > b[1]);
+    if (mode === 3)
+      diffs = diffs.sort((a, b) => a[0] > b[0]);
+
+    info += diffs.map(d => (mode === 3 ? `${d[0]}K ` : '') + `${d[1].toFixed(2)}★`).join(', ');
+  }
+
+  return info;
+}
+
 function getUserLink(name) {
   const user = OsuApi.getUser(name, true);
 
@@ -352,6 +432,7 @@ if (generateMessages) {
         'IMAGE': beatmap.filename,
         'TOPIC_ID': threadIds[beatmap.id],
         'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
+        'BEATMAP_EXTRAS': getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), mode),
         'BEATMAP_ID': beatmap.id,
         'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
         'CAPTAIN': convertToMarkdown(beatmap.captain),

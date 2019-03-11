@@ -37,11 +37,11 @@ exports.getBeatmapset = function (beatmapsetId) {
     if (result.length === 0)
         throw `Beatmapset not found: ${beatmapsetId}`;
 
-    beatmapsetStorage.beatmapsets[result[0].beatmapset_id] = result[0];
+    beatmapsetStorage.beatmapsets[result[0].beatmapset_id] = result;
 
     writeFileSync('./storage/beatmapsets.json', JSON.stringify(beatmapsetStorage, null, 4));
 
-    return result[0];
+    return result;
 }
 
 exports.getUser = function (userIdOrName, byName = false) {
