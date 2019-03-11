@@ -248,143 +248,138 @@ if (generateMessages) {
   });
 }
 
-if (generateThreads) {
-  console.log('Posting threads');
+(async function () {
+  if (generateThreads) {
+    console.log('Posting threads');
 
-  for (let mode of MODES.reverse()) {
-    const modeBeatmaps = Object.values(beatmaps)
-      .filter(bm => bm.mode === mode)
-      .sort((a, b) => a.position - b.position)
-      .reverse();
-    const posts = {};
-    const mainPostTitle = `[${fullModeName(mode)}] ${config.title}`;
-    const mainPostBeatmaps = [];
+    for (let mode of MODES.reverse()) {
+      const modeBeatmaps = Object.values(beatmaps)
+        .filter(bm => bm.mode === mode)
+        .sort((a, b) => a.position - b.position)
+        .reverse();
+      const posts = {};
+      const mainPostTitle = `[${fullModeName(mode)}] ${config.title}`;
+      const mainPostBeatmaps = [];
 
-    for (let beatmap of modeBeatmaps) {
-      let postTitle = `[${fullModeName(mode)}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
+      for (let beatmap of modeBeatmaps) {
+        let postTitle = `[${fullModeName(mode)}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
 
-      if (postTitle.length > 100) {
-        const longerMeta = beatmap.title.length > beatmap.artist.length ? beatmap.title : beatmap.artist;
+        if (postTitle.length > 100) {
+          const longerMeta = beatmap.title.length > beatmap.artist.length ? beatmap.title : beatmap.artist;
 
-        postTitle = postTitle.replace(longerMeta, longerMeta.slice(0, longerMeta.length - postTitle.length + 100 - 4) + ' ...');
+          postTitle = postTitle.replace(longerMeta, longerMeta.slice(0, longerMeta.length - postTitle.length + 100 - 4) + ' ...');
+        }
+
+        const postContent = textFromTemplate(votingThreadTemplate, {
+          MAIN_THREAD_TITLE: mainPostTitle,
+          BEATMAPSET_ID: beatmap.id,
+          BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
+          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+          CAPTAIN_LINK: `[url=${getUserLink(beatmap.captain)}]${beatmap.captain}[/url]`,
+          DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description))
+        });
+
+        const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
+
+        let coverFile = images.find(x => x.split('.')[0] === beatmap.id.toString());
+        coverFile = `${__dirname.replace(/\\/g, '/')}/config/${coverFile}`;
+
+        const coverId = await Forum.storeTopicCover(coverFile);
+        const topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
+
+        threadIds[beatmap.id] = topicId;
+
+        mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
+          BEATMAPSET_ID: beatmap.id,
+          BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
+          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+          THREAD_ID: topicId
+        }));
+
+        const postId = await Forum.findFirstPostId(topicId);
+
+        posts[beatmap.id] = {
+          id: postId,
+          content: postContent
+        };
       }
 
-      const postContent = textFromTemplate(votingThreadTemplate, {
-        MAIN_THREAD_TITLE: mainPostTitle,
-        BEATMAPSET_ID: beatmap.id,
-        BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
-        CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
-        CAPTAIN_LINK: `[url=${getUserLink(beatmap.captain)}]${beatmap.captain}[/url]`,
-        DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description))
+      const mainPostContent = textFromTemplate(mainThreadTemplate, {
+        GOOGLE_FORM: mode === 'mania' ? config.googleForm.mania : config.googleForm.main,
+        GOOGLE_SHEET: mode === 'mania' ? config.googleSheet.mania : config.googleSheet.main,
+        RESULTS_POST: config.resultsPost[mode],
+        THRESHOLD: config.threshold[mode],
+        CAPTAINS: joinList(config.captains[mode].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
+        BEATMAPS: mainPostBeatmaps.join('\n\n')
       });
 
-      const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
+      const mainTopicId = await Forum.storeTopic(mainPostTitle, mainPostContent);
 
-      let coverFile = images.find(x => x.split('.')[0] === beatmap.id.toString());
-      coverFile = `${__dirname.replace(/\\/g, '/')}/config/${coverFile}`;
-
-      Forum.storeTopicCover(coverFile, function (coverId) {
-        Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle, function (topicId) {
-          threadIds[beatmap.id] = topicId;
-
-          mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
-            BEATMAPSET_ID: beatmap.id,
-            BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
-            CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
-            THREAD_ID: topicId
-          }));
-
-          Forum.findFirstPostId(topicId, function (postId) {
-            posts[beatmap.id] = {
-              id: postId,
-              content: postContent,
-              linksToMainTopic: false
-            };
-
-            if (Object.keys(posts).length === modeBeatmaps.length) {
-              const mainPostContent = textFromTemplate(mainThreadTemplate, {
-                GOOGLE_FORM: mode === 'mania' ? config.googleForm.mania : config.googleForm.main,
-                GOOGLE_SHEET: mode === 'mania' ? config.googleSheet.mania : config.googleSheet.main,
-                RESULTS_POST: config.resultsPost[mode],
-                THRESHOLD: config.threshold[mode],
-                CAPTAINS: joinList(config.captains[mode].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
-                BEATMAPS: mainPostBeatmaps.join('\n\n')
-              });
-
-              Forum.storeTopic(mainPostTitle, mainPostContent, function (topicId) {
-                for (let beatmap of modeBeatmaps) {
-                  Forum.updatePost(
-                    posts[beatmap.id].id,
-                    posts[beatmap.id].content.replace('MAIN_TOPIC_ID', topicId),
-                    function (success) {
-                      posts[beatmap.id].linksToMainTopic = success;
-                    }
-                  );
-                }
-              });
-
-              fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));
-            }
-          });
-        });
-      });
+      for (let beatmap of modeBeatmaps) {
+        Forum.updatePost(
+          posts[beatmap.id].id,
+          posts[beatmap.id].content.replace('MAIN_TOPIC_ID', mainTopicId)
+        );
+      }
     }
-  }
-}
 
-console.log('Generating news post');
-
-const beatmapsSections = {};
-const captainMarkdown = {};
-
-MODES.forEach(function (mode) {
-  const postBeatmaps = [];
-
-  const modeBeatmaps = Object.values(beatmaps)
-    .filter(bm => bm.mode === mode)
-    .sort((a, b) => a.position - b.position);
-
-  for (let beatmap of modeBeatmaps) {
-    postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
-      'DATE': config.date,
-      'FOLDER': newsFolder,
-      'MODE': mode,
-      'LINK_MODE': mode.replace('catch', 'fruits'),
-      'IMAGE': beatmap.filename,
-      'TOPIC_ID': threadIds[beatmap.id],
-      'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-      'BEATMAP_ID': beatmap.id,
-      'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
-      'CAPTAIN': convertToMarkdown(beatmap.captain),
-      'CAPTAIN_LINK': getUserLink(beatmap.captain),
-      'CONSISTENT_CAPTAIN': LovedDocument.singleCaptain(mode),
-      'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
-    }));
+    fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));
   }
 
-  beatmapsSections[mode] = postBeatmaps.join('\n\n');
+  console.log('Generating news post');
 
-  captainMarkdown[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
+  const beatmapsSections = {};
+  const captainMarkdown = {};
+
+  MODES.forEach(function (mode) {
+    const postBeatmaps = [];
+
+    const modeBeatmaps = Object.values(beatmaps)
+      .filter(bm => bm.mode === mode)
+      .sort((a, b) => a.position - b.position);
+
+    for (let beatmap of modeBeatmaps) {
+      postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
+        'DATE': config.date,
+        'FOLDER': newsFolder,
+        'MODE': mode,
+        'LINK_MODE': mode.replace('catch', 'fruits'),
+        'IMAGE': beatmap.filename,
+        'TOPIC_ID': threadIds[beatmap.id],
+        'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
+        'BEATMAP_ID': beatmap.id,
+        'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
+        'CAPTAIN': convertToMarkdown(beatmap.captain),
+        'CAPTAIN_LINK': getUserLink(beatmap.captain),
+        'CONSISTENT_CAPTAIN': LovedDocument.singleCaptain(mode),
+        'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
+      }));
+    }
+
+    beatmapsSections[mode] = postBeatmaps.join('\n\n');
+
+    captainMarkdown[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
+  });
+
+  fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
+    'TITLE': config.title,
+    'DATE': config.date,
+    'TIME': config.time,
+    'HEADER': newsPostHeader,
+    'INTRO': newsPostIntro,
+    'VIDEO': config.videos,
+    'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
+    'BEATMAPS': beatmapsSections,
+    'CONSISTENT_CAPTAINS': (function () {
+      const captains = {};
+
+      for (let mode of MODES) {
+        captains[mode] = LovedDocument.singleCaptain(mode);
+      }
+
+      return captains;
+    })(),
+    'ALL_CAPTAINS': captainMarkdown,
+    'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
+  }) + '\n');
 });
-
-fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
-  'TITLE': config.title,
-  'DATE': config.date,
-  'TIME': config.time,
-  'HEADER': newsPostHeader,
-  'INTRO': newsPostIntro,
-  'VIDEO': config.videos,
-  'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
-  'BEATMAPS': beatmapsSections,
-  'CONSISTENT_CAPTAINS': (function () {
-    const captains = {};
-
-    for (let mode of MODES) {
-      captains[mode] = LovedDocument.singleCaptain(mode);
-    }
-
-    return captains;
-  })(),
-  'ALL_CAPTAINS': captainMarkdown,
-  'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
-}) + '\n');
