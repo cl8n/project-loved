@@ -18,6 +18,7 @@ const LovedDocument = require('./loved-document.js');
 const Forum = require('./forum.js');
 
 const generateImages = process.argv.includes('--images', 2);
+const generateMessages = process.argv.includes('--messages', 2);
 const generateThreads = process.argv.includes('--threads', 2);
 
 function osuApiRequestSync(endpoint, params) {
@@ -294,6 +295,16 @@ if (generateImages) {
     Promise.all(imagePromises.map(p => p.catch(e => e)))
       .then(() => browser.close(), () => browser.close());
   })();
+}
+
+if (generateMessages) {
+  mkdirTreeSync('./output/messages');
+
+  Object.values(beatmaps).forEach(beatmap => {
+    let message = `${beatmap.creators[0]}\nProject Loved: Changes required on your beatmap\n---\nHello,\n\nYour beatmap ([url]https://osu.ppy.sh/beatmapsets/${beatmap.id}[/url]) is going to be up for vote in this week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode]} "Yes" votes by the end of this week, it can be moved to the Loved category!\n\nHowever, we kindly request that you apply the following metadata changes before it can be moved into Loved:\n\n[quote="Noffy"][/quote]\n\nThanks!`;
+
+    fs.writeFileSync(`./output/messages/${beatmap.mode}-${beatmap.position}.txt`, message);
+  });
 }
 
 if (generateThreads) {
