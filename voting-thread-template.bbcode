@@ -2,7 +2,10 @@ Main thread: [url=https://osu.ppy.sh/community/forums/topics/MAIN_TOPIC_ID]<? va
 
 [b][url=https://osu.ppy.sh/beatmapsets/<? vars.BEATMAPSET_ID ?>#<? vars.LINK_MODE ?>]<? vars.BEATMAPSET ?>[/url][/b] by <? vars.CREATORS ?>
 
-[b]Captain's description (by <? vars.CAPTAIN_LINK ?>):[/b]
+[b]Captain's description<?
+if (vars.CAPTAIN !== 'Captain') {
+    ` (by [url=${getUserLink(vars.CAPTAIN)}]${vars.CAPTAIN}[/url])`
+} ?>:[/b]
 <? vars.DESCRIPTION ?>
 
 Please use this thread to discuss why you believe this map should or should not enter the Loved category!
