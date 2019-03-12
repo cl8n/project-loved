@@ -356,7 +356,8 @@ if (generateMessages) {
           BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
           CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
           CAPTAIN_LINK: `[url=${getUserLink(beatmap.captain)}]${beatmap.captain}[/url]`,
-          DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description))
+          DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description)),
+          LINK_MODE: mode
         });
 
         const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
@@ -378,6 +379,7 @@ if (generateMessages) {
           BEATMAPSET_ID: beatmap.id,
           BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
           CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
+          LINK_MODE: mode,
           THREAD_ID: topicId
         }));
 
