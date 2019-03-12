@@ -406,6 +406,7 @@ if (generateMessages) {
       });
 
       const mainTopicId = await Forum.storeTopic(mainPostTitle, mainPostContent);
+      Forum.pinTopic(mainTopicId);
 
       for (let beatmap of modeBeatmaps) {
         Forum.updatePost(

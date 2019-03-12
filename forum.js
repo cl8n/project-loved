@@ -99,3 +99,12 @@ exports.updatePost = function (postId, content) {
         }
     });
 }
+
+exports.pinTopic = function (topicId) {
+    return request({
+        uri: `/community/forums/topics/${topicId}/pin`,
+        qs: {
+            pin: 1
+        }
+    });
+}
