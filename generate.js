@@ -87,7 +87,7 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
   let diffs = [];
   let minDiff;
   let maxDiff;
-  let keyModes = [];
+  const keyModes = [];
 
   beatmapset.forEach(beatmap => {
     beatmap.mode = parseInt(beatmap.mode);
@@ -117,8 +117,8 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
       maxDiff = beatmap.difficultyrating;
   });
 
-  let lengthMinutes = Math.floor(maxLength / 60);
-  let lengthSeconds = (maxLength % 60).toString().padStart(2, '0');
+  const lengthMinutes = Math.floor(maxLength / 60);
+  const lengthSeconds = (maxLength % 60).toString().padStart(2, '0');
 
   let info = '';
 
@@ -128,6 +128,11 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
     info += `${minBpm} – ${maxBpm}`;
 
   info += ` BPM, ${lengthMinutes}:${lengthSeconds} | `;
+
+  const filteredDiffs = diffs.filter(d => d[1] !== 0);
+
+  if (filteredDiffs.length > 0)
+    diffs = filteredDiffs;
 
   if (diffs.length > 5) {
     if (mode === 3)
