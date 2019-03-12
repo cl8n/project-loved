@@ -125,7 +125,7 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
   if (minBpm === maxBpm)
     info += minBpm;
   else
-    info += `${minBpm} - ${maxBpm}`;
+    info += `${minBpm} – ${maxBpm}`;
 
   info += ` BPM, ${lengthMinutes}:${lengthSeconds} | `;
 
@@ -133,7 +133,7 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
     if (mode === 3)
       info += keyModes.sort((a, b) => a > b).map(k => `${k}K`).join(' ') + ', ';
 
-    info += `${minDiff.toFixed(2)}★ - ${maxDiff.toFixed(2)}★`
+    info += `${minDiff.toFixed(2)}★ – ${maxDiff.toFixed(2)}★`
   } else {
     diffs = diffs.sort((a, b) => a[1] > b[1]);
     if (mode === 3)
