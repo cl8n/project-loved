@@ -327,9 +327,9 @@ if (generateMessages) {
   mkdirTreeSync('./output/messages');
 
   Object.values(beatmaps).forEach(beatmap => {
-    let message = `${beatmap.creators[0]}\nProject Loved: Changes required on your beatmap\n---\nHello,\n\nYour beatmap ([url]https://osu.ppy.sh/beatmapsets/${beatmap.id}[/url]) is going to be up for vote in this week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode]} "Yes" votes by the end of this week, it can be moved to the Loved category!\n\nHowever, we kindly request that you apply the following metadata changes before it can be moved into Loved:\n\n[quote="Noffy"][/quote]\n\nThanks!`;
+    let message = `${beatmap.creators[0]}\nProject Loved: Changes required on your beatmap\n---\nHello,\n\nYour beatmap, [url=https://osu.ppy.sh/beatmapsets/${beatmap.id}]${beatmap.artist} - ${beatmap.title}[/url], is going to be up for vote in this week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode]} "Yes" votes by the end of this week, it can be moved to the Loved category!\n\nHowever, we kindly request that you apply the following metadata changes before it can be moved into Loved:\n\n[quote="Noffy"][/quote]\n\nThanks!`;
 
-    fs.writeFileSync(`./output/messages/${beatmap.mode}-${beatmap.position}.txt`, message);
+    fs.writeFileSync(`./output/messages/${beatmap.mode}-${beatmap.position + 1}.txt`, message);
   });
 }
 
