@@ -1,0 +1,23 @@
+{
+    "captains": {
+        "osu": ["DigitalHypno", "-Roxas", "BeasttrollMC", "Bubbleman", "waywern2012"],
+        "taiko": ["-Kazu-", "iceOC", "jyake", "nyanmi-1828"],
+        "catch": ["Sartan", "Ascendance", "Tenshichan", "Wesley"],
+        "mania": ["Shoegazer", "Lenfried-", "Pope Gadget", "Toaph Daddy"]
+    },
+    "googleForm": {
+        "main": "https://docs.google.com/forms/d/e/1FAIpQLSdbgHOVqMF8wQQKSdddW1JhC10ff6C7fb4JbEW7PBQTn9gAqg/viewform",
+        "mania": "https://docs.google.com/forms/d/e/1FAIpQLSeaGfoQNGMqw4qQcqRPItUZILh2fGwJR6ly6cZNY9OWPXkFhw/viewform"
+    },
+    "googleSheet": {
+        "main": "https://docs.google.com/spreadsheets/d/1HgHwtO3kIzT8R4ocEJMZTosADrGJRJOFL-TZI97tZS4/edit",
+        "mania": "https://docs.google.com/spreadsheets/d/1sjkTwUSvQ5Me-6rK61rToTg2bU-yX9X29CXdzttvhtM/edit"
+    },
+    "helpers": ["Toy", "Noffy", "clayton", "ThatsNotAName", "huu", "Ephemeral"],
+    "threshold": {
+        "osu": "85%",
+        "taiko": "80%",
+        "catch": "80%",
+        "mania": "80%"
+    }
+}

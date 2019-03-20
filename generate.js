@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 
 const MODES = ['osu', 'taiko', 'catch', 'mania'];
 
-const config = require('./config/config.json');
+const config = {...require('./info.json'), ...require('./config/config.json')};
 const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toString();
 const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
 const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();

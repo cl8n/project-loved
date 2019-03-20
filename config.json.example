@@ -1,42 +1,21 @@
 {
-  "captains": {
-    "osu": ["-Roxas", "BeasttrollMC", "Bubbleman", "DigitalHypno", "waywern2012"],
-    "taiko": ["-Kazu-", "iceOC", "jyake", "nyanmi-1828"],
-    "catch": ["Ascendance", "Sartan", "Tenshichan", "Wesley"],
-    "mania": ["Lenfried-", "Pope Gadget", "Shoegazer", "Toaph Daddy"]
-  },
-  "csrf": "",
-  "date": "1970-01-01",
-  "googleForm": {
-    "main": "https://docs.google.com/forms/d/e/1FAIpQLSdbgHOVqMF8wQQKSdddW1JhC10ff6C7fb4JbEW7PBQTn9gAqg/viewform",
-    "mania": "https://docs.google.com/forms/d/e/1FAIpQLSeaGfoQNGMqw4qQcqRPItUZILh2fGwJR6ly6cZNY9OWPXkFhw/viewform"
-  },
-  "googleSheet": {
-    "main": "https://docs.google.com/spreadsheets/d/1HgHwtO3kIzT8R4ocEJMZTosADrGJRJOFL-TZI97tZS4/edit",
-    "mania": "https://docs.google.com/spreadsheets/d/1sjkTwUSvQ5Me-6rK61rToTg2bU-yX9X29CXdzttvhtM/edit"
-  },
-  "helpers": ["clayton", "Ephemeral", "huu", "Noffy", "Toy"],
-  "osuApiKey": "",
-  "resultsPost": {
-    "osu": "",
-    "taiko": "",
-    "catch": "",
-    "mania": ""
-  },
-  "session": "",
-  "threshold": {
-    "osu": "85%",
-    "taiko": "80%",
-    "catch": "80%",
-    "mania": "80%"
-  },
-  "time": "21:00:00",
-  "title": "Project Loved: Week of January 1st",
-  "videos": {
-    "intro": "",
-    "osu": "",
-    "taiko": "",
-    "catch": "",
-    "mania": ""
-  }
+    "csrf": "",
+    "date": "1970-01-01",
+    "osuApiKey": "",
+    "resultsPost": {
+        "osu": "",
+        "taiko": "",
+        "catch": "",
+        "mania": ""
+    },
+    "session": "",
+    "time": "21:00:00",
+    "title": "Project Loved: Week of January 1st",
+    "videos": {
+        "intro": "",
+        "osu": "",
+        "taiko": "",
+        "catch": "",
+        "mania": ""
+    }
 }
