@@ -9,6 +9,7 @@ const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toSt
 const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
 const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
 const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
+const resultsPostTemplate = fs.readFileSync('./results-post-template.bbcode').toString();
 const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').toString();
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
@@ -19,6 +20,7 @@ const OsuApi = require('./osu-api.js');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateMessages = process.argv.includes('--messages', 2);
+const generateResults = process.argv.includes('--results', 2);
 const generateThreads = process.argv.includes('--threads', 2);
 
 async function generateImage(
@@ -332,6 +334,62 @@ if (generateMessages) {
     fs.writeFileSync(`./output/messages/${beatmap.mode}-${beatmap.position + 1}.txt`, message);
   });
 }
+
+function mapResultsToText(beatmapset, passed) {
+  const color = passed ? '#22DD22' : '#DD2222';
+
+  return `[b][color=${color}]${beatmapset.result}%[/color][/b] - ${beatmapset.title}`;
+}
+
+(async function () {
+  if (generateResults) {
+    console.log('Posting results');
+
+    const mainTopics = await Forum.getModeTopics(120);
+
+    for (let mode of MODES.reverse()) {
+      const mainPostId = await Forum.findFirstPostId(mainTopics[mode]);
+      let mainPost = await Forum.getPostContent(mainPostId);
+
+      const passedBeatmapsets = [];
+      const failedBeatmapsets = [];
+
+      while (true) {
+        const topicMatch = mainPost.match(/\[url=https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\]Vote for this map here!/);
+
+        if (topicMatch === null)
+          break;
+
+        const postId = await Forum.findFirstPostId(topicMatch[1]);
+        const post = await Forum.getPostContent(postId);
+        const pollResult = await Forum.getPollFirstResult(topicMatch[1]);
+
+        const beatmapset = {
+          result: pollResult,
+          title: post.split('\n')[2]
+        };
+
+        if (parseInt(pollResult) >= parseInt(config.threshold[mode]))
+          passedBeatmapsets.push(beatmapset);
+        else
+          failedBeatmapsets.push(beatmapset);
+
+        Forum.lockTopic(topicMatch[1]);
+
+        mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
+      }
+
+      await Forum.reply(mainTopics[mode], textFromTemplate(resultsPostTemplate, {
+        PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
+        FAILED_BEATMAPSETS: failedBeatmapsets.map(b => mapResultsToText(b, false)).join('\n'),
+        THRESHOLD: config.threshold[mode]
+      }));
+
+      Forum.pinTopic(mainTopics[mode], false);
+      Forum.lockTopic(mainTopics[mode]);
+    }
+  }
+})();
 
 (async function () {
   if (generateThreads) {

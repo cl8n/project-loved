@@ -144,3 +144,39 @@ exports.reply = function (topicId, content) {
         }
     });
 }
+
+function convertMode(mode) {
+    switch (mode) {
+        case 'osu!standard':
+            return 'osu';
+        case 'osu!taiko':
+            return 'taiko';
+        case 'osu!catch':
+            return 'catch';
+        case 'osu!mania':
+            return 'mania';
+    }
+
+    return null;
+}
+
+exports.getModeTopics = function (forumId) {
+    return request({
+        uri: `/community/forums/${forumId}`,
+        method: 'GET'
+    }).then(body => {
+        const topics = {};
+
+        body = body.substring(body.search('Pinned Topics'));
+
+        for (let i = 0; i < 4; i++) {
+            const match = body.match(/\[(osu![a-z]+)\] Project Loved: Week of/);
+
+            body = body.substring(match.index + match[0].length);
+
+            topics[convertMode(match[1])] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
+        }
+
+        return topics;
+    });
+}
