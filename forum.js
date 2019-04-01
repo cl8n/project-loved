@@ -19,10 +19,14 @@ requestUnwrapped = requestUnwrapped.defaults({
 
 const limiter = new bottleneck({
     maxConcurrent: 1,
-    minTime: 666
+    minTime: 1000
 });
 
-const request = limiter.wrap(requestUnwrapped);
+const requestUnlogged = limiter.wrap(requestUnwrapped);
+const request = function (...args) {
+    console.log('Making request to ' + args[0].uri);
+    return requestUnlogged(...args);
+}
 
 function idFromUrl(url) {
     return (url.match(/\/(\d+)\s*$/) || [, null])[1];
