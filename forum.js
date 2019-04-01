@@ -104,11 +104,43 @@ exports.updatePost = function (postId, content) {
     });
 }
 
-exports.pinTopic = function (topicId) {
+exports.pinTopic = function (topicId, pin = true) {
     return request({
         uri: `/community/forums/topics/${topicId}/pin`,
         qs: {
-            pin: 1
+            pin: pin ? 1 : 0
+        }
+    });
+}
+
+exports.lockTopic = function (topicId) {
+    return request({
+        uri: `/community/forums/topics/${topicId}/lock`,
+        qs: {
+            lock: 1
+        }
+    });
+}
+
+exports.getPostContent = function (postId) {
+    return request({
+        uri: `/community/forums/posts/${postId}/raw`,
+        method: 'GET'
+    });
+}
+
+exports.getPollFirstResult = function (topicId) {
+    return request({
+        uri: `/community/forums/topics/${topicId}`,
+        method: 'GET'
+    }).then(body => body.match(/(\d{2,3}\.\d{2})%/)[1]);
+}
+
+exports.reply = function (topicId, content) {
+    return request({
+        uri: `/community/forums/topics/${topicId}/reply`,
+        form: {
+            body: content
         }
     });
 }
