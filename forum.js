@@ -180,3 +180,37 @@ exports.getModeTopics = function (forumId) {
         return topics;
     });
 }
+
+exports.getTopic = function (topicId) {
+    return request({
+        uri: `/community/forums/topics/${topicId}`,
+        method: 'GET'
+    });
+}
+
+exports.getTopics = async function (forumId) {
+    const topics = [];
+    let idx;
+
+    for (let page = 1; ; page++) {
+        let listing = await request({
+            uri: `/community/forums/${forumId}`,
+            method: 'GET',
+            qs: {
+                page: page
+            }
+        });
+
+        listing = listing.substring(listing.indexOf('id="topics"'));
+
+        if ((idx = listing.indexOf('js-forum-topic-entry')) === -1)
+            break;
+
+        do {
+            listing = listing.substring(idx + 20);
+            topics.push(listing.match(/data-topic-id="(\d+)"/)[1]);
+        } while ((idx = listing.indexOf('js-forum-topic-entry')) !== -1);
+    }
+
+    return topics;
+}
