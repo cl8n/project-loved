@@ -19,7 +19,7 @@ requestUnwrapped = requestUnwrapped.defaults({
 
 const limiter = new bottleneck({
     maxConcurrent: 1,
-    minTime: 1000
+    minTime: process.argv.includes('--slow-requests', 2) ? 2000 : 1000
 });
 
 const requestUnlogged = limiter.wrap(requestUnwrapped);
