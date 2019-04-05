@@ -5,14 +5,14 @@ function convertMode(mode) {
     switch (mode) {
         case 'osu!standard':
         case 'osu!std':
-            return 'osu!';
+            return 0;
         case 'osu!taiko':
-            return 'osu!taiko';
+            return 1;
         case 'osu!catch':
         case 'osu!ctb':
-            return 'osu!catch';
+            return 2;
         case 'osu!mania':
-            return 'osu!mania';
+            return 3;
     }
 
     return null;
@@ -34,7 +34,6 @@ function convertMode(mode) {
         if (titleGameModeMatch === null)
             continue;
 
-        const mode = convertMode(titleGameModeMatch[1]);
         topic = topic.substring(titleGameModeMatch.index + titleGameModeMatch[0].length);
 
         if (topic.match(/<tr class="forum-poll-row /g).length !== 2)
@@ -49,11 +48,11 @@ function convertMode(mode) {
         }
 
         polls.push({
-            beatmapset: topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1],
-            topic: topicId,
+            beatmapset: parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1]),
+            topic: parseInt(topicId),
             yes_count: voteCounts[0],
             no_count: voteCounts[1],
-            mode: mode,
+            mode: convertMode(titleGameModeMatch[1]),
             poll_end: topic.match(/Polling ended (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/)[1]
         });
     }
