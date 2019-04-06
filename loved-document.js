@@ -1,32 +1,45 @@
 const {readFileSync} = require('fs');
-
-const MODES = ['osu', 'taiko', 'catch', 'mania'];
-const DESCRIPTION_REGEX = /^(\d+)\t(.+?) - (.+)\t([-_,. \[\]a-z0-9]+)\t([-_. \[\]a-z0-9]+)\n((?:.|\n\\\n)+)/i;
+const Gamemode = require('./lib/Gamemode');
+const Nomination = require('./lib/Nomination');
 
 const beatmaps = {};
 
 exports.readDocuments = function () {
-    for (let mode of MODES) {
-        let data = readFileSync(`./config/document-${mode}`, 'utf8').trim();
-        let position = 0;
+    for (let mode of Gamemode.modes()) {
+        let data = readFileSync(`./config/document-${mode.shortName}`, 'utf8').trim();
 
-        while (data.length > 0) {
-            const matches = DESCRIPTION_REGEX.exec(data);
+        for (let position = 1; data.length > 0; position++) {
+            const split = data.split('\n\n', 2);
+            data = split[1].trim();
 
-            beatmaps[matches[1]] = {
-                position: position,
-                id: matches[1],
+            const description = split[0];
+            const descriptionSplit = description.split('\n', 2);
+
+            // osu!catch captains like to put notes after a pipe behind the beatmap info
+            if (descriptionSplit[0].includes(' | '))
+                descriptionSplit[0] = descriptionSplit[0].substring(0, descriptionSplit[0].indexOf(' | '));
+
+            // osu!mania captains like to put notes in parenthesis below the beatmap info
+            if (descriptionSplit[1].startsWith('('))
+                descriptionSplit[1] = descriptionSplit[1].substring(descriptionSplit[1].indexOf('\n') + 1);
+
+            const infoSplit = descriptionSplit[0].split('\t');
+            const titleSplit = infoSplit[1].split(' - ', 2);
+            const nomination = new Nomination({
                 mode: mode,
-                filename: `${matches[3].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^\-|\-$/g, '')}.jpg`,
-                artist: matches[2],
-                title: matches[3],
-                creators: matches[4].split(','),
-                captain: matches[5],
-                description: matches[6].replace(/\n\\\n/g, '\n\n').trim()
-            };
+                position: position,
+                id: infoSplit[0],
+                artist: titleSplit[0],
+                title: titleSplit[1],
+                creators: infoSplit[2],
+                captain: infoSplit[3],
+                description: descriptionSplit[1]
+            });
 
-            data = data.slice(matches[0].length).trim();
-            position++;
+            if (infoSplit.length > 4)
+                nomination.excludedBeatmaps = infoSplit[4];
+
+            beatmaps[nomination.id] = nomination;
         }
     }
 
@@ -37,7 +50,7 @@ exports.singleCaptain = function (mode) {
     let captain;
 
     for (let beatmap of Object.values(beatmaps)) {
-        if (beatmap.mode !== mode) {
+        if (beatmap.mode.shortName !== mode) {
             continue;
         }
 
