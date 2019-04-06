@@ -18,6 +18,14 @@ function convertMode(mode) {
     return null;
 }
 
+const POLL_DATA = [
+    {
+        beatmapset: 339222,
+        yes_count: 504,
+        no_count: 127
+    }
+];
+
 (async function () {
     const topics = await Forum.getTopics(120);
     const polls = [];
@@ -39,16 +47,23 @@ function convertMode(mode) {
         if (topic.match(/<tr class="forum-poll-row /g).length !== 2)
             continue;
 
+        const beatmapset = parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1]);
+        const pollMatch = POLL_DATA.find(p => p.beatmapset === beatmapset);
         const voteCounts = [];
 
-        for (let i = 0; i < 2; i++) {
-            const match = topic.match(/<td class="forum-poll-row__column">\n\s*(\d+)\n\s*<\/td>/);
-            voteCounts.push(parseInt(match[1]));
-            topic = topic.substring(match.index + match[0].length);
+        if (pollMatch === undefined)
+            for (let i = 0; i < 2; i++) {
+                const match = topic.match(/<td class="forum-poll-row__column">\n\s*(\d+)\n\s*<\/td>/);
+                voteCounts.push(parseInt(match[1]));
+                topic = topic.substring(match.index + match[0].length);
+            }
+        else {
+            voteCounts[0] = pollMatch.yes_count;
+            voteCounts[1] = pollMatch.no_count;
         }
 
         polls.push({
-            beatmapset: parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1]),
+            beatmapset: beatmapset,
             topic: parseInt(topicId),
             yes_count: voteCounts[0],
             no_count: voteCounts[1],
