@@ -61,7 +61,7 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
   const keyModes = [];
 
   beatmapset.forEach(beatmap => {
-    if (beatmap.mode.integer !== mode.integer)
+    if (parseInt(beatmap.mode) !== mode.integer)
       return;
 
     beatmap.diff_size = parseInt(beatmap.diff_size);
