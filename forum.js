@@ -1,7 +1,8 @@
 const bottleneck = require('bottleneck');
-const config = require('./config/config.json');
 const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
+const config = require('./config/config.json');
+const Gamemode = require('./lib/Gamemode');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';
 const jar = requestUnwrapped.jar();
@@ -150,21 +151,6 @@ exports.reply = function (topicId, content) {
     });
 }
 
-function convertMode(mode) {
-    switch (mode) {
-        case 'osu!standard':
-            return 'osu';
-        case 'osu!taiko':
-            return 'taiko';
-        case 'osu!catch':
-            return 'catch';
-        case 'osu!mania':
-            return 'mania';
-    }
-
-    return null;
-}
-
 exports.getModeTopics = function (forumId) {
     return request({
         uri: `/community/forums/${forumId}`,
@@ -176,10 +162,11 @@ exports.getModeTopics = function (forumId) {
 
         for (let i = 0; i < 4; i++) {
             const match = body.match(/\[(osu![a-z]+)\] Project Loved: Week of/);
+            const mode = new Gamemode(match[1]);
 
             body = body.substring(match.index + match[0].length);
 
-            topics[convertMode(match[1])] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
+            topics[mode.integer] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
         }
 
         return topics;

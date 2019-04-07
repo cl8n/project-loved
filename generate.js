@@ -1,9 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
-
-const MODES = ['osu', 'taiko', 'catch', 'mania'];
-
 const config = {...require('./info.json'), ...require('./config/config.json')};
 const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toString();
 const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
@@ -13,9 +10,9 @@ const resultsPostTemplate = fs.readFileSync('./results-post-template.bbcode').to
 const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').toString();
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
-
 const LovedDocument = require('./loved-document.js');
 const Forum = require('./forum.js');
+const Gamemode = require('./lib/Gamemode');
 const OsuApi = require('./osu-api.js');
 
 const generateImages = process.argv.includes('--images', 2);
@@ -54,35 +51,7 @@ async function generateImage(
   await page.close();
 }
 
-function fullModeName(mode) {
-  switch (mode) {
-    case 'osu':
-      return 'osu!standard';
-    case 'taiko':
-      return 'osu!taiko';
-    case 'catch':
-      return 'osu!catch';
-    case 'mania':
-      return 'osu!mania';
-  }
-}
-
-function modeInt(mode) {
-  switch (mode) {
-    case 'osu':
-      return 0;
-    case 'taiko':
-      return 1;
-    case 'catch':
-      return 2;
-    case 'mania':
-      return 3;
-  }
-}
-
 function getExtraBeatmapsetInfo(beatmapset, mode) {
-  mode = modeInt(mode);
-
   let minBpm;
   let maxBpm;
   let maxLength;
@@ -92,7 +61,7 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
   const keyModes = [];
 
   beatmapset.forEach(beatmap => {
-    if (beatmap.mode.integer !== mode)
+    if (beatmap.mode.integer !== mode.integer)
       return;
 
     beatmap.diff_size = parseInt(beatmap.diff_size);
@@ -135,16 +104,16 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
     diffs = filteredDiffs;
 
   if (diffs.length > 5) {
-    if (mode === 3)
+    if (mode.integer === 3)
       info += keyModes.sort((a, b) => a > b).map(k => `${k}K`).join(' ') + ', ';
 
     info += `${minDiff.toFixed(2)}★ – ${maxDiff.toFixed(2)}★`
   } else {
     diffs = diffs.sort((a, b) => a[1] > b[1]);
-    if (mode === 3)
+    if (mode.integer === 3)
       diffs = diffs.sort((a, b) => a[0] > b[0]);
 
-    info += diffs.map(d => (mode === 3 ? `${d[0]}K ` : '') + `${d[1].toFixed(2)}★`).join(', ');
+    info += diffs.map(d => (mode.integer === 3 ? `${d[0]}K ` : '') + `${d[1].toFixed(2)}★`).join(', ');
   }
 
   return info;
@@ -281,9 +250,9 @@ const images = fs.readdirSync('./config')
 if (generateImages) {
   console.log('Generating images');
 
-  MODES.forEach(function (mode) {
-    mkdirTreeSync(`./temp/${newsFolder}/${mode}`);
-    mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode}`);
+  Gamemode.modes().forEach(function (mode) {
+    mkdirTreeSync(`./temp/${newsFolder}/${mode.shortName}`);
+    mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode.shortName}`);
   });
 
   (async function () {
@@ -345,8 +314,8 @@ function mapResultsToText(beatmapset, passed) {
 
     const mainTopics = await Forum.getModeTopics(120);
 
-    for (let mode of MODES.reverse()) {
-      const mainPostId = await Forum.findFirstPostId(mainTopics[mode]);
+    for (let mode of Gamemode.modes().reverse()) {
+      const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
       let mainPost = await Forum.getPostContent(mainPostId);
 
       const passedBeatmapsets = [];
@@ -367,7 +336,7 @@ function mapResultsToText(beatmapset, passed) {
           title: post.split('\n')[2]
         };
 
-        if (parseInt(pollResult) >= parseInt(config.threshold[mode]))
+        if (parseInt(pollResult) >= parseInt(config.threshold[mode.shortName]))
           passedBeatmapsets.push(beatmapset);
         else
           failedBeatmapsets.push(beatmapset);
@@ -377,14 +346,14 @@ function mapResultsToText(beatmapset, passed) {
         mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
       }
 
-      await Forum.reply(mainTopics[mode], textFromTemplate(resultsPostTemplate, {
+      await Forum.reply(mainTopics[mode.integer], textFromTemplate(resultsPostTemplate, {
         PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
         FAILED_BEATMAPSETS: failedBeatmapsets.map(b => mapResultsToText(b, false)).join('\n'),
-        THRESHOLD: config.threshold[mode]
+        THRESHOLD: config.threshold[mode.shortName]
       }));
 
-      Forum.pinTopic(mainTopics[mode], false);
-      Forum.lockTopic(mainTopics[mode]);
+      Forum.pinTopic(mainTopics[mode.integer], false);
+      Forum.lockTopic(mainTopics[mode.integer]);
     }
   }
 })();
@@ -393,17 +362,17 @@ function mapResultsToText(beatmapset, passed) {
   if (generateThreads) {
     console.log('Posting threads');
 
-    for (let mode of MODES.reverse()) {
+    for (let mode of Gamemode.modes().reverse()) {
       const modeBeatmaps = Object.values(beatmaps)
-        .filter(bm => bm.mode.shortName === mode)
+        .filter(bm => bm.mode.integer === mode.integer)
         .sort((a, b) => a.position - b.position)
         .reverse();
       const posts = {};
-      const mainPostTitle = `[${fullModeName(mode)}] ${config.title}`;
+      const mainPostTitle = `[${mode.longName}] ${config.title}`;
       const mainPostBeatmaps = [];
 
       for (let beatmap of modeBeatmaps) {
-        let postTitle = `[${fullModeName(mode)}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
+        let postTitle = `[${mode.longName}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
 
         if (postTitle.length > 100) {
           const longerMeta = beatmap.title.length > beatmap.artist.length ? beatmap.title : beatmap.artist;
@@ -418,7 +387,7 @@ function mapResultsToText(beatmapset, passed) {
           CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
           CAPTAIN: beatmap.captain,
           DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description)),
-          LINK_MODE: mode
+          LINK_MODE: mode.linkName
         });
 
         const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
@@ -440,7 +409,7 @@ function mapResultsToText(beatmapset, passed) {
           BEATMAPSET_ID: beatmap.id,
           BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
           CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
-          LINK_MODE: mode,
+          LINK_MODE: mode.linkName,
           THREAD_ID: topicId
         }));
 
@@ -453,11 +422,11 @@ function mapResultsToText(beatmapset, passed) {
       }
 
       const mainPostContent = textFromTemplate(mainThreadTemplate, {
-        GOOGLE_FORM: mode === 'mania' ? config.googleForm.mania : config.googleForm.main,
-        GOOGLE_SHEET: mode === 'mania' ? config.googleSheet.mania : config.googleSheet.main,
-        RESULTS_POST: config.resultsPost[mode],
-        THRESHOLD: config.threshold[mode],
-        CAPTAINS: joinList(config.captains[mode].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
+        GOOGLE_FORM: mode.integer === 3 ? config.googleForm.mania : config.googleForm.main,
+        GOOGLE_SHEET: mode.integer === 3 ? config.googleSheet.mania : config.googleSheet.main,
+        RESULTS_POST: config.resultsPost[mode.shortName],
+        THRESHOLD: config.threshold[mode.shortName],
+        CAPTAINS: joinList(config.captains[mode.shortName].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
         BEATMAPS: mainPostBeatmaps.reverse().join('\n\n')
       });
 
@@ -479,20 +448,21 @@ function mapResultsToText(beatmapset, passed) {
 
   const beatmapsSections = {};
   const captainMarkdown = {};
+  const consistentCaptains = {};
 
-  MODES.forEach(function (mode) {
+  Gamemode.modes().forEach(function (mode) {
     const postBeatmaps = [];
 
     const modeBeatmaps = Object.values(beatmaps)
-      .filter(bm => bm.mode.shortName === mode)
+      .filter(bm => bm.mode.integer === mode.integer)
       .sort((a, b) => a.position - b.position);
 
     for (let beatmap of modeBeatmaps) {
       postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
         'DATE': config.date,
         'FOLDER': newsFolder,
-        'MODE': mode,
-        'LINK_MODE': mode.replace('catch', 'fruits'),
+        'MODE': mode.shortName,
+        'LINK_MODE': mode.linkName,
         'IMAGE': beatmap.imageFilename(),
         'TOPIC_ID': threadIds[beatmap.id],
         'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
@@ -506,9 +476,9 @@ function mapResultsToText(beatmapset, passed) {
       }));
     }
 
-    beatmapsSections[mode] = postBeatmaps.join('\n\n');
-
-    captainMarkdown[mode] = joinList(config.captains[mode].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
+    beatmapsSections[mode.shortName] = postBeatmaps.join('\n\n');
+    captainMarkdown[mode.shortName] = joinList(config.captains[mode.shortName].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
+    consistentCaptains[mode.shortName] = LovedDocument.singleCaptain(mode);
   });
 
   fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
@@ -520,15 +490,7 @@ function mapResultsToText(beatmapset, passed) {
     'VIDEO': config.videos,
     'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
     'BEATMAPS': beatmapsSections,
-    'CONSISTENT_CAPTAINS': (function () {
-      const captains = {};
-
-      for (let mode of MODES) {
-        captains[mode] = LovedDocument.singleCaptain(mode);
-      }
-
-      return captains;
-    })(),
+    'CONSISTENT_CAPTAINS': consistentCaptains,
     'ALL_CAPTAINS': captainMarkdown,
     'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
   }) + '\n');

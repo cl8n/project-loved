@@ -50,7 +50,7 @@ exports.singleCaptain = function (mode) {
     let captain;
 
     for (let beatmap of Object.values(beatmaps)) {
-        if (beatmap.mode.shortName !== mode) {
+        if (beatmap.mode.integer !== mode.integer) {
             continue;
         }
 

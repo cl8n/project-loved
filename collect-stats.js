@@ -1,22 +1,6 @@
 const fs = require('fs');
 const Forum = require('./forum.js');
-
-function convertMode(mode) {
-    switch (mode) {
-        case 'osu!standard':
-        case 'osu!std':
-            return 0;
-        case 'osu!taiko':
-            return 1;
-        case 'osu!catch':
-        case 'osu!ctb':
-            return 2;
-        case 'osu!mania':
-            return 3;
-    }
-
-    return null;
-}
+const Gamemode = require('./lib/Gamemode');
 
 const POLL_DATA = [
     {
@@ -48,6 +32,7 @@ const POLL_DATA = [
             continue;
 
         const beatmapset = parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1]);
+        const mode = new Gamemode(titleGameModeMatch[1]);
         const pollMatch = POLL_DATA.find(p => p.beatmapset === beatmapset);
         const voteCounts = [];
 
@@ -67,7 +52,7 @@ const POLL_DATA = [
             topic: parseInt(topicId),
             yes_count: voteCounts[0],
             no_count: voteCounts[1],
-            mode: convertMode(titleGameModeMatch[1]),
+            mode: mode.integer,
             poll_end: topic.match(/Polling ended (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/)[1]
         });
     }
