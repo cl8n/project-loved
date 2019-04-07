@@ -10,6 +10,10 @@ let userStorage;
 try { userStorage = require('./storage/users.json') }
 catch { userStorage = {users: {}, ids: {}} }
 
+function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 function osuApiRequestSync(endpoint, params) {
     let url = `https://osu.ppy.sh/api/${endpoint}?k=${config.osuApiKey}`;
 
@@ -28,7 +32,7 @@ function osuApiRequestSync(endpoint, params) {
 
 module.exports.getBeatmapset = function (beatmapsetId) {
     if (beatmapsetStorage.beatmapsets[beatmapsetId] !== undefined)
-        return beatmapsetStorage.beatmapsets[beatmapsetId];
+        return clone(beatmapsetStorage.beatmapsets[beatmapsetId]);
 
     const result = osuApiRequestSync('get_beatmaps', {
         s: beatmapsetId
@@ -41,14 +45,14 @@ module.exports.getBeatmapset = function (beatmapsetId) {
 
     writeFileSync('./storage/beatmapsets.json', JSON.stringify(beatmapsetStorage, null, 4));
 
-    return result;
+    return clone(result);
 }
 
 module.exports.getUser = function (userIdOrName, byName = false) {
     if (byName && userStorage.ids[userIdOrName] !== undefined)
-        return userStorage.users[userStorage.ids[userIdOrName]];
+        return clone(userStorage.users[userStorage.ids[userIdOrName]]);
     if (!byName && userStorage.users[userIdOrName] !== undefined)
-        return userStorage.users[userIdOrName];
+        return clone(userStorage.users[userIdOrName]);
 
     const result = osuApiRequestSync('get_user', {
         u: userIdOrName,
@@ -66,5 +70,5 @@ module.exports.getUser = function (userIdOrName, byName = false) {
 
     writeFileSync('./storage/users.json', JSON.stringify(userStorage, null, 4));
 
-    return result[0];
+    return clone(result[0]);
 }
