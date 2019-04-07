@@ -4,16 +4,33 @@ const Nomination = require('./lib/Nomination');
 
 const beatmaps = {};
 
+String.prototype.splitWithLeftOver = function (separator, limit) {
+    const split = this.split(separator, limit);
+
+    if (split.length === limit) {
+        let index = 0;
+        let n = limit - 1;
+
+        while (n--) {
+            index = this.indexOf(separator, index);
+        }
+
+        split[limit - 1] = this.substring(index + separator.length);
+    }
+
+    return split;
+};
+
 module.exports.readDocuments = function () {
     for (let mode of Gamemode.modes()) {
         let data = readFileSync(`./config/document-${mode.shortName}`, 'utf8').trim();
 
         for (let position = 1; data.length > 0; position++) {
-            const split = data.split('\n\n', 2);
-            data = split[1].trim();
+            const split = data.splitWithLeftOver('\n\n', 2);
+            data = split.length === 2 ? split[1].trim() : '';
 
             const description = split[0];
-            const descriptionSplit = description.split('\n', 2);
+            const descriptionSplit = description.splitWithLeftOver('\n', 2);
 
             // osu!catch captains like to put notes after a pipe behind the beatmap info
             if (descriptionSplit[0].includes(' | '))
@@ -24,7 +41,7 @@ module.exports.readDocuments = function () {
                 descriptionSplit[1] = descriptionSplit[1].substring(descriptionSplit[1].indexOf('\n') + 1);
 
             const infoSplit = descriptionSplit[0].split('\t');
-            const titleSplit = infoSplit[1].split(' - ', 2);
+            const titleSplit = infoSplit[1].splitWithLeftOver(' - ', 2);
             const nomination = new Nomination({
                 mode: mode,
                 position: position,
