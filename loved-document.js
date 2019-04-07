@@ -4,7 +4,7 @@ const Nomination = require('./lib/Nomination');
 
 const beatmaps = {};
 
-exports.readDocuments = function () {
+module.exports.readDocuments = function () {
     for (let mode of Gamemode.modes()) {
         let data = readFileSync(`./config/document-${mode.shortName}`, 'utf8').trim();
 
@@ -46,7 +46,7 @@ exports.readDocuments = function () {
     return beatmaps;
 }
 
-exports.singleCaptain = function (mode) {
+module.exports.singleCaptain = function (mode) {
     let captain;
 
     for (let beatmap of Object.values(beatmaps)) {

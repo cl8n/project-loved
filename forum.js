@@ -41,7 +41,7 @@ function firstPostIdFromTopicView(body) {
     return (body.match(/data-post-id="(\d+)"/) || [, null])[1];
 }
 
-exports.storeTopicCover = function (filename) {
+module.exports.storeTopicCover = function (filename) {
     return request({
         uri: '/community/forums/topic-covers',
         formData: {
@@ -50,7 +50,7 @@ exports.storeTopicCover = function (filename) {
     }).then(body => JSON.parse(body).id);
 }
 
-exports.storeTopic = function (title, content) {
+module.exports.storeTopic = function (title, content) {
     return request({
         uri: '/community/forums/topics',
         form: {
@@ -66,7 +66,7 @@ exports.storeTopic = function (title, content) {
     });
 }
 
-exports.storeTopicWithPoll = function (title, content, coverId, pollTitle) {
+module.exports.storeTopicWithPoll = function (title, content, coverId, pollTitle) {
     return request({
         uri: '/community/forums/topics',
         form: {
@@ -90,7 +90,7 @@ exports.storeTopicWithPoll = function (title, content, coverId, pollTitle) {
     });
 }
 
-exports.findFirstPostId = function (topicId) {
+module.exports.findFirstPostId = function (topicId) {
     return request({
         uri: `/community/forums/topics/${topicId}`,
         method: 'GET',
@@ -100,7 +100,7 @@ exports.findFirstPostId = function (topicId) {
     }).then(body => firstPostIdFromTopicView(body));
 }
 
-exports.updatePost = function (postId, content) {
+module.exports.updatePost = function (postId, content) {
     return request({
         uri: `/community/forums/posts/${postId}`,
         method: 'PUT',
@@ -110,7 +110,7 @@ exports.updatePost = function (postId, content) {
     });
 }
 
-exports.pinTopic = function (topicId, pin = true) {
+module.exports.pinTopic = function (topicId, pin = true) {
     return request({
         uri: `/community/forums/topics/${topicId}/pin`,
         qs: {
@@ -119,7 +119,7 @@ exports.pinTopic = function (topicId, pin = true) {
     });
 }
 
-exports.lockTopic = function (topicId) {
+module.exports.lockTopic = function (topicId) {
     return request({
         uri: `/community/forums/topics/${topicId}/lock`,
         qs: {
@@ -128,21 +128,21 @@ exports.lockTopic = function (topicId) {
     });
 }
 
-exports.getPostContent = function (postId) {
+module.exports.getPostContent = function (postId) {
     return request({
         uri: `/community/forums/posts/${postId}/raw`,
         method: 'GET'
     });
 }
 
-exports.getPollFirstResult = function (topicId) {
+module.exports.getPollFirstResult = function (topicId) {
     return request({
         uri: `/community/forums/topics/${topicId}`,
         method: 'GET'
     }).then(body => body.match(/(\d{2,3}\.\d{2})%/)[1]);
 }
 
-exports.reply = function (topicId, content) {
+module.exports.reply = function (topicId, content) {
     return request({
         uri: `/community/forums/topics/${topicId}/reply`,
         form: {
@@ -151,7 +151,7 @@ exports.reply = function (topicId, content) {
     });
 }
 
-exports.getModeTopics = function (forumId) {
+module.exports.getModeTopics = function (forumId) {
     return request({
         uri: `/community/forums/${forumId}`,
         method: 'GET'
@@ -173,14 +173,14 @@ exports.getModeTopics = function (forumId) {
     });
 }
 
-exports.getTopic = function (topicId) {
+module.exports.getTopic = function (topicId) {
     return request({
         uri: `/community/forums/topics/${topicId}`,
         method: 'GET'
     });
 }
 
-exports.getTopics = async function (forumId) {
+module.exports.getTopics = async function (forumId) {
     const topics = [];
     let idx;
 

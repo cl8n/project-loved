@@ -26,7 +26,7 @@ function osuApiRequestSync(endpoint, params) {
     return JSON.parse(response.getBody());
 }
 
-exports.getBeatmapset = function (beatmapsetId) {
+module.exports.getBeatmapset = function (beatmapsetId) {
     if (beatmapsetStorage.beatmapsets[beatmapsetId] !== undefined)
         return beatmapsetStorage.beatmapsets[beatmapsetId];
 
@@ -44,7 +44,7 @@ exports.getBeatmapset = function (beatmapsetId) {
     return result;
 }
 
-exports.getUser = function (userIdOrName, byName = false) {
+module.exports.getUser = function (userIdOrName, byName = false) {
     if (byName && userStorage.ids[userIdOrName] !== undefined)
         return userStorage.users[userStorage.ids[userIdOrName]];
     if (!byName && userStorage.users[userIdOrName] !== undefined)
