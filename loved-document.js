@@ -22,8 +22,11 @@ String.prototype.splitWithLeftOver = function (separator, limit) {
 };
 
 module.exports.readDocuments = function () {
+    let file = readFileSync('./config/document', 'utf8').trim();
+
     for (let mode of Gamemode.modes()) {
-        let data = readFileSync(`./config/document-${mode.shortName}`, 'utf8').trim();
+        file = file.substring(file.indexOf(mode.longName) + mode.longName.length);
+        let data = (mode.integer === 3 ? file : file.substring(0, file.indexOf(`\n${new Gamemode(mode.integer + 1).longName}`))).trim();
 
         for (let position = 1; data.length > 0; position++) {
             const split = data.splitWithLeftOver('\n\n', 2);

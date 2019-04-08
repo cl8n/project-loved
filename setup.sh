@@ -5,9 +5,6 @@ npm install
 mkdir -p config
 
 cp ./config.json.example ./config/config.json
+touch ./config/document
 touch ./config/news-post-header.md
 touch ./config/news-post-intro.md
-
-for mode in osu taiko catch mania; do
-    touch ./config/document-$mode
-done
