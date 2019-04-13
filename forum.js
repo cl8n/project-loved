@@ -3,6 +3,7 @@ const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
 const config = require('./config/config.json');
 const Gamemode = require('./lib/Gamemode');
+const {getUser} = require('./osu-api');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';
 const jar = requestUnwrapped.jar();
@@ -205,4 +206,56 @@ module.exports.getTopics = async function (forumId) {
     }
 
     return topics;
+}
+
+function getIcon(icon) {
+    switch (icon) {
+        default: case 'none': return 0;
+        case 'star': return 5;
+        case 'bubble': return 7;
+        case 'heart': return 4;
+        case 'flame': return 1;
+        case 'nuke': return 6;
+        case 'question': return 9;
+        case 'alert': return 10;
+        case 'info': return 8;
+        case 'pop': return 12;
+        case 'broken_heart': return 13;
+        case 'osu': return 14;
+        case 'taiko': return 15;
+        case 'catch': return 16;
+        case 'mania': return 17;
+    }
+}
+
+module.exports.sendPm = function (subject, icon, message, to, bcc = []) {
+    const form = {
+        icon: getIcon(icon),
+        localUserCheck: config.csrfOld,
+        message: message,
+        subject: subject,
+
+        // constant
+        addbbcode20: 100,
+        cancel: '',
+        load: '',
+        post: 1,
+        preview: '',
+        save: '',
+        username_list: ''
+    };
+
+    to.forEach(u => form[`address_list[u][${getUser(u, true)}]`] = 'to');
+    bcc.forEach(u => form[`address_list[u][${getUser(u, true)}]`] = 'bcc');
+
+    return request({
+        uri: '/forum/ucp.php',
+        qs: {
+            action: 'post',
+            i: 'pm',
+            mode: 'compose',
+            sid: config.sessionOld
+        },
+        form: form
+    });
 }
