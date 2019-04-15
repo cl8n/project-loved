@@ -343,6 +343,7 @@ function mapResultsToText(beatmapset, passed) {
           failedBeatmapsets.push(beatmapset);
 
         Forum.lockTopic(topicMatch[1]);
+        Forum.watchTopic(topicMatch[1], false);
 
         mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
       }
@@ -355,6 +356,7 @@ function mapResultsToText(beatmapset, passed) {
 
       Forum.pinTopic(mainTopics[mode.integer], false);
       Forum.lockTopic(mainTopics[mode.integer]);
+      Forum.watchTopic(mainTopics[mode.integer], false);
     }
   }
 })();
