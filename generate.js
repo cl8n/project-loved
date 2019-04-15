@@ -400,6 +400,7 @@ function mapResultsToText(beatmapset, passed) {
         if (threadIds[beatmap.id] === undefined) {
           const coverId = await Forum.storeTopicCover(coverFile);
           topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
+          Forum.watchTopic(topicId);
 
           threadIds[beatmap.id] = topicId;
         } else {
@@ -433,6 +434,7 @@ function mapResultsToText(beatmapset, passed) {
 
       const mainTopicId = await Forum.storeTopic(mainPostTitle, mainPostContent);
       Forum.pinTopic(mainTopicId);
+      Forum.watchTopic(mainTopicId);
 
       for (let beatmap of modeBeatmaps) {
         Forum.updatePost(

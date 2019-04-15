@@ -208,6 +208,16 @@ module.exports.getTopics = async function (forumId) {
     return topics;
 }
 
+module.exports.watchTopic = function (topicId, watch = true) {
+    return request({
+        uri: `/community/forums/topic-watches/${topicId}`,
+        method: 'PUT',
+        qs: {
+            state: watch ? 'watching_mail' : 'not_watching'
+        }
+    });
+}
+
 function getIcon(icon) {
     switch (icon) {
         default: case 'none': return 0;
