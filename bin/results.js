@@ -20,7 +20,7 @@ function textFromTemplate(template, vars = {}) {
 function mapResultsToText(beatmapset, passed) {
     const color = passed ? '#22DD22' : '#DD2222';
 
-    return `[b][color=${color}]${beatmapset.result}%[/color][/b] - ${beatmapset.title}`;
+    return `[b][color=${color}]${beatmapset.result.percent}%[/color][/b] (${beatmapset.result.yes}:${beatmapset.result.no}) - ${beatmapset.title}`;
 }
 
 (async function () {
@@ -43,14 +43,14 @@ function mapResultsToText(beatmapset, passed) {
 
             const postId = await Forum.findFirstPostId(topicMatch[1]);
             const post = await Forum.getPostContent(postId);
-            const pollResult = await Forum.getPollFirstResult(topicMatch[1]);
+            const pollResult = await Forum.getPollResult(topicMatch[1]);
 
             const beatmapset = {
                 result: pollResult,
                 title: post.split('\n')[2]
             };
 
-            if (parseInt(pollResult) >= parseInt(Config.threshold[mode.shortName]))
+            if (parseFloat(pollResult.percent) >= parseInt(Config.threshold[mode.shortName]))
                 passedBeatmapsets.push(beatmapset);
             else
                 failedBeatmapsets.push(beatmapset);

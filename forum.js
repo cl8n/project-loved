@@ -136,11 +136,25 @@ module.exports.getPostContent = function (postId) {
     });
 }
 
-module.exports.getPollFirstResult = function (topicId) {
-    return request({
+module.exports.getPollResult = async function (topicId) {
+    let topic = await request({
         uri: `/community/forums/topics/${topicId}`,
         method: 'GET'
-    }).then(body => body.match(/(\d{2,3}\.\d{2})%/)[1]);
+    });
+
+    const voteCounts = [];
+
+    for (let i = 0; i < 2; i++) {
+        const match = topic.match(/<td class="forum-poll-row__column">\n\s*(\d+)\n\s*<\/td>/);
+        voteCounts.push(parseInt(match[1]));
+        topic = topic.substring(match.index + match[0].length);
+    }
+
+    return {
+        yes: voteCounts[0],
+        no: voteCounts[1],
+        percent: (100 * voteCounts[0] / (voteCounts[0] + voteCounts[1])).toFixed(2)
+    };
 }
 
 module.exports.reply = function (topicId, content) {
