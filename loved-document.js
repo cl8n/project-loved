@@ -21,8 +21,19 @@ String.prototype.splitWithLeftOver = function (separator, limit) {
     return split;
 };
 
+String.prototype.indexOfFirst = function (searchStrings) {
+    let index;
+
+    for (let search of searchStrings)
+        if ((index = this.indexOf(search)) !== -1)
+            return index;
+
+    return -1;
+}
+
 module.exports.readDocuments = function () {
     let file = readFileSync('./config/document', 'utf8').trim();
+    let noteMatch;
 
     for (let mode of Gamemode.modes()) {
         file = file.substring(file.indexOf(mode.longName) + mode.longName.length);
@@ -35,13 +46,24 @@ module.exports.readDocuments = function () {
             const description = split[0];
             const descriptionSplit = description.splitWithLeftOver('\n', 2);
 
-            // osu!catch captains like to put notes after a pipe behind the beatmap info
-            if (descriptionSplit[0].includes(' | '))
-                descriptionSplit[0] = descriptionSplit[0].substring(0, descriptionSplit[0].indexOf(' | '));
+            let metadataSender;
+            let metadataMessage;
 
-            // osu!mania captains like to put notes in parenthesis below the beatmap info
-            if (descriptionSplit[1].startsWith('('))
-                descriptionSplit[1] = descriptionSplit[1].substring(descriptionSplit[1].indexOf('\n') + 1);
+            while ((noteMatch = descriptionSplit[1].match(/^([-_a-z0-9\[\] ]+): /i)) !== null) {
+                let substringIndex;
+
+                if (noteMatch[1] === 'Video')
+                    substringIndex = descriptionSplit[1].indexOf('\n\n') + 2;
+                else {
+                    metadataSender = noteMatch[1];
+                    metadataMessage = descriptionSplit[1].substring(
+                        noteMatch[0].length,
+                        substringIndex = descriptionSplit[1].indexOfFirst(['Video: ', '\n\n'])
+                    );
+                }
+
+                descriptionSplit[1] = descriptionSplit[1].substring(substringIndex);
+            }
 
             const infoSplit = descriptionSplit[0].split('\t');
             const titleSplit = infoSplit[1].splitWithLeftOver(' - ', 2);
@@ -58,6 +80,11 @@ module.exports.readDocuments = function () {
 
             if (infoSplit.length > 4)
                 nomination.excludedBeatmaps = infoSplit[4];
+
+            if (metadataSender !== undefined && metadataMessage !== undefined) {
+                nomination.metadataMessageAuthor = metadataSender;
+                nomination.metadataEdits = metadataMessage;
+            }
 
             beatmaps[nomination.id] = nomination;
         }
