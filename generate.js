@@ -291,13 +291,29 @@ if (generateImages) {
 }
 
 if (generateMessages) {
-  mkdirTreeSync('./output/messages');
+  // TODO
+  // Indexed by beatmap id
+  // {
+  //   message: string,
+  //   sender: string [Noffy/clayton]
+  // }
+  const pms = {};
 
   Object.values(beatmaps).forEach(beatmap => {
+    const hasMetadataChanges = pms[beatmap.id] !== undefined;
     const apiBeatmap = OsuApi.getBeatmapset(beatmap.id)[0];
-    const message = `${beatmap.creators[0]}\nProject Loved: Changes required on your beatmap\n---\nHello,\n\nYour beatmap, [url=https://osu.ppy.sh/beatmapsets/${beatmap.id}]${apiBeatmap.artist} - ${apiBeatmap.title}[/url], is going to be up for vote in this week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode.shortName]} "Yes" votes by the end of this week, it can be moved to the Loved category!\n\nHowever, we kindly request that you apply the following metadata changes before it can be moved into Loved:\n\n[quote="Noffy"][/quote]\n\nThanks!`;
+    const message = hasMetadataChanges
+      ? `Hello,\n\nYour beatmap, [url=https://osu.ppy.sh/beatmapsets/${beatmap.id}]${apiBeatmap.artist} - ${apiBeatmap.title}[/url], is going to be up for vote in next week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode.shortName]} "Yes" votes by the end of next week, it can be moved to the Loved category!\n\nHowever, we kindly request that you apply the following metadata changes before then:\n\n[quote="${pms[beatmap.id].sender}"]${pms[beatmap.id].message}[/quote]\n\nAlso, if for any reason you [i]do not[/i] want your map to be put up for voting, please let me know ASAP.\n\nThanks!`
+      : `Hello,\n\nYour beatmap, [url=https://osu.ppy.sh/beatmapsets/${beatmap.id}]${apiBeatmap.artist} - ${apiBeatmap.title}[/url], is going to be up for vote in next week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode.shortName]} "Yes" votes by the end of next week, it can be moved to the Loved category!\n\nIf for any reason you [i]do not[/i] want your map to be put up for voting, please let me know ASAP.\n\nThanks!`;
 
-    fs.writeFileSync(`./output/messages/${beatmap.mode.shortName}-${beatmap.position}.txt`, message);
+    Forum.sendPm(
+      hasMetadataChanges
+        ? 'Project Loved: Changes required on your beatmap'
+        : 'Project Loved: Your map will be up for voting soon!',
+      hasMetadataChanges ? 'alert' : 'heart',
+      message,
+      [beatmap.creators[0]]
+    );
   });
 }
 
