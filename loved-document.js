@@ -5,13 +5,16 @@ const Nomination = require('./lib/Nomination');
 const beatmaps = {};
 
 String.prototype.splitWithLeftOver = function (separator, limit) {
+    if (limit <= 1)
+        return this;
+
     const split = this.split(separator, limit);
 
     if (split.length === limit) {
         let index = 0;
-        let n = limit - 1;
+        let n = limit;
 
-        while (n--) {
+        while (--n) {
             index = this.indexOf(separator, index);
         }
 
