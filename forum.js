@@ -269,8 +269,8 @@ module.exports.sendPm = function (subject, icon, message, to, bcc = []) {
         username_list: ''
     };
 
-    to.forEach(u => form[`address_list[u][${getUser(u, true)}]`] = 'to');
-    bcc.forEach(u => form[`address_list[u][${getUser(u, true)}]`] = 'bcc');
+    to.forEach(u => form[`address_list[u][${getUser(u, true).user_id}]`] = 'to');
+    bcc.forEach(u => form[`address_list[u][${getUser(u, true).user_id}]`] = 'bcc');
 
     return request({
         uri: '/forum/ucp.php',
