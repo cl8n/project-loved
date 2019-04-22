@@ -185,7 +185,10 @@ function convertToMarkdown(bbcode) {
     .replace(/\[quote(?:=".+?")?\](.+?)\[\/quote\]/gs, '> $1')
 
     // osu!-specific bbcode
-    .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
+    .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')')
+
+    // escapes overlapping with bbcode
+    .replace(/\[(.+?)\]([^\(])/g, '\\[$1\\]$2');
 }
 
 function escapeHtml(text) {
