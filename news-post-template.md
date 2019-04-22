@@ -88,7 +88,7 @@ if (vars.CONSISTENT_CAPTAINS.mania && vars.CONSISTENT_CAPTAINS.mania !== 'Captai
 
 ---
 
-From everyone on the Project Loved team, we hope you enjoy this week's selection, and look forward to the next! The winning beatmaps will hit the [Loved beatmap listing](https://osu.ppy.sh/beatmapsets?s=8) sometime next week and will be announced via [@osugame on Twitter](https://twitter.com/osugame).
+From everyone on the Project Loved team, we hope you enjoyed this week's selection, and are looking forward to the next! The winning beatmaps will hit the [Loved beatmap listing](https://osu.ppy.sh/beatmapsets?s=8) sometime next week and will be announced via [@osugame on Twitter](https://twitter.com/osugame).
 
 In addition to all of the Loved captains that choose the maps and write the descriptions, make sure to thank <? vars.HELPERS ?> for their miscellaneous help in managing Project Loved.
 
