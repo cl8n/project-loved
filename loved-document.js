@@ -24,12 +24,12 @@ String.prototype.splitWithLeftOver = function (separator, limit) {
     return split;
 };
 
-String.prototype.indexOfFirst = function (searchStrings) {
+String.prototype.indexOfFirst = function (searches) {
     let index;
 
-    for (let search of searchStrings)
-        if ((index = this.indexOf(search)) !== -1)
-            return index;
+    for (let search of searches)
+        if ((index = this.indexOf(search[0])) !== -1)
+            return index + search[1];
 
     return -1;
 }
@@ -56,12 +56,15 @@ module.exports.readDocuments = function () {
                 let substringIndex;
 
                 if (noteMatch[1] === 'Video')
-                    substringIndex = descriptionSplit[1].indexOf('\n\n') + 2;
+                    substringIndex = descriptionSplit[1].indexOf('\n\\\n') + 3;
                 else {
                     metadataSender = noteMatch[1];
                     metadataMessage = descriptionSplit[1].substring(
                         noteMatch[0].length,
-                        substringIndex = descriptionSplit[1].indexOfFirst(['Video: ', '\n\n'])
+                        substringIndex = descriptionSplit[1].indexOfFirst([
+                            ['\nVideo: ', 1],
+                            ['\n\\\n', 3]
+                        ])
                     );
                 }
 
