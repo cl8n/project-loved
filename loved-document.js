@@ -65,7 +65,7 @@ module.exports.readDocuments = function () {
                             ['\nVideo: ', 1],
                             ['\n\\\n', 3]
                         ])
-                    );
+                    ).replace(/^[\n\\ ]+|[\n\\ ]+$/g, '');
                 }
 
                 descriptionSplit[1] = descriptionSplit[1].substring(substringIndex);
