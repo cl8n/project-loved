@@ -292,6 +292,13 @@ module.exports.sendPm = function (subject, icon, message, to, bcc = []) {
             mode: 'compose',
             sid: config.sessionOld
         },
-        form: form
+        form: form,
+        simple: false,
+        resolveWithFullResponse: true
+    }).then(response => {
+        if (response.statusCode !== 302) {
+            console.error(response.body);
+            console.error('Failed to send PM');
+        }
     });
 }
