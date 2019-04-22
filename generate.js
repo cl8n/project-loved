@@ -49,7 +49,7 @@ async function generateImage(
   await page.close();
 }
 
-function getExtraBeatmapsetInfo(beatmapset, mode) {
+function getExtraBeatmapsetInfo(beatmapset, nomination) {
   let minBpm;
   let maxBpm;
   let maxLength;
@@ -59,7 +59,10 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
   const keyModes = [];
 
   beatmapset.forEach(beatmap => {
-    if (parseInt(beatmap.mode) !== mode.integer)
+    if (parseInt(beatmap.mode) !== nomination.mode.integer)
+      return;
+
+    if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id)))
       return;
 
     beatmap.diff_size = parseInt(beatmap.diff_size);
@@ -102,16 +105,16 @@ function getExtraBeatmapsetInfo(beatmapset, mode) {
     diffs = filteredDiffs;
 
   if (diffs.length > 5) {
-    if (mode.integer === 3)
+    if (nomination.mode.integer === 3)
       info += keyModes.sort((a, b) => a > b).map(k => `${k}K`).join(' ') + ', ';
 
     info += `${minDiff.toFixed(2)}★ – ${maxDiff.toFixed(2)}★`
   } else {
     diffs = diffs.sort((a, b) => a[1] > b[1]);
-    if (mode.integer === 3)
+    if (nomination.mode.integer === 3)
       diffs = diffs.sort((a, b) => a[0] > b[0]);
 
-    info += diffs.map(d => (mode.integer === 3 ? `${d[0]}K ` : '') + `${d[1].toFixed(2)}★`).join(', ');
+    info += diffs.map(d => (nomination.mode.integer === 3 ? `${d[0]}K ` : '') + `${d[1].toFixed(2)}★`).join(', ');
   }
 
   return info;
@@ -422,7 +425,7 @@ if (generateMessages) {
         'IMAGE': beatmap.imageFilename(),
         'TOPIC_ID': threadIds[beatmap.id],
         'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-        'BEATMAP_EXTRAS': getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), mode),
+        'BEATMAP_EXTRAS': getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap),
         'BEATMAP_ID': beatmap.id,
         'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
         'CAPTAIN': convertToMarkdown(beatmap.captain),
