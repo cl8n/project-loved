@@ -7,13 +7,16 @@ const {getUser} = require('./osu-api');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';
 const jar = requestUnwrapped.jar();
-jar.setCookie(`XSRF-TOKEN=${config.csrf}`, OSU_SERVER);
+jar.setCookie(`__cfduid=${config.cloudflare.id}`, OSU_SERVER);
+jar.setCookie(`cf_clearance=${config.cloudflare.clearance}`, OSU_SERVER);
 jar.setCookie(`osu_session=${config.session}`, OSU_SERVER);
+jar.setCookie(`XSRF-TOKEN=${config.csrf}`, OSU_SERVER);
 requestUnwrapped = requestUnwrapped.defaults({
     baseUrl: OSU_SERVER,
     method: 'POST',
     followRedirect: false,
     headers: {
+        'User-Agent': config.userAgent,
         'X-CSRF-TOKEN': config.csrf
     },
     jar: jar

@@ -1,4 +1,8 @@
 {
+    "cloudflare": {
+        "id": "",
+        "clearance": ""
+    },
     "csrf": "",
     "csrfOld": "",
     "date": "1970-01-01",
@@ -14,6 +18,7 @@
     "sessionOld": "",
     "time": "21:00:00",
     "title": "Project Loved: Week of January 1st",
+    "userAgent": "",
     "videos": {
         "intro": "",
         "osu": "",
