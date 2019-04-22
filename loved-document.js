@@ -6,7 +6,7 @@ const beatmaps = {};
 
 String.prototype.splitWithLeftOver = function (separator, limit) {
     if (limit <= 1)
-        return this;
+        return [this];
 
     const split = this.split(separator, limit);
 
