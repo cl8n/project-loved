@@ -31,12 +31,19 @@ const limiter = new bottleneck({
             : 1000
 });
 
+let requestCounter = 0;
 const requestUnlogged = limiter.wrap(requestUnwrapped);
-const request = function (...args) {
-    let message = `Making request to ${args[0].uri}`;
-    console.log(message);
+const request = async function (...args) {
+    const n = ++requestCounter;
+    console.log(`Making request #${n} to ${args[0].uri}`);
 
-    return requestUnlogged(...args);
+    try {
+        const response = await requestUnlogged(...args);
+        console.log(`Request #${n} to ${args[0].uri} finished`);
+        return response;
+    } catch (error) {
+        console.error(`Request #${n} to ${args[0].uri} failed: ${error}`);
+    }
 }
 
 function idFromUrl(url) {
