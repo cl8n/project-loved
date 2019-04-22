@@ -30,8 +30,6 @@ const limiter = new bottleneck({
 const requestUnlogged = limiter.wrap(requestUnwrapped);
 const request = function (...args) {
     let message = `Making request to ${args[0].uri}`;
-    if (args[0].qs !== undefined)
-        message += ` with ${Object.entries(args[0].qs).map(e => `${e[0]}=${e[1]}`).join(', ')}`;
     console.log(message);
 
     return requestUnlogged(...args);
