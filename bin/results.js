@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const Config = require('../info.json');
+const config = {...require('../info.json'), ...require('../config/config.json')};
 const Forum = require('../forum');
 const fs = require('fs');
 const Gamemode = require('../lib/Gamemode');
@@ -50,7 +50,7 @@ function mapResultsToText(beatmapset, passed) {
                 title: post.split('\n')[2]
             };
 
-            if (parseFloat(pollResult.percent) >= parseInt(Config.threshold[mode.shortName]))
+            if (parseFloat(pollResult.percent) >= parseInt(config.threshold[mode.shortName]))
                 passedBeatmapsets.push(beatmapset);
             else
                 failedBeatmapsets.push(beatmapset);
@@ -64,7 +64,7 @@ function mapResultsToText(beatmapset, passed) {
         await Forum.reply(mainTopics[mode.integer], textFromTemplate(resultsPostTemplate, {
             PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
             FAILED_BEATMAPSETS: failedBeatmapsets.map(b => mapResultsToText(b, false)).join('\n'),
-            THRESHOLD: Config.threshold[mode.shortName]
+            THRESHOLD: config.threshold[mode.shortName]
         }));
 
         Forum.pinTopic(mainTopics[mode.integer], false);
