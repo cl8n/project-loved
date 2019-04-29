@@ -6,6 +6,12 @@
     "csrf": "",
     "csrfOld": "",
     "date": "1970-01-01",
+    "discord": {
+        "osu": "",
+        "taiko": "",
+        "catch": "",
+        "mania": ""
+    },
     "osuApiKey": "",
     "resultsPost": {
         "osu": "",
