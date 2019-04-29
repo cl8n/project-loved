@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const config = {...require('../info.json'), ...require('../config/config.json')};
+const Discord = require('../lib/Discord');
 const Forum = require('../forum');
 const fs = require('fs');
 const Gamemode = require('../lib/Gamemode');
@@ -21,6 +22,20 @@ function mapResultsToText(beatmapset, passed) {
     const color = passed ? '#22DD22' : '#DD2222';
 
     return `[b][color=${color}]${beatmapset.result.percent}%[/color][/b] (${beatmapset.result.yes}:${beatmapset.result.no}) - ${beatmapset.title}`;
+}
+
+function mapResultsToEmbed(beatmapset, passed) {
+    return {
+        color: passed ? 2284834 : 14492194,
+        description: `${beatmapset.result.percent}% - ${beatmapset.result.yes}:${beatmapset.result.no}`,
+        title: beatmapset.title
+            .replace(/\[\/?url(?:=.+?)?\]/g, '')
+            .replace(/\\/g, '\\\\')
+            .replace(/\*/g, '\\*')
+            .replace(/_/g, '\\_')
+            .replace(/\[b\](.+?)\[\/b\]/g, '**$1**'),
+        url: beatmapset.title.match(/\[url=(https:\/\/osu\.ppy\.sh\/beatmapsets\/[a-z0-9#]+)\]/)[1],
+    }
 }
 
 (async function () {
@@ -70,5 +85,13 @@ function mapResultsToText(beatmapset, passed) {
         Forum.pinTopic(mainTopics[mode.integer], false);
         Forum.lockTopic(mainTopics[mode.integer]);
         Forum.watchTopic(mainTopics[mode.integer], false);
+
+        if (config.discord[mode.shortName] !== '')
+            new Discord(config.discord[mode.shortName]).post(
+                `Project Loved: ${mode.longName}`,
+                'Results from the last round are posted!',
+                passedBeatmapsets.map(b => mapResultsToEmbed(b, true))
+                    .concat(failedBeatmapsets.map(b => mapResultsToEmbed(b, false)))
+            );
     }
 })();
