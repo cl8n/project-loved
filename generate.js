@@ -183,7 +183,11 @@ function convertToMarkdown(bbcode) {
     // escapes
     .replace(/\\/g, '\\\\')
     .replace(/\*/g, '\\*')
-    .replace(/_/g, '\\_')
+
+    // conditional escapes
+    .replace(/(\s|^)_/g, '$1\\_')
+    .replace(/_(\s|$)/g, '\\_$1')
+    .replace(/\[(.+?)\]\(/g, '\\[$1\\](')
 
     // general bbcode
     .replace(/\[b\](.+?)\[\/b\]/gs, '**$1**')
@@ -193,13 +197,10 @@ function convertToMarkdown(bbcode) {
     .replace(/\[color\=.+?\](.+?)\[\/color\]/gs, '$1')
     .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs, '[$2]($1)')
     .replace(/\[quote(?:=".+?")?\](.+?)\[\/quote\]/gs, '> $1')
-    .replace(/([^\n])\n([^\n])/g, '$1  \n$2')
+    .replace(/([^\n]|^)\n([^\n]|$)/g, '$1  \n$2')
 
     // osu!-specific bbcode
-    .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')')
-
-    // escapes overlapping with bbcode
-    .replace(/\[(.+?)\]([^\(])/g, '\\[$1\\]$2');
+    .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')');
 }
 
 function escapeHtml(text) {
