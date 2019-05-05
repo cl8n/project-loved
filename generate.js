@@ -398,6 +398,12 @@ if (generateMessages) {
           posts[beatmap.id].content.replace('MAIN_TOPIC_ID', mainTopicId)
         );
       }
+
+      if (config.discord[mode.shortName])
+        new Discord(config.discord[mode.shortName]).post(
+          `Project Loved: ${mode.longName}`,
+          `Check out the ${mainPostBeatmaps.length} beatmaps nominated in the latest round!\n\n${mainPostBeatmaps.reverse().map(b => convertToMarkdown(b.substring(3))).join('\n\n')}`
+        );
     }
 
     fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));

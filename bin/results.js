@@ -86,7 +86,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         Forum.lockTopic(mainTopics[mode.integer]);
         Forum.watchTopic(mainTopics[mode.integer], false);
 
-        if (config.discord[mode.shortName] !== '')
+        if (config.discord[mode.shortName])
             new Discord(config.discord[mode.shortName]).post(
                 `Project Loved: ${mode.longName}`,
                 'Results from the last round are posted!',
