@@ -121,7 +121,7 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   }
 
   if (excludedDiffNames.length > 0) {
-    info += `\nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties are' : 'difficulty is'} *not* being nominated for Loved.`;
+    info += `\nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties are' : 'difficulty is'} [i]not[/i] being nominated for Loved.`;
   }
 
   return info;
