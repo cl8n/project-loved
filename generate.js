@@ -60,13 +60,13 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   const excludedDiffNames = [];
 
   beatmapset.forEach(beatmap => {
-    if (parseInt(beatmap.mode) !== nomination.mode.integer)
-      return;
-
     if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id))) {
       excludedDiffNames.push(`[${beatmap.version}]`);
       return;
     }
+
+    if (parseInt(beatmap.mode) !== nomination.mode.integer)
+      return;
 
     beatmap.diff_size = parseInt(beatmap.diff_size);
     beatmap.bpm = Math.round(parseFloat(beatmap.bpm));
