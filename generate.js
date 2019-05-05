@@ -57,13 +57,16 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   let minDiff;
   let maxDiff;
   const keyModes = [];
+  const excludedDiffNames = [];
 
   beatmapset.forEach(beatmap => {
     if (parseInt(beatmap.mode) !== nomination.mode.integer)
       return;
 
-    if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id)))
+    if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id))) {
+      excludedDiffNames.push(`[${beatmap.version}]`);
       return;
+    }
 
     beatmap.diff_size = parseInt(beatmap.diff_size);
     beatmap.bpm = Math.round(parseFloat(beatmap.bpm));
@@ -115,6 +118,10 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
       diffs = diffs.sort((a, b) => a[0] > b[0]);
 
     info += diffs.map(d => (nomination.mode.integer === 3 ? `${d[0]}K ` : '') + `${d[1].toFixed(2)}★`).join(', ');
+  }
+
+  if (excludedDiffNames.length > 0) {
+    info += `  \nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties' : 'difficulty'} are *not* being nominated for Loved.`;
   }
 
   return info;
