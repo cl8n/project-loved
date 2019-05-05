@@ -440,7 +440,7 @@ if (generateMessages) {
         'IMAGE': beatmap.imageFilename(),
         'TOPIC_ID': threadIds[beatmap.id],
         'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-        'BEATMAP_EXTRAS': getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap),
+        'BEATMAP_EXTRAS': convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
         'BEATMAP_ID': beatmap.id,
         'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
         'CAPTAIN': convertToMarkdown(beatmap.captain),
