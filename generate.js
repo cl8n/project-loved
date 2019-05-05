@@ -433,20 +433,20 @@ if (generateMessages) {
 
     for (let beatmap of modeBeatmaps) {
       postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
-        'DATE': config.date,
-        'FOLDER': newsFolder,
-        'MODE': mode.shortName,
-        'LINK_MODE': mode.linkName,
-        'IMAGE': beatmap.imageFilename(),
-        'TOPIC_ID': threadIds[beatmap.id],
-        'BEATMAP': convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-        'BEATMAP_EXTRAS': convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
-        'BEATMAP_ID': beatmap.id,
-        'CREATORS_MD': joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
-        'CAPTAIN': convertToMarkdown(beatmap.captain),
-        'CAPTAIN_LINK': getUserLink(beatmap.captain),
-        'CONSISTENT_CAPTAIN': LovedDocument.singleCaptain(mode),
-        'DESCRIPTION': fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
+        DATE: config.date,
+        FOLDER: newsFolder,
+        MODE: mode.shortName,
+        LINK_MODE: mode.linkName,
+        IMAGE: beatmap.imageFilename(),
+        TOPIC_ID: threadIds[beatmap.id],
+        BEATMAP: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
+        BEATMAP_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
+        BEATMAP_ID: beatmap.id,
+        CREATORS_MD: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
+        CAPTAIN: convertToMarkdown(beatmap.captain),
+        CAPTAIN_LINK: getUserLink(beatmap.captain),
+        CONSISTENT_CAPTAIN: LovedDocument.singleCaptain(mode),
+        DESCRIPTION: fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
       }));
     }
 
@@ -456,16 +456,16 @@ if (generateMessages) {
   });
 
   fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
-    'TITLE': config.title,
-    'DATE': config.date,
-    'TIME': config.time,
-    'HEADER': newsPostHeader,
-    'INTRO': newsPostIntro,
-    'VIDEO': config.videos,
-    'INCLUDE_VIDEO': Object.keys(config.videos).length > 0,
-    'BEATMAPS': beatmapsSections,
-    'CONSISTENT_CAPTAINS': consistentCaptains,
-    'ALL_CAPTAINS': captainMarkdown,
-    'HELPERS': joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
+    TITLE: config.title,
+    DATE: config.date,
+    TIME: config.time,
+    HEADER: newsPostHeader,
+    INTRO: newsPostIntro,
+    VIDEO: config.videos,
+    INCLUDE_VIDEO: Object.keys(config.videos).length > 0,
+    BEATMAPS: beatmapsSections,
+    CONSISTENT_CAPTAINS: consistentCaptains,
+    ALL_CAPTAINS: captainMarkdown,
+    HELPERS: joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
   }) + '\n');
 })();
