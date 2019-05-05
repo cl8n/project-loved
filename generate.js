@@ -121,7 +121,7 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   }
 
   if (excludedDiffNames.length > 0) {
-    info += `  \nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties' : 'difficulty'} are *not* being nominated for Loved.`;
+    info += `\nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties' : 'difficulty'} are *not* being nominated for Loved.`;
   }
 
   return info;
@@ -193,6 +193,7 @@ function convertToMarkdown(bbcode) {
     .replace(/\[color\=.+?\](.+?)\[\/color\]/gs, '$1')
     .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs, '[$2]($1)')
     .replace(/\[quote(?:=".+?")?\](.+?)\[\/quote\]/gs, '> $1')
+    .replace(/([^\n])\n([^\n])/g, '$1  \n$2')
 
     // osu!-specific bbcode
     .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')')
@@ -346,6 +347,7 @@ if (generateMessages) {
 
         const postContent = textFromTemplate(votingThreadTemplate, {
           MAIN_THREAD_TITLE: mainPostTitle,
+          BEATMAP_EXTRAS: getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap),
           BEATMAPSET_ID: beatmap.id,
           BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
           CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
