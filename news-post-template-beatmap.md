@@ -4,7 +4,7 @@
 <? vars.BEATMAP_EXTRAS ?><?
 if (!vars.CONSISTENT_CAPTAIN) {
 `  
-*written by [${vars.CAPTAIN}](${vars.CAPTAIN_LINK})*`
+*description written by [${vars.CAPTAIN}](${vars.CAPTAIN_LINK})*`
 } ?>
 
 <? vars.DESCRIPTION ?>
