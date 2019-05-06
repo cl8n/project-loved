@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const config = {...require('./info.json'), ...require('./config/config.json')};
+const discordTemplateBeatmap = fs.readFileSync('./discord-template-beatmap.md', 'utf8');
 const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toString();
 const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
 const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
@@ -10,6 +11,7 @@ const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').
 const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
 const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
 const LovedDocument = require('./loved-document.js');
+const Discord = require('./lib/Discord');
 const Forum = require('./forum.js');
 const Gamemode = require('./lib/Gamemode');
 const OsuApi = require('./osu-api.js');
@@ -330,6 +332,7 @@ if (generateMessages) {
       const posts = {};
       const mainPostTitle = `[${mode.longName}] ${config.title}`;
       const mainPostBeatmaps = [];
+      const discordBeatmaps = [];
 
       for (let beatmap of modeBeatmaps) {
         let postTitle = `[${mode.longName}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
@@ -375,6 +378,14 @@ if (generateMessages) {
           THREAD_ID: topicId
         }));
 
+        discordBeatmaps.push(textFromTemplate(discordTemplateBeatmap, {
+          BEATMAPSET_ID: beatmap.id,
+          BEATMAPSET: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
+          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
+          LINK_MODE: mode.linkName,
+          THREAD_ID: topicId
+        }));
+
         const postId = await Forum.findFirstPostId(topicId);
 
         posts[beatmap.id] = {
@@ -406,7 +417,7 @@ if (generateMessages) {
       if (config.discord[mode.shortName])
         new Discord(config.discord[mode.shortName]).post(
           `Project Loved: ${mode.longName}`,
-          `Check out the ${mainPostBeatmaps.length} beatmaps nominated in the latest round!\n\n${mainPostBeatmaps.reverse().map(b => convertToMarkdown(b.substring(3))).join('\n\n')}`
+          `Check out the ${discordBeatmaps.length} beatmaps nominated in the latest round!\n\n${discordBeatmaps.reverse().join('\n\n')}`
         );
     }
 
