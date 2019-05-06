@@ -184,6 +184,7 @@ function convertToMarkdown(bbcode) {
     .replace(/\\/g, '\\\\')
     .replace(/\*/g, '\\*')
     .replace(/\[(.+?)\]\(/g, '\\[$1\\](')
+    .replace(/~/g, '\\~')
 
     .replace(/\[b\](.+?)\[\/b\]/gs, '**$1**')
     .replace(/\[\i\](.+?)\[\/\i\]/gs, '*$1*')
