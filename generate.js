@@ -381,7 +381,7 @@ if (generateMessages) {
         discordBeatmaps.push(textFromTemplate(discordTemplateBeatmap, {
           BEATMAPSET_ID: beatmap.id,
           BEATMAPSET: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
+          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](<${getUserLink(name)}>)`)),
           LINK_MODE: mode.linkName,
           THREAD_ID: topicId
         }));
