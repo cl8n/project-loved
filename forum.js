@@ -27,7 +27,7 @@ const limiter = new bottleneck({
     minTime: process.argv.includes('--messages', 2)
         ? 20000
         : process.argv.includes('--slow-requests', 2)
-            ? 2500
+            ? 3500
             : 1000
 });
 
