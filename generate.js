@@ -316,7 +316,7 @@ if (generateMessages) {
         : 'Project Loved: Your map will be up for voting soon!',
       hasMetadataChanges ? 'alert' : 'heart',
       message,
-      [beatmap.creators[0]]
+      [OsuApi.getUser(apiBeatmap.creator_id).username]
     );
   });
 }
