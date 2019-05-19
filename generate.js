@@ -416,7 +416,7 @@ if (generateMessages) {
       if (config.discord[mode.shortName])
         new Discord(config.discord[mode.shortName]).post(
           `Project Loved: ${mode.longName}`,
-          `Check out the ${discordBeatmaps.length} beatmaps nominated in the latest round!\n\n${discordBeatmaps.reverse().join('\n\n')}`
+          `@everyone Check out the ${discordBeatmaps.length} beatmaps nominated in the latest round!\n\n${discordBeatmaps.reverse().join('\n\n')}`
         );
     }
 
