@@ -39,7 +39,7 @@ module.exports.readDocuments = function () {
     let noteMatch;
 
     for (let mode of Gamemode.modes()) {
-        file = file.substring(file.indexOf(mode.longName) + mode.longName.length);
+        file = file.substring(file.indexOf(`${mode.longName}\n`) + mode.longName.length);
         let data = (mode.integer === 3 ? file : file.substring(0, file.indexOf(`\n${new Gamemode(mode.integer + 1).longName}`))).trim();
 
         for (let position = 1; data.length > 0; position++) {
