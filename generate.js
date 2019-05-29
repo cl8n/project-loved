@@ -31,8 +31,8 @@ async function generateImage(
   const page = await browser.newPage();
 
   await page.setViewport({
-    width: 1000,
-    height: 400
+    width: 920,
+    height: 300
   });
   await page.goto(`file://${__dirname.replace(/\\/g, '/')}/image-template/index.html`);
 

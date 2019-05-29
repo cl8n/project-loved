@@ -22,24 +22,24 @@ p {
   font-style: italic;
   font-weight: 600;
   text-align: center;
-  text-shadow: 0 2px 4px #0007;
+  text-shadow: 0 1px 2px #0007;
 }
 
 #title {
-  font-size: 30px;
-  margin-top: 283px;
+  font-size: 21px;
+  margin-top: 219px;
 }
 
 #artist {
-  font-size: 20px;
-  margin-top: 317px;
+  font-size: 14px;
+  margin-top: 242.5px;
 }
 
 #creator {
-  font-size: 14px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 400;
-  margin-top: 349px;
+  margin-top: 264px;
 }
 
 b {
