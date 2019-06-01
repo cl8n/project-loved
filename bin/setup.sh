@@ -1,7 +1,3 @@
-#!/bin/sh
-
-npm install
-
 mkdir -p config storage
 
 cp config.json.example config/config.json

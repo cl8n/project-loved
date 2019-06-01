@@ -1,6 +1,7 @@
 const fs = require('fs');
-const Forum = require('./forum.js');
-const Gamemode = require('./lib/Gamemode');
+const Forum = require('../src/forum');
+const Gamemode = require('../src/gamemode');
+const path = require('path');
 
 const POLL_DATA = [
     {
@@ -57,7 +58,8 @@ const POLL_DATA = [
         });
     }
 
-    if (!fs.existsSync('./output'))
-        fs.mkdirSync('./output');
-    fs.writeFileSync('./output/poll-info.json', JSON.stringify(polls));
+    if (!fs.existsSync(path.join(__dirname, '../output')))
+        fs.mkdirSync(path.join(__dirname, '../output'));
+
+    fs.writeFileSync(path.join(__dirname, '../output/poll-info.json'), JSON.stringify(polls));
 })();

@@ -1,6 +1,7 @@
+const path = require('path');
 const {readFileSync} = require('fs');
-const Gamemode = require('./lib/Gamemode');
-const Nomination = require('./lib/Nomination');
+const Gamemode = require('./gamemode');
+const Nomination = require('./nomination');
 
 const beatmaps = {};
 
@@ -35,7 +36,7 @@ String.prototype.indexOfFirst = function (searches) {
 }
 
 module.exports.readDocuments = function () {
-    let file = readFileSync('./config/document', 'utf8').trim();
+    let file = readFileSync(path.join(__dirname, '../config/document'), 'utf8').trim();
     let noteMatch;
 
     for (let mode of Gamemode.modes()) {

@@ -1,12 +1,11 @@
-#!/usr/bin/env node
-
-const config = {...require('../info.json'), ...require('../config/config.json')};
-const Discord = require('../lib/Discord');
-const Forum = require('../forum');
+const config = {...require('../resources/info.json'), ...require('../config/config.json')};
+const Discord = require('../src/discord');
+const Forum = require('../src/forum');
 const fs = require('fs');
-const Gamemode = require('../lib/Gamemode');
+const Gamemode = require('../src/gamemode');
+const path = require('path');
 
-const resultsPostTemplate = fs.readFileSync(`${__dirname}/../results-post-template.bbcode`).toString();
+const resultsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/results-post-template.bbcode'), 'utf8');
 
 function textFromTemplate(template, vars = {}) {
     return template

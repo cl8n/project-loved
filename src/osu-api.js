@@ -1,13 +1,14 @@
-const config = require('./config/config.json');
+const config = require('../config/config.json');
+const path = require('path');
 const syncRequest = require('sync-request');
 const {writeFileSync} = require('fs');
 
 let beatmapsetStorage;
-try { beatmapsetStorage = require('./storage/beatmapsets.json') }
+try { beatmapsetStorage = require('../storage/beatmapsets.json') }
 catch { beatmapsetStorage = {beatmapsets: {}} }
 
 let userStorage;
-try { userStorage = require('./storage/users.json') }
+try { userStorage = require('../storage/users.json') }
 catch { userStorage = {users: {}, ids: {}} }
 
 function clone(obj) {
@@ -43,7 +44,7 @@ module.exports.getBeatmapset = function (beatmapsetId) {
 
     beatmapsetStorage.beatmapsets[result[0].beatmapset_id] = result;
 
-    writeFileSync('./storage/beatmapsets.json', JSON.stringify(beatmapsetStorage, null, 4));
+    writeFileSync(path.join(__dirname, '../storage/beatmapsets.json'), JSON.stringify(beatmapsetStorage, null, 4));
 
     return clone(result);
 }
@@ -68,7 +69,7 @@ module.exports.getUser = function (userIdOrName, byName = false) {
     userStorage.users[result[0].user_id] = result[0];
     userStorage.ids[result[0].username] = result[0].user_id;
 
-    writeFileSync('./storage/users.json', JSON.stringify(userStorage, null, 4));
+    writeFileSync(path.join(__dirname, '../storage/users.json'), JSON.stringify(userStorage, null, 4));
 
     return clone(result[0]);
 }

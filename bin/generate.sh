@@ -1,12 +1,8 @@
-#!/bin/sh
-
-mkdir -p ./storage
-
 node generate.js "$@"
 
 shopt -s nullglob
 
-for image in ./temp/*/*/*.jpg; do
+for image in temp/*/*/*.jpg; do
     ./jpeg-recompress \
         --method smallfry \
         --accurate \
@@ -26,4 +22,4 @@ done
 
 shopt -u nullglob
 
-rm -rf ./temp
+rm -rf temp

@@ -1,20 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
-const config = {...require('./info.json'), ...require('./config/config.json')};
-const discordTemplateBeatmap = fs.readFileSync('./discord-template-beatmap.md', 'utf8');
-const mainThreadTemplate = fs.readFileSync('./main-thread-template.bbcode').toString();
-const mainThreadTemplateBeatmap = fs.readFileSync('./main-thread-template-beatmap.bbcode').toString();
-const newsPostTemplate = fs.readFileSync('./news-post-template.md').toString();
-const newsPostTemplateBeatmap = fs.readFileSync('./news-post-template-beatmap.md').toString();
-const votingThreadTemplate = fs.readFileSync('./voting-thread-template.bbcode').toString();
-const newsPostHeader = textFromTemplate(fs.readFileSync('./config/news-post-header.md').toString());
-const newsPostIntro = textFromTemplate(fs.readFileSync('./config/news-post-intro.md').toString());
-const LovedDocument = require('./loved-document.js');
-const Discord = require('./lib/Discord');
-const Forum = require('./forum.js');
-const Gamemode = require('./lib/Gamemode');
-const OsuApi = require('./osu-api.js');
+const config = {...require('../resources/info.json'), ...require('../config/config.json')};
+const discordTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/discord-template-beatmap.md'), 'utf8');
+const mainThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/main-thread-template.bbcode'), 'utf8');
+const mainThreadTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/main-thread-template-beatmap.bbcode'), 'utf8');
+const newsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/news-post-template.md'), 'utf8');
+const newsPostTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-beatmap.md'), 'utf8');
+const votingThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/voting-thread-template.bbcode'), 'utf8');
+const newsPostHeader = fs.readFileSync(path.join(__dirname, '../config/news-post-header.md'), 'utf8').trim();
+const newsPostIntro = fs.readFileSync(path.join(__dirname, '../config/news-post-intro.md'), 'utf8').trim();
+const LovedDocument = require('../src/loved-document');
+const Discord = require('../src/discord');
+const Forum = require('../src/forum');
+const Gamemode = require('../src/gamemode');
+const OsuApi = require('../src/osu-api');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateMessages = process.argv.includes('--messages', 2);
@@ -34,7 +34,7 @@ async function generateImage(
     width: 920,
     height: 300
   });
-  await page.goto(`file://${__dirname.replace(/\\/g, '/')}/image-template/index.html`);
+  await page.goto(`file://${path.join(__dirname, '../resources/image-template/index.html').replace(/\\/g, '/')}`);
 
   await Promise.all([
     page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
@@ -136,11 +136,8 @@ function getUserLink(name) {
 }
 
 let threadIds;
-if (fs.existsSync('./storage/thread-ids.json')) {
-  threadIds = require('./storage/thread-ids.json');
-} else {
-  threadIds = {};
-}
+try { threadIds = require('../storage/thread-ids.json') }
+catch { threadIds = {} }
 
 function textFromTemplate(template, vars = {}) {
   return template
@@ -248,21 +245,26 @@ function mkdirTreeSync(dir) {
   }
 }
 
-mkdirTreeSync('./output/news');
+mkdirTreeSync(path.join(__dirname, '../output/news'));
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 const beatmaps = LovedDocument.readDocuments();
 
-const images = fs.readdirSync('./config')
-  .filter(x => fs.statSync(path.join('./config', x)).isFile()
-          && (path.extname(x).match(/\.?(png|jpg|jpeg)/) !== null));
+const images =
+  fs
+    .readdirSync(path.join(__dirname, '../config'))
+    .filter(
+      f =>
+        fs.statSync(path.join(__dirname, '../config', f)).isFile() &&
+        path.extname(f).match(/png|jpg|jpeg/) !== null
+    );
 
 if (generateImages) {
   console.log('Generating images');
 
   Gamemode.modes().forEach(function (mode) {
-    mkdirTreeSync(`./temp/${newsFolder}/${mode.shortName}`);
-    mkdirTreeSync(`./output/wiki/shared/news/${newsFolder}/${mode.shortName}`);
+    mkdirTreeSync(path.join(__dirname, `../temp/${newsFolder}/${mode.shortName}`));
+    mkdirTreeSync(path.join(__dirname, `../output/wiki/shared/news/${newsFolder}/${mode.shortName}`));
   });
 
   (async function () {
@@ -280,11 +282,11 @@ if (generateImages) {
 
       const promise = generateImage(
         browser,
-        `file://${__dirname.replace(/\\/g, '/')}/config/${image}`,
+        `file://${path.join(__dirname, `../config/${image}`).replace(/\\/g, '/')}`,
         beatmap.title,
         beatmap.artist,
         beatmap.creators,
-        `./temp/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`
+        path.join(__dirname, `../temp/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`)
       );
 
       promise.then(() => console.log(`Generated ${beatmap.imageFilename()}`),
@@ -357,8 +359,8 @@ if (generateMessages) {
 
         const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
 
-        let coverFile = images.find(x => x.split('.')[0] === beatmap.id.toString());
-        coverFile = `${__dirname.replace(/\\/g, '/')}/config/${coverFile}`;
+        let coverFile = images.find(f => parseInt(f.split('.')[0]) === beatmap.id);
+        coverFile = path.join(__dirname, `../config/${coverFile}`);
 
         let topicId;
         if (threadIds[beatmap.id] === undefined) {
@@ -420,7 +422,7 @@ if (generateMessages) {
         );
     }
 
-    fs.writeFileSync('./storage/thread-ids.json', JSON.stringify(threadIds, null, 4));
+    fs.writeFileSync(path.join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
   }
 
   console.log('Generating news post');
@@ -460,7 +462,7 @@ if (generateMessages) {
     consistentCaptains[mode.shortName] = LovedDocument.singleCaptain(mode);
   });
 
-  fs.writeFileSync(`./output/news/${newsFolder}.md`, textFromTemplate(newsPostTemplate, {
+  fs.writeFileSync(path.join(__dirname, `../output/news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
     TITLE: config.title,
     DATE: config.date,
     TIME: config.time,

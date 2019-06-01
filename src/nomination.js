@@ -1,4 +1,4 @@
-const Gamemode = require('./Gamemode');
+const Gamemode = require('./gamemode');
 
 module.exports = class {
     constructor(properties) {

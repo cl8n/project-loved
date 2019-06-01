@@ -1,8 +1,8 @@
 const bottleneck = require('bottleneck');
 const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
-const config = require('./config/config.json');
-const Gamemode = require('./lib/Gamemode');
+const config = require('../config/config.json');
+const Gamemode = require('./gamemode');
 const {getUser} = require('./osu-api');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';
