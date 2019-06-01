@@ -20,6 +20,10 @@ const generateImages = process.argv.includes('--images', 2);
 const generateMessages = process.argv.includes('--messages', 2);
 const generateThreads = process.argv.includes('--threads', 2);
 
+let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
+if (outPath === undefined)
+  outPath = path.join(__dirname, '../output');
+
 async function generateImage(
   browser,
   backgroundImage,
@@ -245,7 +249,7 @@ function mkdirTreeSync(dir) {
   }
 }
 
-mkdirTreeSync(path.join(__dirname, '../output/news'));
+mkdirTreeSync(path.join(outPath, 'news'));
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 const beatmaps = LovedDocument.readDocuments();
@@ -264,7 +268,7 @@ if (generateImages) {
 
   Gamemode.modes().forEach(function (mode) {
     mkdirTreeSync(path.join(__dirname, `../storage/${newsFolder}/${mode.shortName}`));
-    mkdirTreeSync(path.join(__dirname, `../output/wiki/shared/news/${newsFolder}/${mode.shortName}`));
+    mkdirTreeSync(path.join(outPath, `wiki/shared/news/${newsFolder}/${mode.shortName}`));
   });
 
   (async function () {
@@ -462,7 +466,7 @@ if (generateMessages) {
     consistentCaptains[mode.shortName] = LovedDocument.singleCaptain(mode);
   });
 
-  fs.writeFileSync(path.join(__dirname, `../output/news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
+  fs.writeFileSync(path.join(outPath, `news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
     TITLE: config.title,
     DATE: config.date,
     TIME: config.time,
