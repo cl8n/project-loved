@@ -263,7 +263,7 @@ if (generateImages) {
   console.log('Generating images');
 
   Gamemode.modes().forEach(function (mode) {
-    mkdirTreeSync(path.join(__dirname, `../temp/${newsFolder}/${mode.shortName}`));
+    mkdirTreeSync(path.join(__dirname, `../storage/${newsFolder}/${mode.shortName}`));
     mkdirTreeSync(path.join(__dirname, `../output/wiki/shared/news/${newsFolder}/${mode.shortName}`));
   });
 
@@ -286,7 +286,7 @@ if (generateImages) {
         beatmap.title,
         beatmap.artist,
         beatmap.creators,
-        path.join(__dirname, `../temp/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`)
+        path.join(__dirname, `../storage/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`)
       );
 
       promise.then(() => console.log(`Generated ${beatmap.imageFilename()}`),
