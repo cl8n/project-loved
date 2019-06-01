@@ -2,5 +2,4 @@ config/
 node_modules/
 output/
 storage/
-temp/
 jpeg-recompress*
