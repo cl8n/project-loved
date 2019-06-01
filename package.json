@@ -8,11 +8,11 @@
   },
   "private": true,
   "scripts": {
-    "images": "sh bin/generate.sh --images",
+    "images": "node bin/generate.js --images",
     "images:unpack": "sh bin/get-images.sh",
-    "messages": "sh bin/generate.sh --messages",
-    "news": "sh bin/generate.sh",
-    "news:forum": "sh bin/generate.sh --threads --slow-requests",
+    "messages": "node bin/generate.js --messages",
+    "news": "node bin/generate.js",
+    "news:forum": "node bin/generate.js --threads --slow-requests",
     "results": "node bin/results.js --slow-requests",
     "setup": "npm install & sh bin/setup.sh",
     "stats": "node bin/collect-stats.js --slow-requests"

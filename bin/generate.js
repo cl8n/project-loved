@@ -1,3 +1,4 @@
+const {exec, execFile} = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
@@ -15,6 +16,17 @@ const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
 const OsuApi = require('../src/osu-api');
+
+const jpegRecompress =
+  fs
+    .readdirSync(__dirname)
+    .find(
+      f =>
+        fs.statSync(path.join(__dirname, f)).isFile() &&
+        f.includes('jpeg-recompress')
+    );
+if (jpegRecompress === undefined)
+  console.error('jpeg-recompress not found in ./bin');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateMessages = process.argv.includes('--messages', 2);
@@ -284,27 +296,55 @@ if (generateImages) {
         return;
       }
 
+      const storageLocation = path.join(__dirname, `../storage/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`);
+      const storageLocationPosix = storageLocation.replace(/\\/g, '/');
+
       const promise = generateImage(
         browser,
         `file://${path.join(__dirname, `../config/${image}`).replace(/\\/g, '/')}`,
         beatmap.title,
         beatmap.artist,
         beatmap.creators,
-        path.join(__dirname, `../storage/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`)
+        storageLocation
       );
 
-      promise.then(() => console.log(`Generated ${beatmap.imageFilename()}`),
-                   () => console.log(`Failed to generate ${beatmap.imageFilename()}`));
+      promise.then(
+        () => {
+          console.log(`Generated ${beatmap.imageFilename()}`);
+          execFile(jpegRecompress, [
+            '--accurate',
+            '--quiet',
+            '--strip',
+            '--method',
+            'smallfry',
+            storageLocationPosix,
+            path.posix.normalize(storageLocationPosix.replace(/.+\/storage/, path.posix.join(outPath, 'wiki/shared/news')))
+          ], (error, _, stderr) => {
+            if (error) {
+              console.error(`Failed to minimize ${beatmap.imageFilename()}. Copied uncompressed image to output folder`);
+              console.error(stderr);
+            } else
+              console.log(`Minimized ${beatmap.imageFilename()}`);
+          });
+        },
+        () => console.error(`Failed to generate ${beatmap.imageFilename()}`)
+      );
 
       imagePromises.push(promise);
     });
+
+    const afterAllImages = () => {
+      browser.close();
+      exec(`rm -rf storage/${newsFolder}`);
+    };
 
     // Each promise is mapped to catch and return errors so that Promise.all()
     // does not resolve until all of the promises are resolved, regardless of
     // if any fail. This is important because we don't want the browser to close
     // while new pages are still being opened.
-    Promise.all(imagePromises.map(p => p.catch(e => e)))
-      .then(() => browser.close(), () => browser.close());
+    Promise
+      .all(imagePromises.map(p => p.catch(e => e)))
+      .then(afterAllImages, afterAllImages);
   })();
 }
 
