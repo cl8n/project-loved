@@ -8,7 +8,6 @@
   },
   "private": true,
   "scripts": {
-    "clean": "rm -rf output",
     "images": "sh bin/generate.sh --images",
     "images:unpack": "sh bin/get-images.sh",
     "messages": "sh bin/generate.sh --messages",
