@@ -3,7 +3,7 @@ node generate.js "$@"
 shopt -s nullglob
 
 for image in temp/*/*/*.jpg; do
-    ./jpeg-recompress \
+    ./bin/jpeg-recompress \
         --method smallfry \
         --accurate \
         --strip \
