@@ -141,9 +141,8 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
     info += diffs.map(d => (nomination.mode.integer === 3 ? `[${d[0]}K] ` : '') + `${d[1].toFixed(2)}★`).join(', ');
   }
 
-  if (excludedDiffNames.length > 0) {
+  if (excludedDiffNames.length > 0)
     info += `\nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties are' : 'difficulty is'} [i]not[/i] being nominated for Loved.`;
-  }
 
   return info;
 }
@@ -231,25 +230,21 @@ function joinList(array) {
 
   let line = array[0];
 
-  for (let i = 1; i < array.length; i++) {
-    if (i === array.length - 1) {
-      if (array[i].includes('et al.')) {
+  for (let i = 1; i < array.length; i++)
+    if (i === array.length - 1)
+      if (array[i].includes('et al.'))
         line += ' et al.';
-      } else {
+      else
         line += ` and ${array[i]}`;
-      }
-    } else {
+    else
       line += `, ${array[i]}`;
-    }
-  }
 
   return line;
 }
 
 function mkdirTreeSync(dir) {
-  if (fs.existsSync(dir)) {
+  if (fs.existsSync(dir))
     return;
-  }
 
   try {
     fs.mkdirSync(dir);
@@ -257,9 +252,8 @@ function mkdirTreeSync(dir) {
     if (error.code === 'ENOENT') {
       mkdirTreeSync(path.dirname(dir));
       mkdirTreeSync(dir);
-    } else {
+    } else
       throw error;
-    }
   }
 }
 
@@ -414,9 +408,8 @@ if (generateMessages) {
           topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
 
           threadIds[beatmap.id] = topicId;
-        } else {
+        } else
           topicId = threadIds[beatmap.id];
-        }
 
         mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
           BEATMAPSET_ID: beatmap.id,

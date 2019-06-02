@@ -104,18 +104,16 @@ module.exports.singleCaptain = function (mode) {
     let captain;
 
     for (let beatmap of Object.values(beatmaps)) {
-        if (beatmap.mode.integer !== mode.integer) {
+        if (beatmap.mode.integer !== mode.integer)
             continue;
-        }
 
         if (captain === undefined) {
             captain = beatmap.captain;
             continue;
         }
 
-        if (beatmap.captain !== captain) {
+        if (beatmap.captain !== captain)
             return null;
-        }
     }
 
     return captain === undefined ? null : captain;

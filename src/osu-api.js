@@ -24,9 +24,8 @@ function osuApiRequestSync(endpoint, params) {
 
     const response = syncRequest('GET', url);
 
-    if (response.statusCode === 401) {
+    if (response.statusCode === 401)
         throw new Error('Invalid osu! API key');
-    }
 
     return JSON.parse(response.getBody());
 }
