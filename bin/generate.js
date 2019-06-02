@@ -168,9 +168,7 @@ function textFromTemplate(template, vars = {}) {
 }
 
 function fixCommonMistakes(text) {
-  return text
-
-    // "smart" characters
+  return text.toString()
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
     .replace(/…/g, '...')
@@ -180,9 +178,9 @@ function fixCommonMistakes(text) {
     .replace(/⅙/g, '1/6')
     .replace(/⅛/g, '1/8')
 
-    // acronym consistency
     .replace(/(\d+) ?k(?<=\s)/gi, '$1K')
-    .replace(/(\d+) ?bpm/gi, '$1 BPM');
+    .replace(/(\d+) ?bpm/gi, '$1 BPM')
+    .replace(/o2jam/gi, 'O2Jam');
 }
 
 function osuModernLinks(text) {
