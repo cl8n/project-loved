@@ -78,7 +78,7 @@ module.exports.storeTopic = async function (title, content) {
     });
 
     if (response.statusCode !== 302)
-        throw `Missing redirect to new topic. Expected 302, got ${response.statusCode}`;
+        throw new Error(`Missing redirect to new topic: status code ${response.statusCode}`);
 
     return idFromUrl(response.headers.location);
 }
@@ -104,7 +104,7 @@ module.exports.storeTopicWithPoll = async function (title, content, coverId, pol
     });
 
     if (response.statusCode !== 302)
-        throw `Missing redirect to new topic. Expected 302, got ${response.statusCode}`;
+        throw new Error(`Missing redirect to new topic: status code ${response.statusCode}`);
 
     return idFromUrl(response.headers.location);
 }

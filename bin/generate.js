@@ -226,9 +226,8 @@ function escapeHtml(text) {
 }
 
 function joinList(array) {
-  if (array.length === 0) {
-    throw 'Invalid array';
-  }
+  if (array.length === 0)
+    throw new Error('List must not be empty');
 
   let line = array[0];
 

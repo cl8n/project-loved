@@ -25,7 +25,7 @@ function osuApiRequestSync(endpoint, params) {
     const response = syncRequest('GET', url);
 
     if (response.statusCode === 401) {
-        throw 'Invalid osu!API key';
+        throw new Error('Invalid osu! API key');
     }
 
     return JSON.parse(response.getBody());
@@ -40,7 +40,7 @@ module.exports.getBeatmapset = function (beatmapsetId) {
     });
 
     if (result.length === 0)
-        throw `Beatmapset not found: ${beatmapsetId}`;
+        throw new Error(`Beatmapset not found: ${beatmapsetId}`);
 
     beatmapsetStorage.beatmapsets[result[0].beatmapset_id] = result;
 
@@ -61,7 +61,7 @@ module.exports.getUser = function (userIdOrName, byName = false) {
     });
 
     if (result.length === 0)
-        throw `User not found: ${userIdOrName}`;
+        throw new Error(`User not found: ${userIdOrName}`);
 
     // We will never need to work with events, and they take up a lot of space
     delete result[0].events;

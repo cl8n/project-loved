@@ -7,7 +7,7 @@ module.exports = class {
 
     post(name, content, embeds = null) {
         if (content.length > 2000)
-            throw `Discord message content is too long (${content.length} characters)`;
+            throw new Error(`Discord message content is too long (${content.length} characters)`);
 
         return request({
             uri: this._webhook,
