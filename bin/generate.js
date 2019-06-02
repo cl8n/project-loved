@@ -17,6 +17,14 @@ const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
 const OsuApi = require('../src/osu-api');
 
+const generateImages = process.argv.includes('--images', 2);
+const generateMessages = process.argv.includes('--messages', 2);
+const generateThreads = process.argv.includes('--threads', 2);
+
+let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
+if (outPath === undefined)
+  outPath = path.join(__dirname, '../output');
+
 const jpegRecompress =
   fs
     .readdirSync(__dirname)
@@ -25,16 +33,11 @@ const jpegRecompress =
         fs.statSync(path.join(__dirname, f)).isFile() &&
         f.includes('jpeg-recompress')
     );
-if (jpegRecompress === undefined)
-  console.error('jpeg-recompress not found in ./bin');
 
-const generateImages = process.argv.includes('--images', 2);
-const generateMessages = process.argv.includes('--messages', 2);
-const generateThreads = process.argv.includes('--threads', 2);
-
-let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
-if (outPath === undefined)
-  outPath = path.join(__dirname, '../output');
+if (jpegRecompress === undefined && generateImages) {
+  console.error('jpeg-recompress must be in bin/ to generate images');
+  process.exit(1);
+}
 
 async function generateImage(
   browser,
