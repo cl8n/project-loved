@@ -54,17 +54,19 @@ function firstPostIdFromTopicView(body) {
     return (body.match(/data-post-id="(\d+)"/) || [, null])[1];
 }
 
-module.exports.storeTopicCover = function (filename) {
-    return request({
+module.exports.storeTopicCover = async function (filename) {
+    const body = await request({
         uri: '/community/forums/topic-covers',
         formData: {
             cover_file: fs.createReadStream(filename)
         }
-    }).then(body => JSON.parse(body).id);
+    });
+
+    return JSON.parse(body).id;
 }
 
-module.exports.storeTopic = function (title, content) {
-    return request({
+module.exports.storeTopic = async function (title, content) {
+    const response = await request({
         uri: '/community/forums/topics',
         form: {
             forum_id: 120,
@@ -73,14 +75,16 @@ module.exports.storeTopic = function (title, content) {
         },
         simple: false,
         resolveWithFullResponse: true
-    }).then(response => {
-        if (response.statusCode === 302)
-            return idFromUrl(response.headers.location);
     });
+
+    if (response.statusCode !== 302)
+        throw `Missing redirect to new topic. Expected 302, got ${response.statusCode}`;
+
+    return idFromUrl(response.headers.location);
 }
 
-module.exports.storeTopicWithPoll = function (title, content, coverId, pollTitle) {
-    return request({
+module.exports.storeTopicWithPoll = async function (title, content, coverId, pollTitle) {
+    const response = await request({
         uri: '/community/forums/topics',
         form: {
             forum_id: 120,
@@ -97,20 +101,24 @@ module.exports.storeTopicWithPoll = function (title, content, coverId, pollTitle
         },
         simple: false,
         resolveWithFullResponse: true
-    }).then(response => {
-        if (response.statusCode === 302)
-            return idFromUrl(response.headers.location);
     });
+
+    if (response.statusCode !== 302)
+        throw `Missing redirect to new topic. Expected 302, got ${response.statusCode}`;
+
+    return idFromUrl(response.headers.location);
 }
 
-module.exports.findFirstPostId = function (topicId) {
-    return request({
+module.exports.findFirstPostId = async function (topicId) {
+    const body = await request({
         uri: `/community/forums/topics/${topicId}`,
         method: 'GET',
         qs: {
             skip_layout: 1
         }
-    }).then(body => firstPostIdFromTopicView(body));
+    });
+
+    return firstPostIdFromTopicView(body);
 }
 
 module.exports.updatePost = function (postId, content) {
@@ -178,26 +186,25 @@ module.exports.reply = function (topicId, content) {
     });
 }
 
-module.exports.getModeTopics = function (forumId) {
-    return request({
+module.exports.getModeTopics = async function (forumId) {
+    let body = await request({
         uri: `/community/forums/${forumId}`,
         method: 'GET'
-    }).then(body => {
-        const topics = {};
-
-        body = body.substring(body.search('Pinned Topics'));
-
-        for (let i = 0; i < 4; i++) {
-            const match = body.match(/\[(osu![a-z]+)\] Project Loved: Week of/);
-            const mode = new Gamemode(match[1]);
-
-            body = body.substring(match.index + match[0].length);
-
-            topics[mode.integer] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
-        }
-
-        return topics;
     });
+
+    const topics = {};
+    body = body.substring(body.search('Pinned Topics'));
+
+    for (let i = 0; i < 4; i++) {
+        const match = body.match(/\[(osu![a-z]+)\] Project Loved: Week of/);
+        const mode = new Gamemode(match[1]);
+
+        body = body.substring(match.index + match[0].length);
+
+        topics[mode.integer] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
+    }
+
+    return topics;
 }
 
 module.exports.getTopic = function (topicId) {
@@ -264,7 +271,10 @@ function getIcon(icon) {
     }
 }
 
-module.exports.sendPm = function (subject, icon, message, to, bcc = []) {
+module.exports.sendPm = async function (subject, icon, message, to, bcc = []) {
+    if (to.length < 1)
+        throw new Error('Recipient list must not be empty');
+
     const form = {
         icon: getIcon(icon),
         localUserCheck: config.csrfOld,
@@ -284,7 +294,7 @@ module.exports.sendPm = function (subject, icon, message, to, bcc = []) {
     to.forEach(u => form[`address_list[u][${getUser(u, true).user_id}]`] = 'to');
     bcc.forEach(u => form[`address_list[u][${getUser(u, true).user_id}]`] = 'bcc');
 
-    return request({
+    const response = await request({
         uri: '/forum/ucp.php',
         qs: {
             action: 'post',
@@ -295,10 +305,8 @@ module.exports.sendPm = function (subject, icon, message, to, bcc = []) {
         form: form,
         simple: false,
         resolveWithFullResponse: true
-    }).then(response => {
-        if (response.statusCode !== 302) {
-            console.error(response.body);
-            console.error('Failed to send PM');
-        }
     });
+
+    if (response.statusCode !== 302)
+        console.error(`Failed to send PM to ${to[0]}: status code ${response.statusCode}`);
 }
