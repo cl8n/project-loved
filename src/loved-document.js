@@ -36,8 +36,13 @@ String.prototype.indexOfFirst = function (searches) {
 }
 
 module.exports.readDocuments = function () {
-    let file = readFileSync(path.join(__dirname, '../config/document'), 'utf8').trim();
+    let file = readFileSync(path.join(__dirname, '../config/document'), 'utf8');
     let noteMatch;
+
+    file = file.substring(
+        file.match(/^osu!standard$/m).index,
+        file.match(/^Graveyard$/m).index
+    ).trim();
 
     for (let mode of Gamemode.modes()) {
         file = file.substring(file.indexOf(`${mode.longName}\n`) + mode.longName.length);
