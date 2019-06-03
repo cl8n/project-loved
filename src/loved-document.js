@@ -35,9 +35,14 @@ String.prototype.indexOfFirst = function (searches) {
     return -1;
 }
 
-module.exports.readDocuments = function () {
+module.exports.readDocument = function () {
     let file = readFileSync(path.join(__dirname, '../config/document'), 'utf8');
     let noteMatch;
+
+    file = file.substring(file.match(/^News post$/m).index);
+
+    const header = file.match(/^Header$(.+?)^Intro$/ms)[1].trim();
+    const intro = file.match(/^Intro$(.+?)^osu!standard$/ms)[1].trim();
 
     file = file.substring(
         file.match(/^osu!standard$/m).index,
@@ -102,7 +107,11 @@ module.exports.readDocuments = function () {
         }
     }
 
-    return beatmaps;
+    return {
+        header: header,
+        intro: intro,
+        nominations: beatmaps
+    };
 }
 
 module.exports.singleCaptain = function (mode) {

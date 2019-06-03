@@ -25,8 +25,6 @@ There are four files you can configure:
 
 - `config.json` contains various options listed below
 - `document` should have a content-only copy of the Project Loved Google document
-- `news-post-header.md`'s content will be inserted before the header image in the news post
-- `news-post-intro.md`'s content will be inserted immediately after the header image in the news post
 
 | Option | Description |
 | :-- | :-- |

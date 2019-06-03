@@ -9,8 +9,6 @@ const mainThreadTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resou
 const newsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/news-post-template.md'), 'utf8');
 const newsPostTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-beatmap.md'), 'utf8');
 const votingThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/voting-thread-template.bbcode'), 'utf8');
-const newsPostHeader = fs.readFileSync(path.join(__dirname, '../config/news-post-header.md'), 'utf8').trim();
-const newsPostIntro = fs.readFileSync(path.join(__dirname, '../config/news-post-intro.md'), 'utf8').trim();
 const LovedDocument = require('../src/loved-document');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
@@ -258,7 +256,8 @@ function mkdirTreeSync(dir) {
 mkdirTreeSync(path.join(outPath, 'news'));
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
-const beatmaps = LovedDocument.readDocuments();
+const document = LovedDocument.readDocument();
+const beatmaps = document.nominations;
 
 const images =
   fs
@@ -503,8 +502,8 @@ if (generateMessages) {
     TITLE: config.title,
     DATE: config.date,
     TIME: config.time,
-    HEADER: newsPostHeader,
-    INTRO: newsPostIntro,
+    HEADER: document.header,
+    INTRO: document.intro,
     VIDEO: config.videos,
     INCLUDE_VIDEO: Object.keys(config.videos).length > 0,
     BEATMAPS: beatmapsSections,
