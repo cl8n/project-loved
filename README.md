@@ -21,7 +21,7 @@ A typical week in Project Loved involves:
 
 ### Config
 
-There are four files you can configure:
+There are two files you can configure:
 
 - `config.json` contains various options listed below
 - `document` should have a content-only copy of the Project Loved Google document
@@ -44,4 +44,4 @@ There are four files you can configure:
 | `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
 | `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
 
-In addition to the four config files, you need to provide beatmap backgrounds for each of the sets listed in `document`. Their filenames (not including the extension) must match the beatmapset ID. To speed up the process of collecting backgrounds, you can put all of the OSZ files in the `config` folder and run `npm run images:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
+In addition to the two config files, you need to provide beatmap backgrounds for each of the sets listed in `document`. Their filenames (not including the extension) must match the beatmapset ID. To speed up the process of collecting backgrounds, you can put all of the OSZ files in the `config` folder and run `npm run images:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
