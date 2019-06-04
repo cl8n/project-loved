@@ -16,7 +16,6 @@ const Gamemode = require('../src/gamemode');
 const OsuApi = require('../src/osu-api');
 
 const generateImages = process.argv.includes('--images', 2);
-const generateMessages = process.argv.includes('--messages', 2);
 const generateThreads = process.argv.includes('--threads', 2);
 
 let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
@@ -339,25 +338,6 @@ if (generateImages) {
       .all(imagePromises.map(p => p.catch(e => e)))
       .then(afterAllImages, afterAllImages);
   })();
-}
-
-if (generateMessages) {
-  Object.values(beatmaps).forEach(beatmap => {
-    const hasMetadataChanges = beatmap.metadataEdits !== undefined;
-    const apiBeatmap = OsuApi.getBeatmapset(beatmap.id)[0];
-    const message = hasMetadataChanges
-      ? `Hello,\n\nYour beatmap, [url=https://osu.ppy.sh/beatmapsets/${beatmap.id}]${apiBeatmap.artist} - ${apiBeatmap.title}[/url], is going to be up for vote in next week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode.shortName]} "Yes" votes by the time polls end, it can be moved to the Loved category!\n\nHowever, we kindly request that you apply the following metadata changes before then:\n\n[quote="${beatmap.metadataMessageAuthor}"]${beatmap.metadataEdits}[/quote]\n\nAlso, if for any reason you [i]do not[/i] want your map to be put up for voting, please let me know ASAP.\n\nThanks!`
-      : `Hello,\n\nYour beatmap, [url=https://osu.ppy.sh/beatmapsets/${beatmap.id}]${apiBeatmap.artist} - ${apiBeatmap.title}[/url], is going to be up for vote in next week's round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. If your map receives over ${config.threshold[beatmap.mode.shortName]} "Yes" votes by the time polls end, it can be moved to the Loved category!\n\nIf for any reason you [i]do not[/i] want your map to be put up for voting, please let me know ASAP.\n\nThanks!`;
-
-    Forum.sendPm(
-      hasMetadataChanges
-        ? 'Project Loved: Changes required on your beatmap'
-        : 'Project Loved: Your map will be up for voting soon!',
-      hasMetadataChanges ? 'alert' : 'heart',
-      message,
-      [OsuApi.getUser(apiBeatmap.creator_id).username]
-    );
-  });
 }
 
 (async function () {

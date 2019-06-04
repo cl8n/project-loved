@@ -10,7 +10,7 @@
   "scripts": {
     "images": "node bin/generate.js --images",
     "images:unpack": "sh bin/get-images.sh",
-    "messages": "node bin/generate.js --messages",
+    "messages": "node bin/pm-mappers.js --messages",
     "news": "node bin/generate.js",
     "news:forum": "node bin/generate.js --threads --slow-requests",
     "results": "node bin/results.js --slow-requests",
