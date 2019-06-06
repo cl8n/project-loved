@@ -22,7 +22,7 @@ let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
 if (outPath === undefined)
   outPath = path.join(__dirname, '../output');
 
-const jpegRecompress =
+let jpegRecompress =
   fs
     .readdirSync(__dirname)
     .find(
@@ -34,7 +34,8 @@ const jpegRecompress =
 if (jpegRecompress === undefined && generateImages) {
   console.error('jpeg-recompress must be in bin/ to generate images');
   process.exit(1);
-}
+} else
+  jpegRecompress = path.join(__dirname, jpegRecompress);
 
 async function generateImage(
   browser,
@@ -289,7 +290,6 @@ if (generateImages) {
       }
 
       const storageLocation = path.join(__dirname, `../storage/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`);
-      const storageLocationPosix = storageLocation.replace(/\\/g, '/');
 
       const promise = generateImage(
         browser,
@@ -309,8 +309,8 @@ if (generateImages) {
             '--strip',
             '--method',
             'smallfry',
-            storageLocationPosix,
-            path.posix.normalize(storageLocationPosix.replace(/.+\/storage/, path.posix.join(outPath, 'wiki/shared/news')))
+            storageLocation,
+            storageLocation.replace(/.+[\/\\]storage/, path.join(outPath, 'wiki/shared/news'))
           ], error => {
             if (error) {
               console.error(`Failed to minimize ${beatmap.imageFilename()}. Copied uncompressed image to output folder`);
