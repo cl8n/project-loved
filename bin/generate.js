@@ -311,10 +311,10 @@ if (generateImages) {
             'smallfry',
             storageLocationPosix,
             path.posix.normalize(storageLocationPosix.replace(/.+\/storage/, path.posix.join(outPath, 'wiki/shared/news')))
-          ], (error, _, stderr) => {
+          ], error => {
             if (error) {
               console.error(`Failed to minimize ${beatmap.imageFilename()}. Copied uncompressed image to output folder`);
-              console.error(stderr);
+              console.error(error);
             } else
               console.log(`Minimized ${beatmap.imageFilename()}`);
           });
