@@ -42,7 +42,8 @@ module.exports.readDocument = function () {
     file = file.substring(file.match(/^News post$/m).index);
 
     const header = file.match(/^Header$(.+?)^Intro$/ms)[1].trim();
-    const intro = file.match(/^Intro$(.+?)^osu!standard$/ms)[1].trim();
+    const intro = file.match(/^Intro$(.+?)^Outro$/ms)[1].trim();
+    const outro = file.match(/^Outro$(.+?)^osu!standard$/ms)[1].trim();
 
     file = file.substring(
         file.match(/^osu!standard$/m).index,
@@ -110,6 +111,7 @@ module.exports.readDocument = function () {
     return {
         header: header,
         intro: intro,
+        outro: outro,
         nominations: beatmaps
     };
 }

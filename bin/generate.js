@@ -489,6 +489,6 @@ if (generateImages) {
     BEATMAPS: beatmapsSections,
     CONSISTENT_CAPTAINS: consistentCaptains,
     ALL_CAPTAINS: captainMarkdown,
-    HELPERS: joinList(config.helpers.map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`))
+    OUTRO: document.outro
   }) + '\n');
 })();
