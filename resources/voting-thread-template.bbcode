@@ -1,12 +1,12 @@
-Main thread: [url=https://osu.ppy.sh/community/forums/topics/MAIN_TOPIC_ID]<? vars.MAIN_THREAD_TITLE ?>[/url]
+Main thread: [url=https://osu.ppy.sh/community/forums/topics/MAIN_TOPIC_ID]{{MAIN_THREAD_TITLE}}[/url]
 
-[b][url=https://osu.ppy.sh/beatmapsets/<? vars.BEATMAPSET_ID ?>#<? vars.LINK_MODE ?>]<? vars.BEATMAPSET ?>[/url][/b] by <? vars.CREATORS ?>
-<? vars.BEATMAP_EXTRAS ?>
+[b][url=https://osu.ppy.sh/beatmapsets/{{BEATMAPSET_ID}}#{{LINK_MODE}}]{{BEATMAPSET}}[/url][/b] by {{CREATORS}}
+{{BEATMAP_EXTRAS}}
 
 [b]Captain's description<?
 if (vars.CAPTAIN !== 'Captain') {
     ` (by [url=${getUserLink(vars.CAPTAIN)}]${vars.CAPTAIN}[/url])`
 } ?>:[/b]
-<? vars.DESCRIPTION ?>
+{{DESCRIPTION}}
 
 Please use this thread to discuss why you believe this map should or should not enter the Loved category!

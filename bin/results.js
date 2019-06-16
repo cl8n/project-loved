@@ -7,13 +7,14 @@ const path = require('path');
 
 const resultsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/results-post-template.bbcode'), 'utf8');
 
-function textFromTemplate(template, vars = {}) {
+function textFromTemplate(template, vars) {
     return template
-        .replace(/<\?(.+?)\?>/gs, function (_, script) {
+        .replace(/<\?(.+?)\?>/gs, (_, script) => {
             let result = eval(script);
 
             return result === undefined || result === null ? '' : result;
         })
+        .replace(/{{(.+?)}}/g, (match, key) => vars[key] === undefined ? match : vars[key])
         .trim();
 }
 
