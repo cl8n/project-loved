@@ -8,6 +8,7 @@ const mainThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/ma
 const mainThreadTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/main-thread-template-beatmap.bbcode'), 'utf8');
 const newsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/news-post-template.md'), 'utf8');
 const newsPostTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-beatmap.md'), 'utf8');
+const newsPostTemplateMode = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-mode.md'), 'utf8');
 const votingThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/voting-thread-template.bbcode'), 'utf8');
 const LovedDocument = require('../src/loved-document');
 const Discord = require('../src/discord');
@@ -444,9 +445,7 @@ if (generateImages) {
 
   console.log('Generating news post');
 
-  const beatmapsSections = {};
-  const captainMarkdown = {};
-  const consistentCaptains = {};
+  const beatmapSectionModes = [];
 
   Gamemode.modes().forEach(function (mode) {
     const postBeatmaps = [];
@@ -474,9 +473,14 @@ if (generateImages) {
       }));
     }
 
-    beatmapsSections[mode.shortName] = postBeatmaps.join('\n\n');
-    captainMarkdown[mode.shortName] = joinList(config.captains[mode.shortName].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`));
-    consistentCaptains[mode.shortName] = LovedDocument.singleCaptain(mode);
+    beatmapSectionModes.push(textFromTemplate(newsPostTemplateMode, {
+      MODE_SHORT: mode.shortName,
+      MODE_LONG: mode.longName,
+      VIDEO: config.videos[mode.shortName],
+      ALL_CAPTAINS: joinList(config.captains[mode.shortName].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
+      CONSISTENT_CAPTAINS: LovedDocument.singleCaptain(mode),
+      BEATMAPS: postBeatmaps.join('\n\n')
+    }));
   });
 
   fs.writeFileSync(path.join(outPath, `news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
@@ -486,9 +490,7 @@ if (generateImages) {
     HEADER: document.header,
     INTRO: document.intro,
     VIDEO: config.videos,
-    BEATMAPS: beatmapsSections,
-    CONSISTENT_CAPTAINS: consistentCaptains,
-    ALL_CAPTAINS: captainMarkdown,
-    OUTRO: document.outro
+    OUTRO: document.outro,
+    BEATMAPS: beatmapSectionModes.join('\n\n')
   }) + '\n');
 })();
