@@ -486,7 +486,6 @@ if (generateImages) {
     HEADER: document.header,
     INTRO: document.intro,
     VIDEO: config.videos,
-    INCLUDE_VIDEO: Object.keys(config.videos).length > 0,
     BEATMAPS: beatmapsSections,
     CONSISTENT_CAPTAINS: consistentCaptains,
     ALL_CAPTAINS: captainMarkdown,
