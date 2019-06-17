@@ -64,7 +64,7 @@ module.exports.readDocument = function () {
             let metadataSender;
             let metadataMessage;
 
-            while ((noteMatch = descriptionSplit[1].match(/^([-_a-z0-9\[\] ]{3,15}): /i)) !== null) {
+            while ((noteMatch = descriptionSplit[1].match(/^(Noffy|Video): /)) !== null) {
                 let substringIndex;
 
                 if (noteMatch[1] === 'Video')
