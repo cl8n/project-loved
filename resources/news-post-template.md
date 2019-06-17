@@ -17,10 +17,10 @@ if (vars.VIDEO.intro) {
 
 ### Navigation
 
-- [osu!](#osu)
-- [osu!taiko](#osutaiko)
-- [osu!catch](#osucatch)
-- [osu!mania](#osumania)
+- [osu!standard](#osu)
+- [osu!taiko](#taiko)
+- [osu!catch](#catch)
+- [osu!mania](#mania)
 
 {{BEATMAPS}}
 
