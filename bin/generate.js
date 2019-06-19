@@ -32,11 +32,12 @@ let jpegRecompress =
         f.includes('jpeg-recompress')
     );
 
-if (jpegRecompress === undefined && generateImages) {
-  console.error('jpeg-recompress must be in bin/ to generate images');
-  process.exit(1);
-} else
-  jpegRecompress = path.join(__dirname, jpegRecompress);
+if (generateImages)
+  if (jpegRecompress === undefined) {
+    console.error('jpeg-recompress must be in bin/ to generate images');
+    process.exit(1);
+  } else
+    jpegRecompress = path.join(__dirname, jpegRecompress);
 
 async function generateImage(
   browser,
