@@ -5,6 +5,7 @@ const fs = require('fs');
 const Gamemode = require('../src/gamemode');
 const path = require('path');
 
+const keepWatches = process.argv.includes('--keep-watches', 2);
 const resultsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/results-post-template.bbcode'), 'utf8');
 
 function textFromTemplate(template, vars) {
@@ -71,7 +72,9 @@ function mapResultsToEmbed(beatmapset, passed) {
                 failedBeatmapsets.push(beatmapset);
 
             Forum.lockTopic(topicMatch[1]);
-            Forum.watchTopic(topicMatch[1], false);
+
+            if (!keepWatches)
+                Forum.watchTopic(topicMatch[1], false);
 
             mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
         }
@@ -84,7 +87,9 @@ function mapResultsToEmbed(beatmapset, passed) {
 
         Forum.pinTopic(mainTopics[mode.integer], false);
         Forum.lockTopic(mainTopics[mode.integer]);
-        Forum.watchTopic(mainTopics[mode.integer], false);
+
+        if (!keepWatches)
+            Forum.watchTopic(mainTopics[mode.integer], false);
 
         if (config.discord[mode.shortName])
             new Discord(config.discord[mode.shortName]).post(
