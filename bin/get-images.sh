@@ -3,7 +3,7 @@ for beatmap in config/*.osz; do
            | sed -e 's/^\n+|\n+$//')
     file_count=$(echo "$file" | wc -l)
 
-    if [ $file_count == 1 ]; then
+    if [ $file_count == 1 -a "$file" != '' ]; then
         unzip "$beatmap" "$file" > /dev/null
 
         set_id=$(basename "$beatmap" | grep -o '^[0-9]\+')
