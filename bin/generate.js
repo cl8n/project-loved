@@ -268,7 +268,7 @@ const images =
     .filter(
       f =>
         fs.statSync(path.join(__dirname, '../config', f)).isFile() &&
-        path.extname(f).match(/png|jpg|jpeg/) !== null
+        path.extname(f).match(/png|jpg|jpeg/i) !== null
     );
 
 if (generateImages) {
