@@ -4,6 +4,8 @@ const Gamemode = require('../src/gamemode');
 const path = require('path');
 
 const POLL_DATA = [
+    // This poll's online stats are misleading due to a brigade done by banned
+    // accounts. peppy decided that this is the most accurate result instead.
     {
         beatmapset: 339222,
         yes_count: 504,
