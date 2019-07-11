@@ -39,6 +39,7 @@ module.exports.readDocument = function () {
     let file = readFileSync(path.join(__dirname, '../config/document'), 'utf8');
     let noteMatch;
 
+    file = file.replace(/\r\n/g, '\n');
     file = file.substring(file.match(/^News post$/m).index);
 
     const header = file.match(/^Header$(.+?)^Intro$/ms)[1].trim();
