@@ -62,12 +62,18 @@ async function generateImage(
     page.$eval('#creator', (el, creatorsList) => el.innerHTML = `mapped by ${creatorsList}`, joinList(creators.map((name) => `<b>${name}</b>`)))
   ]);
 
-  await page.screenshot({
-    path: outputImage,
-    quality: 100
-  });
+  await new Promise(resolve => {
+    setTimeout(async () => {
+      await page.screenshot({
+        path: outputImage,
+        quality: 100
+      });
 
-  await page.close();
+      await page.close();
+
+      resolve();
+    }, config.imageLoadWait);
+  });
 }
 
 function getExtraBeatmapsetInfo(beatmapset, nomination) {
