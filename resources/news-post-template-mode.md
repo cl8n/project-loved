@@ -6,7 +6,7 @@ if (vars.VIDEO) {
 } ?>
 
 {{MODE_LONG}} Loved candidates were chosen by {{ALL_CAPTAINS}}!<?
-if (vars.CONSISTENT_CAPTAINS) {
+if (vars.CONSISTENT_CAPTAINS && vars.CONSISTENT_CAPTAINS !== 'Captain') {
 ` This week, all ${vars.MODE_LONG} beatmap descriptions were written by [${vars.CONSISTENT_CAPTAINS}](${getUserLink(vars.CONSISTENT_CAPTAINS)}).`
 } ?>
 
