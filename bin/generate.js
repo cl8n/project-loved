@@ -394,6 +394,7 @@ if (generateImages) {
           topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
 
           threadIds[beatmap.id] = topicId;
+          fs.writeFileSync(path.join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
         } else
           topicId = threadIds[beatmap.id];
 
@@ -446,8 +447,6 @@ if (generateImages) {
           `@everyone Check out the ${discordBeatmaps.length} beatmaps nominated in the latest round!\n\n${discordBeatmaps.reverse().join('\n\n')}`
         );
     }
-
-    fs.writeFileSync(path.join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
   }
 
   console.log('Generating news post');
