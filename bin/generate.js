@@ -159,10 +159,6 @@ function getUserLink(name) {
   return `https://osu.ppy.sh/users/${user.user_id}`;
 }
 
-let threadIds;
-try { threadIds = require('../storage/thread-ids.json') }
-catch { threadIds = {} }
-
 function textFromTemplate(template, vars) {
   return template
     .replace(/<\?(.+?)\?>/gs, (_, script) => {
@@ -348,6 +344,10 @@ if (generateImages) {
       .then(afterAllImages, afterAllImages);
   })();
 }
+
+const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json'))
+  ? require('../storage/thread-ids.json')
+  : {};
 
 (async function () {
   if (generateThreads) {
