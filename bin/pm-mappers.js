@@ -16,6 +16,6 @@ Object.values(readDocument().nominations).forEach(nomination => {
             : 'Project Loved: Your map will be up for voting soon!',
         hasMetadataChanges ? 'alert' : 'heart',
         message,
-        [OsuApi.getUser(apiBeatmap.creator_id).username]
+        [apiBeatmap.creator_id]
     );
 });

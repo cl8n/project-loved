@@ -3,7 +3,6 @@ const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
 const config = require('../config/config.json');
 const Gamemode = require('./gamemode');
-const {getUser} = require('./osu-api');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';
 const jar = requestUnwrapped.jar();
@@ -300,8 +299,8 @@ module.exports.sendPm = async function (subject, icon, message, to, bcc = []) {
         username_list: ''
     };
 
-    to.forEach(u => form[`address_list[u][${getUser(u, true).user_id}]`] = 'to');
-    bcc.forEach(u => form[`address_list[u][${getUser(u, true).user_id}]`] = 'bcc');
+    to.forEach(u => form[`address_list[u][${u}]`] = 'to');
+    bcc.forEach(u => form[`address_list[u][${u}]`] = 'bcc');
 
     const response = await request({
         uri: '/forum/ucp.php',
