@@ -166,7 +166,7 @@ module.exports.getPollResult = async function (topicId) {
     const voteCounts = [];
 
     for (let i = 0; i < 2; i++) {
-        const match = topic.match(/<td class="forum-poll-row__column">\n\s*(\d+)\n\s*<\/td>/);
+        const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*(\d+)\s*<\/div>/);
         voteCounts.push(parseInt(match[1]));
         topic = topic.substring(match.index + match[0].length);
     }
