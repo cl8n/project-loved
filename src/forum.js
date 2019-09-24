@@ -215,6 +215,7 @@ module.exports.getTopic = function (topicId) {
     });
 }
 
+// Note: This excludes pinned topics
 module.exports.getTopics = async function (forumId) {
     const topics = [];
     let idx;
