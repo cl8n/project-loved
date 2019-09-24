@@ -279,6 +279,15 @@ function getIcon(icon) {
     }
 }
 
+/**
+ * Sends a forum message using the old website.
+ * @param {string} subject Subject of the message.
+ * @param {string} icon Icon of the message. Must be one of the available icons in {@link getIcon}.
+ * @param {string} message Message contents.
+ * @param {number[]} to Recipients of the message. Must be an array of user IDs.
+ * @param {number[]} bcc Blind copy recipients of the message. Must be an array of user IDs.
+ * @returns {undefined}
+ */
 module.exports.sendPm = async function (subject, icon, message, to, bcc = []) {
     if (to.length < 1)
         throw new Error('Recipient list must not be empty');
