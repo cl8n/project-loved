@@ -43,6 +43,7 @@ const request = async function (...args) {
         return response;
     } catch (error) {
         console.error(`Request #${n} to ${args[0].uri} failed: ${error}`);
+        throw error;
     }
 }
 
