@@ -167,6 +167,10 @@ module.exports.getPollResult = async function (topicId) {
 
     for (let i = 0; i < 2; i++) {
         const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*(\d+)\s*<\/div>/);
+
+        if (match === null)
+            throw new Error('Forum topic page does not match the expected format');
+
         voteCounts.push(parseInt(match[1]));
         topic = topic.substring(match.index + match[0].length);
     }
@@ -199,6 +203,9 @@ module.exports.getModeTopics = async function (forumId) {
     for (let i = 0; i < 4; i++) {
         const match = body.match(/\[(osu![a-z]+)\] Project Loved: Week of/);
         const mode = new Gamemode(match[1]);
+
+        if (match === null)
+            throw new Error(`Could not find pinned topic for ${mode.longName}`);
 
         body = body.substring(match.index + match[0].length);
 
