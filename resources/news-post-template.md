@@ -27,5 +27,3 @@ if (vars.VIDEO.intro) {
 ---
 
 {{OUTRO}}
-
-—the Project Loved team
