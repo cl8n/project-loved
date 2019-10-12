@@ -8,7 +8,6 @@
   },
   "private": true,
   "scripts": {
-    "client:make": "node bin/oauth.js",
     "images": "node bin/generate.js --images",
     "images:unpack": "sh bin/get-images.sh",
     "messages": "node bin/pm-mappers.js --messages",
