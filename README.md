@@ -28,6 +28,7 @@ There are two files you can configure:
 
 | Option | Description |
 | :-- | :-- |
+| `captains.<mode>` | Captains credited for selecting the maps |
 | `cloudflare.id` | https://osu.ppy.sh's `__cfduid` cookie |
 | `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie |
 | `csrf` | https://osu.ppy.sh's `XSRF-TOKEN` cookie |
