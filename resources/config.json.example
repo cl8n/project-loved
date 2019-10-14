@@ -1,4 +1,10 @@
 {
+    "captains": {
+        "osu": [],
+        "taiko": [],
+        "catch": [],
+        "mania": []
+    },
     "cloudflare": {
         "id": "",
         "clearance": ""
