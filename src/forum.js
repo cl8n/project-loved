@@ -197,14 +197,15 @@ module.exports.getModeTopics = async function (forumId) {
     });
 
     const topics = {};
-    body = body.substring(body.search('Pinned Topics'));
+    body = body.substring(body.indexOf('Pinned Topics'), body.indexOf('id="topics"'));
 
-    for (let i = 0; i < 4; i++) {
+    while (true) {
         const match = body.match(/\[(osu![a-z]+)\] Project Loved: Week of/);
-        const mode = new Gamemode(match[1]);
 
         if (match === null)
-            throw new Error(`Could not find pinned topic for ${mode.longName}`);
+            break;
+
+        const mode = new Gamemode(match[1]);
 
         body = body.substring(match.index + match[0].length);
 

@@ -45,6 +45,9 @@ function mapResultsToEmbed(beatmapset, passed) {
     const mainTopics = await Forum.getModeTopics(120);
 
     for (let mode of Gamemode.modes().reverse()) {
+        if (mainTopics[mode.integer] === undefined)
+            continue;
+
         const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
         let mainPost = await Forum.getPostContent(mainPostId);
 
