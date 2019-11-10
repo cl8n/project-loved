@@ -94,6 +94,13 @@ module.exports.readDocument = function () {
             }
 
             const infoSplit = descriptionSplit[0].split('\t');
+
+            if (infoSplit[1] === undefined)
+                logError(
+                    'Description did not match the expected format (info line contains no tabs)',
+                    `Contents of descriptionSplit[0]:\n${descriptionSplit[0]}\n\nContents of description:\n${description}`
+                );
+
             const titleSplit = infoSplit[1].splitWithLeftOver(' - ', 2);
             const nomination = new Nomination({
                 mode: mode,
