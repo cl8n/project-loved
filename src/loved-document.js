@@ -1,5 +1,5 @@
 const path = require('path');
-const {readFileSync} = require('fs');
+const {appendFileSync, readFileSync} = require('fs');
 const Gamemode = require('./gamemode');
 const Nomination = require('./nomination');
 
@@ -36,6 +36,15 @@ String.prototype.indexOfFirst = function (searches) {
 }
 
 module.exports.readDocument = function () {
+    const logError = (shortMessage, longMessage) => {
+        console.error(shortMessage + '\nSee error.log for more details.');
+
+        const error = `> ${new Date()}\n> ${shortMessage}\n\n${longMessage}\n\n------------------------\n\n`;
+        appendFileSync(path.join(__dirname, '../error.log'), error);
+
+        process.exit();
+    };
+
     let file = readFileSync(path.join(__dirname, '../config/document'), 'utf8');
     let noteMatch;
 
