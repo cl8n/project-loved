@@ -1,6 +1,7 @@
 const bottleneck = require('bottleneck');
 const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
+const WebSocket = require('ws');
 const config = require('../config/config.json');
 const Gamemode = require('./gamemode');
 
@@ -18,7 +19,8 @@ requestUnwrapped = requestUnwrapped.defaults({
         'User-Agent': config.userAgent,
         'X-CSRF-TOKEN': config.csrf
     },
-    jar: jar
+    jar: jar,
+    simple: false
 });
 
 const limiter = new bottleneck({
@@ -30,8 +32,53 @@ const limiter = new bottleneck({
             : 1000
 });
 
+function handleVerification() {
+    console.log('osu! needs you to verify your account. Click the link in the email you received.');
+
+    const ws = new WebSocket(`wss://notify.ppy.sh/?csrf=${config.csrf}`, {
+        headers: {
+            Cookie: `osu_session=${config.session}`
+        }
+    });
+
+    return new Promise(resolve => {
+        ws.on('message', data => {
+            try {
+                if (JSON.parse(data).event === 'verified') {
+                    ws.close();
+                    resolve();
+                }
+            } catch {}
+        });
+    });
+}
+
+const requestWrapped = async function requestWrapped(options) {
+    const response = await requestUnwrapped({
+        ...options,
+        resolveWithFullResponse: true
+    });
+
+    switch (response.statusCode) {
+        case 401:
+            if (!response.body.includes('<h1 class="user-verification'))
+                throw 'Authentication failed';
+
+            await handleVerification();
+            return await requestWrapped(options);
+        case 403:
+            throw 'Authorization failed';
+        case 404:
+            throw 'Not found';
+        case 500:
+            throw 'Server error';
+    }
+
+    return options.resolveWithFullResponse ? response : response.body;
+}
+
 let requestCounter = 0;
-const requestUnlogged = limiter.wrap(requestUnwrapped);
+const requestUnlogged = limiter.wrap(requestWrapped);
 const request = async function (...args) {
     const n = ++requestCounter;
     console.log(`Making request #${n} to ${args[0].uri}`);
@@ -73,7 +120,6 @@ module.exports.storeTopic = async function (title, content) {
             title: title,
             body: content
         },
-        simple: false,
         resolveWithFullResponse: true
     });
 
@@ -99,7 +145,6 @@ module.exports.storeTopicWithPoll = async function (title, content, coverId, pol
             'forum_topic_poll[title]': pollTitle,
             'forum_topic_poll[vote_change]': 1
         },
-        simple: false,
         resolveWithFullResponse: true
     });
 
@@ -321,7 +366,6 @@ module.exports.sendPm = async function (subject, icon, message, to, bcc = []) {
             sid: config.sessionOld
         },
         form: form,
-        simple: false,
         resolveWithFullResponse: true
     });
 
