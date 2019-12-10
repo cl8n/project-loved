@@ -51,8 +51,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
         let mainPost = await Forum.getPostContent(mainPostId);
 
-        const passedBeatmapsets = [];
-        const failedBeatmapsets = [];
+        const beatmapsets = [];
 
         while (true) {
             const topicMatch = mainPost.match(/\[url=https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\]Vote for this map here!/);
@@ -64,15 +63,12 @@ function mapResultsToEmbed(beatmapset, passed) {
             const post = await Forum.getPostContent(postId);
             const pollResult = await Forum.getPollResult(topicMatch[1]);
 
-            const beatmapset = {
+            beatmapsets.push({
+                passed: parseFloat(pollResult.percent) >= parseInt(config.threshold[mode.shortName]),
                 result: pollResult,
-                title: post.split('\n')[2]
-            };
-
-            if (parseFloat(pollResult.percent) >= parseInt(config.threshold[mode.shortName]))
-                passedBeatmapsets.push(beatmapset);
-            else
-                failedBeatmapsets.push(beatmapset);
+                title: post.split('\n')[2],
+                topicId: topicMatch[1]
+            });
 
             Forum.lockTopic(topicMatch[1]);
 
@@ -81,6 +77,16 @@ function mapResultsToEmbed(beatmapset, passed) {
 
             mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
         }
+
+        for (const beatmapset of beatmapsets.splice().reverse()) {
+            const replyContent = beatmapset.passed
+                ? 'This map passed the voting! It will be moved to Loved soon.'
+                : 'This map did not pass the voting.';
+            await Forum.reply(beatmapset.topicId, replyContent);
+        }
+
+        const passedBeatmapsets = beatmapsets.filter(b => b.passed);
+        const failedBeatmapsets = beatmapsets.filter(b => !b.passed);
 
         await Forum.reply(mainTopics[mode.integer], textFromTemplate(resultsPostTemplate, {
             PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
