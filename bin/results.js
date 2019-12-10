@@ -43,8 +43,9 @@ function mapResultsToEmbed(beatmapset, passed) {
     console.log('Posting results');
 
     const mainTopics = await Forum.getModeTopics(120);
+    const mainTopicsReplies = {};
 
-    for (let mode of Gamemode.modes().reverse()) {
+    for (const mode of Gamemode.modes().reverse()) {
         if (mainTopics[mode.integer] === undefined)
             continue;
 
@@ -88,13 +89,12 @@ function mapResultsToEmbed(beatmapset, passed) {
         const passedBeatmapsets = beatmapsets.filter(b => b.passed);
         const failedBeatmapsets = beatmapsets.filter(b => !b.passed);
 
-        await Forum.reply(mainTopics[mode.integer], textFromTemplate(resultsPostTemplate, {
+        mainTopicsReplies[mode.integer] = textFromTemplate(resultsPostTemplate, {
             PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
             FAILED_BEATMAPSETS: failedBeatmapsets.map(b => mapResultsToText(b, false)).join('\n'),
             THRESHOLD: config.threshold[mode.shortName]
-        }));
+        });
 
-        Forum.pinTopic(mainTopics[mode.integer], false);
         Forum.lockTopic(mainTopics[mode.integer]);
 
         if (!keepWatches)
@@ -107,5 +107,10 @@ function mapResultsToEmbed(beatmapset, passed) {
                 passedBeatmapsets.map(b => mapResultsToEmbed(b, true))
                     .concat(failedBeatmapsets.map(b => mapResultsToEmbed(b, false)))
             );
+    }
+
+    for (const mode of Gamemode.modes().reverse()) {
+        await Forum.reply(mainTopics[mode.integer], mainTopicsReplies[mode.integer]);
+        Forum.pinTopic(mainTopics[mode.integer], false);
     }
 })();
