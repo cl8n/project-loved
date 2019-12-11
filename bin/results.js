@@ -79,7 +79,7 @@ function mapResultsToEmbed(beatmapset, passed) {
             mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
         }
 
-        for (const beatmapset of beatmapsets.splice().reverse()) {
+        for (const beatmapset of beatmapsets.slice().reverse()) {
             const replyContent = beatmapset.passed
                 ? 'This map passed the voting! It will be moved to Loved soon.'
                 : 'This map did not pass the voting.';
