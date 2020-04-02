@@ -312,8 +312,6 @@ if (generateImages) {
             '--accurate',
             '--quiet',
             '--strip',
-            '--method',
-            'smallfry',
             storageLocation,
             storageLocation.replace(/.+[\/\\]storage/, path.join(outPath, 'wiki/shared/news'))
           ], error => {
