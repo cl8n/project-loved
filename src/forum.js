@@ -176,12 +176,15 @@ module.exports.updatePost = function (postId, content) {
     });
 }
 
-module.exports.pinTopic = function (topicId, pin = true) {
+module.exports.pinTopic = function (topicId, type = 'pin') {
+    const pin = [false, 'pin', 'announce'].indexOf(type);
+
+    if (pin === -1)
+        throw 'Invalid pin type';
+
     return request({
         uri: `/community/forums/topics/${topicId}/pin`,
-        qs: {
-            pin: pin ? 1 : 0
-        }
+        qs: { pin }
     });
 }
 
