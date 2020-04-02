@@ -432,7 +432,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
       });
 
       const mainTopicId = await Forum.storeTopic(mainPostTitle, mainPostContent);
-      Forum.pinTopic(mainTopicId);
+      Forum.pinTopic(mainTopicId, 'announce');
 
       for (let beatmap of modeBeatmaps) {
         Forum.updatePost(
