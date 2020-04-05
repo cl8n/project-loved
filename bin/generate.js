@@ -213,7 +213,8 @@ function convertToMarkdown(bbcode) {
     .replace(/([^\n]|^)\n([^\n]|$)/g, '$1  \n$2')
 
     .replace(/(\s|^|\[)_/g, '$1\\_')
-    .replace(/_(\s|$|\])/g, '\\_$1');
+    .replace(/_(\s|$|\])/g, '\\_$1')
+    .replace(/(?<!\\)\[(.*?[^\\])\]/g, '\\[$1\\]');
 }
 
 function escapeHtml(text) {
