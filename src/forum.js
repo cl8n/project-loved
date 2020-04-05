@@ -139,7 +139,7 @@ module.exports.storeTopicWithPoll = async function (title, content, coverId, pol
             with_poll: 1,
             cover_id: coverId,
             'forum_topic_poll[hide_results]': 1,
-            'forum_topic_poll[length_days]': 7,
+            'forum_topic_poll[length_days]': 10,
             'forum_topic_poll[max_options]': 1,
             'forum_topic_poll[options]': 'Yes\r\nNo',
             'forum_topic_poll[title]': pollTitle,
