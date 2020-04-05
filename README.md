@@ -7,7 +7,7 @@ This project contains the tools required to generate announcements, forum thread
 
 ## Usage
 
-A typical week in Project Loved involves:
+A typical round of Project Loved involves:
 
 - Messaging mappers of nominated mapsets: `npm run messages`
 - Creating images for a news post: `npm run images`
