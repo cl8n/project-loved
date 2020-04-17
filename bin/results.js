@@ -67,7 +67,7 @@ function mapResultsToEmbed(beatmapset, passed) {
             beatmapsets.push({
                 passed: parseFloat(pollResult.percent) >= parseInt(config.threshold[mode.shortName]),
                 result: pollResult,
-                title: post.split('\n')[2],
+                title: post.split('\r\n')[2],
                 topicId: topicMatch[1]
             });
 
