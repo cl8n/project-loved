@@ -35,6 +35,7 @@ There are two files you can configure:
 | `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
 | `date` | Publishing date of the news post |
 | `discord.<mode>` | Discord webhooks for announcing new maps and results |
+| `month` | Month of the Project Loved round |
 | `osuApiKey` | API key from https://old.ppy.sh/p/api |
 | `resultsPost.<mode>` | Previous round's results forum posts |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
