@@ -104,7 +104,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         if (config.discord[mode.shortName])
             new Discord(config.discord[mode.shortName]).post(
                 `Project Loved: ${mode.longName}`,
-                '@everyone Results from the last round are posted!',
+                '@everyone Results from the last round are posted! The passing maps will be moved to Loved soon.',
                 passedBeatmapsets.map(b => mapResultsToEmbed(b, true))
                     .concat(failedBeatmapsets.map(b => mapResultsToEmbed(b, false)))
             );
