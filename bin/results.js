@@ -63,11 +63,12 @@ function mapResultsToEmbed(beatmapset, passed) {
             const postId = await Forum.findFirstPostId(topicMatch[1]);
             const post = await Forum.getPostContent(postId);
             const pollResult = await Forum.getPollResult(topicMatch[1]);
+            const postLineEnding = post.includes('\r\n') ? '\r\n' : '\n';
 
             beatmapsets.push({
                 passed: parseFloat(pollResult.percent) >= parseInt(config.threshold[mode.shortName]),
                 result: pollResult,
-                title: post.split('\r\n')[2],
+                title: post.split(postLineEnding)[2],
                 topicId: topicMatch[1]
             });
 
