@@ -55,10 +55,7 @@ module.exports.readDocument = function () {
     const intro = file.match(/^Intro$(.+?)^Outro$/ms)[1].trim();
     const outro = file.match(/^Outro$(.+?)^osu!standard$/ms)[1].trim();
 
-    file = file.substring(
-        file.match(/^osu!standard$/m).index,
-        file.match(/^Graveyard$/m).index
-    ).trim();
+    file = file.substring(file.match(/^osu!standard$/m).index).trim();
 
     for (let mode of Gamemode.modes()) {
         file = file.substring(file.indexOf(`${mode.longName}\n`) + mode.longName.length);
