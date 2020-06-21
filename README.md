@@ -43,6 +43,7 @@ There are two files you can configure:
 | `time` | Publishing time of the news post |
 | `title` | Title of the news post |
 | `userAgent` | `User-Agent` header of the browser used to obtain Cloudflare cookies |
+| `username` | Author of the news post |
 | `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
 | `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
 
