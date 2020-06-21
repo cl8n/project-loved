@@ -6,9 +6,12 @@ date: {{DATE}} {{TIME}} +0000
 
 {{HEADER}}
 
-![](/wiki/shared/news/banners/project-loved.jpg)
+![](/wiki/shared/news/banners/project-loved.jpg)<?
+if (vars.INTRO) {
+`
 
-{{INTRO}}<?
+${vars.INTRO}`
+} ?><?
 if (vars.VIDEO.intro) {
 `
 
