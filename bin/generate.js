@@ -496,6 +496,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
     INTRO: document.intro,
     VIDEO: config.videos,
     OUTRO: document.outro,
-    BEATMAPS: beatmapSectionModes.join('\n\n')
+    BEATMAPS: beatmapSectionModes.join('\n\n'),
+    AUTHOR: config.username
   }) + '\n');
 })();

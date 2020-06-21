@@ -30,3 +30,5 @@ if (vars.VIDEO.intro) {
 ---
 
 {{OUTRO}}
+
+—{{AUTHOR}}
