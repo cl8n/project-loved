@@ -214,7 +214,7 @@ function convertToMarkdown(bbcode) {
 
     .replace(/(\s|^|\[)_/g, '$1\\_')
     .replace(/_(\s|$|\])/g, '\\_$1')
-    .replace(/(?<!\\)\[(.*?[^\\])\]/g, '\\[$1\\]');
+    .replace(/(?<!\\)\[(.*?[^\\])\](?!\()/g, '\\[$1\\]');
 }
 
 function escapeHtml(text) {
