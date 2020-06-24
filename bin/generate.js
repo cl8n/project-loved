@@ -136,13 +136,13 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
 
   if (diffs.length > 5) {
     if (nomination.mode.integer === 3)
-      info += keyModes.sort((a, b) => a > b).map(k => `[${k}K]`).join(' ') + ', ';
+      info += keyModes.sort((a, b) => a - b).map(k => `[${k}K]`).join(' ') + ', ';
 
     info += `${minDiff.toFixed(2)}★ – ${maxDiff.toFixed(2)}★`
   } else {
-    diffs = diffs.sort((a, b) => a[1] > b[1]);
+    diffs = diffs.sort((a, b) => a[1] - b[1]);
     if (nomination.mode.integer === 3)
-      diffs = diffs.sort((a, b) => a[0] > b[0]);
+      diffs = diffs.sort((a, b) => a[0] - b[0]);
 
     info += diffs.map(d => (nomination.mode.integer === 3 ? `[${d[0]}K] ` : '') + `${d[1].toFixed(2)}★`).join(', ');
   }
