@@ -1,9 +1,10 @@
-This project contains the tools required to generate announcements, forum threads and related content for osu!'s Project Loved.
+This project contains the tools required to generate announcements, forum threads and related content for osu!'s [Project Loved](https://osu.ppy.sh/help/wiki/Project_Loved).
 
 ## Dependencies
 
 - [Node.js](https://nodejs.org/en/download/)
 - [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive/releases) - Download the jpeg-archive binaries and place jpeg-recompress(.exe) in `bin`.
+- `unzip` and `zipinfo`
 
 ## Usage
 
