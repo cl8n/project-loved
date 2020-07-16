@@ -210,7 +210,7 @@ function convertToMarkdown(bbcode) {
     .replace(/\[url=(.+?)\](.+?)\[\/url\]/gs, '[$2]($1)')
     .replace(/\[quote(?:=".+?")?\](.+?)\[\/quote\]/gs, '> $1')
     .replace(/\[profile\](.+?)\[\/profile\]/g, (match, p1) => '[' + p1 + '](' + getUserLink(p1) + ')')
-    .replace(/([^\n]|^)\n([^\n]|$)/g, '$1  \n$2')
+    .replace(/([^\n]|^)\n([^\n]|$)/g, '$1\\\n$2')
 
     .replace(/(\s|^|\[)_/g, '$1\\_')
     .replace(/_(\s|$|\])/g, '\\_$1')
