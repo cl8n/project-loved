@@ -1,3 +1,5 @@
+const OsuApi = require('./osu-api');
+
 function convertToMarkdown(bbcode) {
     return bbcode.toString()
         .replace(/\\/g, '\\\\')

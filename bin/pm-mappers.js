@@ -4,27 +4,65 @@ const { join } = require('path');
 const OsuApi = require('../src/osu-api');
 const { readDocument } = require('../src/loved-document');
 const { readFileSync } = require('fs');
-const metadataTemplate = readFileSync(join(__dirname, '../resources/metadata-template.bbcode'), 'utf8');
-const { textFromTemplate } = require('../src/helpers');
+const { joinList, textFromTemplate } = require('../src/helpers');
+
+const guestTemplate = readFileSync(join(__dirname, '../resources/pm-guest-template.bbcode'), 'utf8');
+const metadataTemplate = readFileSync(join(__dirname, '../resources/pm-metadata-template.bbcode'), 'utf8');
+const hostTemplate = readFileSync(join(__dirname, '../resources/pm-template.bbcode'), 'utf8');
+
+const metadataPm = process.argv.includes('--metadata', 2);
 
 for (const nomination of Object.values(readDocument().nominations)) {
     const hasMetadataChanges = nomination.metadataEdits !== undefined;
     const apiBeatmap = OsuApi.getBeatmapset(nomination.id)[0];
 
+    if (metadataPm) {
+        if (hasMetadataChanges)
+            Forum.sendPm(
+                config.messages.pmMetadata,
+                'alert',
+                textFromTemplate(metadataTemplate, {
+                    ARTIST: apiBeatmap.artist,
+                    AUTHOR: nomination.metadataMessageAuthor,
+                    BEATMAPSET_ID: nomination.id,
+                    CHANGES: nomination.metadataEdits,
+                    TITLE: apiBeatmap.title,
+                }),
+                [apiBeatmap.creator_id]
+            );
+
+        continue;
+    }
+
+    const guestCreators = nomination.creators.slice(1);
+
     Forum.sendPm(
-        hasMetadataChanges
-            ? config.messages.pmMetadata
-            : config.messages.pmHost,
-        hasMetadataChanges ? 'alert' : 'heart',
-        textFromTemplate(metadataTemplate, {
+        config.messages.pmHost,
+        'heart',
+        textFromTemplate(hostTemplate, {
             ARTIST: apiBeatmap.artist,
             BEATMAPSET_ID: nomination.id,
-            METADATA_AUTHOR: nomination.metadataMessageAuthor,
-            METADATA_CHANGES: nomination.metadataEdits,
+            GUESTS: guestCreators.length === 0 ? null : joinList(guestCreators),
             MONTH: config.month,
+            POLL_START: config.pollStartGuess,
             TITLE: apiBeatmap.title,
-            THRESHOLD: config.threshold[nomination.mode.shortName]
+            THRESHOLD: config.threshold[nomination.mode.shortName],
         }),
         [apiBeatmap.creator_id]
     );
+
+    for (const guest of guestCreators)
+        Forum.sendPm(
+            config.messages.pmGuest,
+            'heart',
+            textFromTemplate(guestTemplate, {
+                ARTIST: apiBeatmap.artist,
+                BEATMAPSET_ID: nomination.id,
+                MONTH: config.month,
+                POLL_START: config.pollStartGuess,
+                TITLE: apiBeatmap.title,
+                THRESHOLD: config.threshold[nomination.mode.shortName],
+            }),
+            [OsuApi.getUser(guest, true).user_id]
+        );
 }

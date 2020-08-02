@@ -13,6 +13,7 @@
     "images": "node bin/generate.js --images",
     "images:unpack": "sh bin/get-images.sh",
     "messages": "node bin/pm-mappers.js --messages",
+    "messages:metadata": "node bin/pm-mappers.js --messages --metadata",
     "news": "node bin/generate.js",
     "news:forum": "node bin/generate.js --threads --slow-requests",
     "open-maps": "node bin/open-maps.js",

@@ -21,6 +21,7 @@
     "imageLoadWait": 3000,
     "month": "January",
     "osuApiKey": "",
+    "pollStartGuess": "next weekend",
     "resultsPost": {
         "osu": "",
         "taiko": "",
