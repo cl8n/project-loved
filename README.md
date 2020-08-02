@@ -11,9 +11,10 @@ This project contains the tools required to generate announcements, forum thread
 A typical round of Project Loved involves:
 
 - Messaging mappers of nominated mapsets: `npm run messages`
-- Creating images for a news post: `npm run images`
-- Creating a news post: `npm run news`
-- Opening forum polls and updating the news post: `npm run news:forum`
+- Messaging mappers for any update requests: `npm run messages:metadata`
+- Creating images for a news post: `npm run images -- <osu-wiki folder>`
+- Creating a news post: `npm run news -- <osu-wiki folder>`
+- Opening forum polls and updating the news post: `npm run news:forum -- <osu-wiki folder>`
 - Posting results when forum polls have concluded: `npm run results`
 
 ### Setup
@@ -36,8 +37,10 @@ There are two files you can configure:
 | `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
 | `date` | Publishing date of the news post |
 | `discord.<mode>` | Discord webhooks for announcing new maps and results |
+| `imageLoadWait` | Milliseconds to wait before chrome screenshots map images, sometimes needed for a slow hard drive |
 | `month` | Month of the Project Loved round |
 | `osuApiKey` | API key from https://old.ppy.sh/p/api |
+| `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
 | `resultsPost.<mode>` | Previous round's results forum posts |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
 | `sessionOld` | https://old.ppy.sh's `phpbb3_2cjk5_sid` cookie |
