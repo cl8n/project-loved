@@ -7,7 +7,6 @@
         "main": "https://docs.google.com/spreadsheets/d/1HgHwtO3kIzT8R4ocEJMZTosADrGJRJOFL-TZI97tZS4/edit",
         "mania": "https://docs.google.com/spreadsheets/d/1sjkTwUSvQ5Me-6rK61rToTg2bU-yX9X29CXdzttvhtM/edit"
     },
-    "imageLoadWait": 3000,
     "threshold": {
         "osu": "85%",
         "taiko": "80%",

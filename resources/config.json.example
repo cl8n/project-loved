@@ -18,6 +18,7 @@
         "catch": "",
         "mania": ""
     },
+    "imageLoadWait": 3000,
     "month": "January",
     "osuApiKey": "",
     "resultsPost": {
