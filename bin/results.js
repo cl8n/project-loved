@@ -4,20 +4,10 @@ const Forum = require('../src/forum');
 const fs = require('fs');
 const Gamemode = require('../src/gamemode');
 const path = require('path');
+const { textFromTemplate } = require('../src/helpers');
 
 const keepWatches = process.argv.includes('--keep-watches', 2);
 const resultsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/results-post-template.bbcode'), 'utf8');
-
-function textFromTemplate(template, vars) {
-    return template
-        .replace(/<\?(.+?)\?>/gs, (_, script) => {
-            let result = eval(script);
-
-            return result === undefined || result === null ? '' : result;
-        })
-        .replace(/{{(.+?)}}/g, (match, key) => vars[key] === undefined ? match : vars[key])
-        .trim();
-}
 
 function mapResultsToText(beatmapset, passed) {
     const color = passed ? '#22DD22' : '#DD2222';

@@ -5,17 +5,7 @@ const OsuApi = require('../src/osu-api');
 const { readDocument } = require('../src/loved-document');
 const { readFileSync } = require('fs');
 const metadataTemplate = readFileSync(join(__dirname, '../resources/metadata-template.bbcode'), 'utf8');
-
-function textFromTemplate(template, vars) {
-    return template
-        .replace(/<\?(.+?)\?>/gs, (_, script) => {
-            let result = eval(script);
-
-            return result === undefined || result === null ? '' : result;
-        })
-        .replace(/{{(.+?)}}/g, (match, key) => vars[key] === undefined ? match : vars[key])
-        .trim();
-}
+const { textFromTemplate } = require('../src/helpers');
 
 for (const nomination of Object.values(readDocument().nominations)) {
     const hasMetadataChanges = nomination.metadataEdits !== undefined;
