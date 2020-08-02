@@ -81,9 +81,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         }
 
         for (const beatmapset of beatmapsets.slice().reverse()) {
-            const replyContent = beatmapset.passed
-                ? 'This map passed the voting! It will be moved to Loved soon.'
-                : 'This map did not pass the voting.';
+            const replyContent = beatmapset.passed ? config.messages.resultsPassed : config.messages.resultsFailed;
             await Forum.reply(beatmapset.topicId, replyContent);
         }
 
@@ -104,7 +102,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         if (config.discord[mode.shortName])
             new Discord(config.discord[mode.shortName]).post(
                 `Project Loved: ${mode.longName}`,
-                '@everyone Results from the last round are posted! The passing maps will be moved to Loved soon.',
+                config.messages.discordResults,
                 passedBeatmapsets.map(b => mapResultsToEmbed(b, true))
                     .concat(failedBeatmapsets.map(b => mapResultsToEmbed(b, false)))
             );

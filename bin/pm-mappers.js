@@ -23,8 +23,8 @@ for (const nomination of Object.values(readDocument().nominations)) {
 
     Forum.sendPm(
         hasMetadataChanges
-            ? 'Project Loved: Changes required on your beatmap'
-            : 'Project Loved: Your map will be up for voting soon!',
+            ? config.messages.pmMetadata
+            : config.messages.pmHost,
         hasMetadataChanges ? 'alert' : 'heart',
         textFromTemplate(metadataTemplate, {
             ARTIST: apiBeatmap.artist,

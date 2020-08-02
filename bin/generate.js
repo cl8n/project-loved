@@ -443,7 +443,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
       if (config.discord[mode.shortName])
         new Discord(config.discord[mode.shortName]).post(
           `Project Loved: ${mode.longName}`,
-          `@everyone Check out the ${discordBeatmaps.length} beatmaps nominated in the latest round!\n\n${discordBeatmaps.reverse().join('\n\n')}`
+          `${textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmaps.length })}\n\n${discordBeatmaps.reverse().join('\n\n')}`
         );
     }
   }
