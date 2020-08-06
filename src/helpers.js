@@ -1,3 +1,5 @@
+const { existsSync, mkdirSync } = require('fs');
+const { dirname } = require('path');
 const OsuApi = require('./osu-api');
 
 function convertToMarkdown(bbcode) {
@@ -56,14 +58,14 @@ function joinList(array) {
 }
 
 function mkdirTreeSync(dir) {
-    if (fs.existsSync(dir))
+    if (existsSync(dir))
         return;
 
     try {
-        fs.mkdirSync(dir);
+        mkdirSync(dir);
     } catch (error) {
         if (error.code === 'ENOENT') {
-            mkdirTreeSync(path.dirname(dir));
+            mkdirTreeSync(dirname(dir));
             mkdirTreeSync(dir);
         } else
             throw error;
