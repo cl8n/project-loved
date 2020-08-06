@@ -71,7 +71,7 @@ module.exports.readDocument = function () {
             let metadataSender;
             let metadataMessage;
 
-            while ((noteMatch = descriptionSplit[1].match(/^(Noffy|Video): /)) !== null) {
+            while ((noteMatch = descriptionSplit[1].match(/^(Noffy|hypercyte|eiri-|Video): /)) !== null) {
                 let substringIndex;
 
                 if (noteMatch[1] === 'Video')
