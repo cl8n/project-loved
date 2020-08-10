@@ -342,8 +342,8 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
       }
 
       const mainPostContent = textFromTemplate(mainThreadTemplate, {
-        GOOGLE_FORM: mode.integer === 3 ? config.googleForm.mania : config.googleForm.main,
-        GOOGLE_SHEET: mode.integer === 3 ? config.googleSheet.mania : config.googleSheet.main,
+        GOOGLE_FORM: config.googleForm[mode.shortName] || config.googleForm.main,
+        GOOGLE_SHEET: config.googleSheet[mode.shortName] || config.googleSheet.main,
         RESULTS_POST: config.resultsPost[mode.shortName],
         THRESHOLD: config.threshold[mode.shortName],
         CAPTAINS: joinList(config.captains[mode.shortName].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
