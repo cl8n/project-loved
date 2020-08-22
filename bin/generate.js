@@ -1,27 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const config = {...require('../resources/info.json'), ...require('../config/config.json')};
-const discordTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/discord-template-beatmap.md'), 'utf8');
-const mainThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/main-thread-template.bbcode'), 'utf8');
-const mainThreadTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/main-thread-template-beatmap.bbcode'), 'utf8');
-const newsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/news-post-template.md'), 'utf8');
-const newsPostTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-beatmap.md'), 'utf8');
-const newsPostTemplateMode = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-mode.md'), 'utf8');
-const votingThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/voting-thread-template.bbcode'), 'utf8');
+const { existsSync, readdirSync, readFileSync, statSync, writeFileSync } = require('fs');
+const { extname, join } = require('path');
+const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
 const BeatmapImage = require('../src/BeatmapImage');
-const LovedDocument = require('../src/loved-document');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
-const OsuApi = require('../src/osu-api');
 const { convertToMarkdown, getUserLink, joinList, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
-
-const generateImages = process.argv.includes('--images', 2);
-const generateThreads = process.argv.includes('--threads', 2);
-
-let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
-if (outPath === undefined)
-  outPath = path.join(__dirname, '../output');
+const LovedDocument = require('../src/loved-document');
+const OsuApi = require('../src/osu-api');
 
 function getExtraBeatmapsetInfo(beatmapset, nomination) {
   let minBpm;
@@ -125,40 +111,59 @@ function osuModernLinks(text) {
     .replace(/https\:\/\/osu.ppy.sh\/forum\/t\//g, 'https://osu.ppy.sh/community/forums/topics/');
 }
 
-mkdirTreeSync(path.join(outPath, 'news'));
+function loadTextResource(basename) {
+  return readFileSync(join(__dirname, '../resources', basename), 'utf8');
+}
+
+const discordTemplateBeatmap = loadTextResource('discord-template-beatmap.md');
+const mainThreadTemplate = loadTextResource('main-thread-template.bbcode');
+const mainThreadTemplateBeatmap = loadTextResource('main-thread-template-beatmap.bbcode');
+const newsPostTemplate = loadTextResource('news-post-template.md');
+const newsPostTemplateBeatmap = loadTextResource('news-post-template-beatmap.md');
+const newsPostTemplateMode = loadTextResource('news-post-template-mode.md');
+const votingThreadTemplate = loadTextResource('voting-thread-template.bbcode');
+
+const generateImages = process.argv.includes('--images', 2);
+const generateThreads = process.argv.includes('--threads', 2);
+
+const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-')) || join(__dirname, '../output');
+
+mkdirTreeSync(join(outPath, 'news'));
 
 const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
 const document = LovedDocument.readDocument();
-const beatmaps = document.nominations;
 
 const images =
-  fs
-    .readdirSync(path.join(__dirname, '../config'))
+  readdirSync(join(__dirname, '../config'))
     .filter(
       f =>
-        fs.statSync(path.join(__dirname, '../config', f)).isFile() &&
-        path.extname(f).match(/png|jpg|jpeg/i) !== null
+        statSync(join(__dirname, '../config', f)).isFile() &&
+        extname(f).match(/png|jpg|jpeg/i) !== null
     );
+
+const threadIds = existsSync(join(__dirname, '../storage/thread-ids.json'))
+  ? require('../storage/thread-ids.json')
+  : {};
 
 if (generateImages) {
   console.log('Generating images');
 
-  const imagesDirname = path.join(outPath, `wiki/shared/news/${newsFolder}`);
+  const imagesDirname = join(outPath, `wiki/shared/news/${newsFolder}`);
 
   for (const mode of Gamemode.modes())
-    mkdirTreeSync(path.join(imagesDirname, mode.shortName));
+    mkdirTreeSync(join(imagesDirname, mode.shortName));
 
   for (const imageBasename of images) {
     const id = parseInt(imageBasename.split('.')[0]);
-    const beatmap = beatmaps[id];
+    const beatmap = document.nominations[id];
 
     if (beatmap === undefined) {
       console.error(`No nomination corresponding to ${imageBasename}`);
       return;
     }
 
-    const imageFilename = path.join(__dirname, '../config', imageBasename);
-    const outputFilename = path.join(imagesDirname, `${beatmap.mode.shortName}/${beatmap.imageBasename}`);
+    const imageFilename = join(__dirname, '../config', imageBasename);
+    const outputFilename = join(imagesDirname, `${beatmap.mode.shortName}/${beatmap.imageBasename}`);
     const beatmapImage = new BeatmapImage(beatmap, imageFilename);
 
     beatmapImage.createBanner(outputFilename)
@@ -169,16 +174,12 @@ if (generateImages) {
   }
 }
 
-const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json'))
-  ? require('../storage/thread-ids.json')
-  : {};
-
 (async function () {
   if (generateThreads) {
     console.log('Posting threads');
 
     for (let mode of Gamemode.modes().reverse()) {
-      const modeBeatmaps = Object.values(beatmaps)
+      const modeBeatmaps = Object.values(document.nominations)
         .filter(bm => bm.mode.integer === mode.integer)
         .sort((a, b) => a.position - b.position)
         .reverse();
@@ -210,7 +211,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
         const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
 
         let coverFile = images.find(f => parseInt(f.split('.')[0]) === beatmap.id);
-        coverFile = path.join(__dirname, `../config/${coverFile}`);
+        coverFile = join(__dirname, `../config/${coverFile}`);
 
         let topicId;
         if (threadIds[beatmap.id] === undefined) {
@@ -218,7 +219,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
           topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
 
           threadIds[beatmap.id] = topicId;
-          fs.writeFileSync(path.join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
+          writeFileSync(join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
         } else
           topicId = threadIds[beatmap.id];
 
@@ -280,7 +281,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
   Gamemode.modes().forEach(function (mode) {
     const postBeatmaps = [];
 
-    const modeBeatmaps = Object.values(beatmaps)
+    const modeBeatmaps = Object.values(document.nominations)
       .filter(bm => bm.mode.integer === mode.integer)
       .sort((a, b) => a.position - b.position);
 
@@ -313,7 +314,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
     }));
   });
 
-  fs.writeFileSync(path.join(outPath, `news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
+  writeFileSync(join(outPath, `news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
     TITLE: config.title,
     DATE: config.date,
     TIME: config.time,
