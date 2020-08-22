@@ -116,7 +116,7 @@ module.exports = class {
         this._title = title.trim();
     }
 
-    imageFilename() {
+    get imageBasename() {
         return `${this.position}-${this.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^\-|\-$/g, '')}.jpg`;
     }
 }

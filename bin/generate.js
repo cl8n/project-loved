@@ -1,7 +1,5 @@
-const {exec, execFile} = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const puppeteer = require('puppeteer');
 const config = {...require('../resources/info.json'), ...require('../config/config.json')};
 const discordTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/discord-template-beatmap.md'), 'utf8');
 const mainThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/main-thread-template.bbcode'), 'utf8');
@@ -10,12 +8,13 @@ const newsPostTemplate = fs.readFileSync(path.join(__dirname, '../resources/news
 const newsPostTemplateBeatmap = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-beatmap.md'), 'utf8');
 const newsPostTemplateMode = fs.readFileSync(path.join(__dirname, '../resources/news-post-template-mode.md'), 'utf8');
 const votingThreadTemplate = fs.readFileSync(path.join(__dirname, '../resources/voting-thread-template.bbcode'), 'utf8');
+const BeatmapImage = require('../src/BeatmapImage');
 const LovedDocument = require('../src/loved-document');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
 const OsuApi = require('../src/osu-api');
-const { convertToMarkdown, escapeHtml, getUserLink, joinList, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, getUserLink, joinList, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 
 const generateImages = process.argv.includes('--images', 2);
 const generateThreads = process.argv.includes('--threads', 2);
@@ -23,59 +22,6 @@ const generateThreads = process.argv.includes('--threads', 2);
 let outPath = process.argv.slice(2).find(a => !a.startsWith('-'));
 if (outPath === undefined)
   outPath = path.join(__dirname, '../output');
-
-let jpegRecompress =
-  fs
-    .readdirSync(__dirname)
-    .find(
-      f =>
-        fs.statSync(path.join(__dirname, f)).isFile() &&
-        f.includes('jpeg-recompress')
-    );
-
-if (generateImages)
-  if (jpegRecompress === undefined) {
-    console.error('jpeg-recompress must be in bin/ to generate images');
-    process.exit(1);
-  } else
-    jpegRecompress = path.join(__dirname, jpegRecompress);
-
-async function generateImage(
-  browser,
-  backgroundImage,
-  title,
-  artist,
-  creators,
-  outputImage
-) {
-  const page = await browser.newPage();
-
-  await page.setViewport({
-    width: 920,
-    height: 300
-  });
-  await page.goto(`file://${path.join(__dirname, '../resources/image-template/index.html').replace(/\\/g, '/')}`);
-
-  await Promise.all([
-    page.$eval('img', (el, img) => el.style.backgroundImage = `url('${img}')`, backgroundImage),
-    page.$eval('#title', (el, title) => el.innerHTML = title, escapeHtml(title)),
-    page.$eval('#artist', (el, artist) => el.innerHTML = artist, escapeHtml(artist)),
-    page.$eval('#creator', (el, creatorsList) => el.innerHTML = `mapped by ${creatorsList}`, joinList(creators.map((name) => `<b>${name}</b>`)))
-  ]);
-
-  await new Promise(resolve => {
-    setTimeout(async () => {
-      await page.screenshot({
-        path: outputImage,
-        quality: 100
-      });
-
-      await page.close();
-
-      resolve();
-    }, config.imageLoadWait);
-  });
-}
 
 function getExtraBeatmapsetInfo(beatmapset, nomination) {
   let minBpm;
@@ -197,71 +143,30 @@ const images =
 if (generateImages) {
   console.log('Generating images');
 
-  Gamemode.modes().forEach(function (mode) {
-    mkdirTreeSync(path.join(__dirname, `../storage/${newsFolder}/${mode.shortName}`));
-    mkdirTreeSync(path.join(outPath, `wiki/shared/news/${newsFolder}/${mode.shortName}`));
-  });
+  const imagesDirname = path.join(outPath, `wiki/shared/news/${newsFolder}`);
 
-  (async function () {
-    const browser = await puppeteer.launch();
-    const imagePromises = [];
+  for (const mode of Gamemode.modes())
+    mkdirTreeSync(path.join(imagesDirname, mode.shortName));
 
-    images.forEach(function (image) {
-      const id = parseInt(image.split('.')[0]);
-      const beatmap = beatmaps[id];
+  for (const imageBasename of images) {
+    const id = parseInt(imageBasename.split('.')[0]);
+    const beatmap = beatmaps[id];
 
-      if (beatmap === undefined) {
-        console.log(`Could not find beatmapset with ID ${id}; skipping`);
-        return;
-      }
+    if (beatmap === undefined) {
+      console.error(`No nomination corresponding to ${imageBasename}`);
+      return;
+    }
 
-      const storageLocation = path.join(__dirname, `../storage/${newsFolder}/${beatmap.mode.shortName}/${beatmap.imageFilename()}`);
+    const imageFilename = path.join(__dirname, '../config', imageBasename);
+    const outputFilename = path.join(imagesDirname, `${beatmap.mode.shortName}/${beatmap.imageBasename}`);
+    const beatmapImage = new BeatmapImage(beatmap, imageFilename);
 
-      const promise = generateImage(
-        browser,
-        `file://${path.join(__dirname, `../config/${image}`).replace(/\\/g, '/')}`,
-        beatmap.title,
-        beatmap.artist,
-        beatmap.creators,
-        storageLocation
-      );
-
-      promise.then(
-        () => {
-          console.log(`Generated ${beatmap.imageFilename()}`);
-          execFile(jpegRecompress, [
-            '--accurate',
-            '--quiet',
-            '--strip',
-            storageLocation,
-            storageLocation.replace(/.+[\/\\]storage/, path.join(outPath, 'wiki/shared/news'))
-          ], error => {
-            if (error) {
-              console.error(`Failed to minimize ${beatmap.imageFilename()}. Copied uncompressed image to output folder`);
-              console.error(error);
-            } else
-              console.log(`Minimized ${beatmap.imageFilename()}`);
-          });
-        },
-        () => console.error(`Failed to generate ${beatmap.imageFilename()}`)
-      );
-
-      imagePromises.push(promise);
-    });
-
-    const afterAllImages = () => {
-      browser.close();
-      exec(`rm -rf storage/${newsFolder}`);
-    };
-
-    // Each promise is mapped to catch and return errors so that Promise.all()
-    // does not resolve until all of the promises are resolved, regardless of
-    // if any fail. This is important because we don't want the browser to close
-    // while new pages are still being opened.
-    Promise
-      .all(imagePromises.map(p => p.catch(e => e)))
-      .then(afterAllImages, afterAllImages);
-  })();
+    beatmapImage.createBanner(outputFilename)
+      .catch((reason) => {
+        console.error(`Failed to create banner image for ${beatmap.title} (#${beatmap.id}):`);
+        console.error(reason);
+      });
+  }
 }
 
 const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json'))
@@ -385,7 +290,7 @@ const threadIds = fs.existsSync(path.join(__dirname, '../storage/thread-ids.json
         FOLDER: newsFolder,
         MODE: mode.shortName,
         LINK_MODE: mode.linkName,
-        IMAGE: beatmap.imageFilename(),
+        IMAGE: beatmap.imageBasename,
         TOPIC_ID: threadIds[beatmap.id],
         BEATMAP: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
         BEATMAP_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
