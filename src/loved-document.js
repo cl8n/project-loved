@@ -93,9 +93,9 @@ module.exports.readDocument = function () {
 
             const infoSplit = descriptionSplit[0].split('\t');
 
-            if (infoSplit[1] === undefined)
+            if (infoSplit.length < 4 || infoSplit.length > 5)
                 logError(
-                    'Description did not match the expected format (info line contains no tabs)',
+                    `Invalid description info line format. Expected 3 or 4 tabs, got ${infoSplit.length - 1}`,
                     `Contents of descriptionSplit[0]:\n${descriptionSplit[0]}\n\nContents of description:\n${description}`
                 );
 
