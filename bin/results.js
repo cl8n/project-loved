@@ -1,3 +1,4 @@
+require('colors');
 const config = {...require('../resources/info.json'), ...require('../config/config.json')};
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
@@ -30,7 +31,7 @@ function mapResultsToEmbed(beatmapset, passed) {
 }
 
 (async function () {
-    console.log('Posting results');
+    console.log('Posting results'.green);
 
     const mainTopics = await Forum.getModeTopics(120);
     const mainTopicsReplies = {};
