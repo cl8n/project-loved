@@ -1,4 +1,4 @@
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 const { execFile } = require('child_process');
 const { readdir } = require('fs').promises;
 const { join } = require('path');
@@ -8,6 +8,8 @@ const bannerHeight = 200;
 const binDir = join(__dirname, '../bin');
 let jpegRecompressFilename;
 let overlayImage;
+
+registerFont(join(__dirname, '../resources/Torus-SemiBold.otf'), { family: 'Torus' });
 
 async function getJpegRecompressFilename() {
     if (jpegRecompressFilename === undefined) {
@@ -65,6 +67,14 @@ module.exports = class {
         context.quality = 'best';
         context.drawImage(...drawImageCoverParams(beatmapImage, bannerWidth, bannerHeight));
         context.drawImage(overlayImage, 0, 0);
+        context.fillStyle = '#fff';
+        context.font = '21px Torus';
+        context.shadowBlur = 2;
+        context.shadowColor = '#0007';
+        context.shadowOffsetY = 1;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(this.beatmap.title, bannerWidth / 2, bannerHeight - 26);
 
         const jpegStream = canvas.createJPEGStream({ chromaSubsampling: false, quality: 1 });
         const jpegRecompressFilename = await getJpegRecompressFilename();
