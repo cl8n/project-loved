@@ -63,11 +63,36 @@ module.exports.readDocument = function () {
         let data = (mode.integer === 3 ? file : file.substring(0, file.indexOf(`\n${new Gamemode(mode.integer + 1).longName}`))).trim();
 
         for (let position = 1; data.length > 0; position++) {
-            const split = data.splitWithLeftOver('\n\n', 2);
-            data = split.length === 2 ? split[1].trim() : '';
+            const descriptionsMatch = [...data.matchAll(/^\d+\t/gm)];
+            let description = '';
 
-            const description = split[0];
+            if (descriptionsMatch.length === 0)
+                logError(
+                    'Invalid document format. Make sure each map starts with a beatmapset ID, then a tab',
+                    `Occurred in ${mode.longName} portion of the document`
+                );
+
+            if (descriptionsMatch.length === 1) {
+                description = data.trim();
+                data = '';
+            } else {
+                description = data.substring(0, descriptionsMatch[1].index).trim();
+                data = data.substring(descriptionsMatch[1].index);
+            }
+
             const descriptionSplit = description.splitWithLeftOver('\n', 2);
+
+            if (descriptionSplit.length !== 2)
+                logError(
+                    'Invalid description format. Expected at least 1 newline, got 0',
+                    `Contents of descriptionSplit[0]:\n${descriptionSplit[0]}`
+                );
+
+            if (descriptionSplit[1].includes('\n\n'))
+                logError(
+                    'Invalid description format. Descriptions cannot contain double newlines',
+                    `Contents of description:\n${description}`
+                );
 
             let metadataSender;
             let metadataMessage;
