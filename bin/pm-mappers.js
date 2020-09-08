@@ -34,7 +34,10 @@ for (const nomination of Object.values(readDocument().nominations)) {
         continue;
     }
 
-    const guestCreators = nomination.creators.slice(1);
+    let guestCreators = nomination.creators.slice(1);
+
+    if (guestCreators.length === 1 && guestCreators[0] === 'et al.')
+        guestCreators = [];
 
     Forum.sendPm(
         config.messages.pmHost,
