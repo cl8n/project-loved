@@ -160,7 +160,7 @@ if (generateImages) {
 
     if (beatmap === undefined) {
       console.error(`No nomination corresponding to ${imageBasename}`.yellow);
-      return;
+      continue;
     }
 
     const imageFilename = join(__dirname, '../config', imageBasename);
