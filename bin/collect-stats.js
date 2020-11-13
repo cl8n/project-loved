@@ -9,8 +9,8 @@ const POLL_DATA = [
     {
         beatmapset: 339222,
         yes_count: 504,
-        no_count: 127
-    }
+        no_count: 127,
+    },
 ];
 
 (async function () {
@@ -39,13 +39,13 @@ const POLL_DATA = [
         const pollMatch = POLL_DATA.find(p => p.beatmapset === beatmapset);
         const voteCounts = [];
 
-        if (pollMatch === undefined)
+        if (pollMatch === undefined) {
             for (let i = 0; i < 2; i++) {
                 const match = topic.match(/<td class="forum-poll-row__column">\n\s*(\d+)\n\s*<\/td>/);
                 voteCounts.push(parseInt(match[1]));
                 topic = topic.substring(match.index + match[0].length);
             }
-        else {
+        } else {
             voteCounts[0] = pollMatch.yes_count;
             voteCounts[1] = pollMatch.no_count;
         }
@@ -56,7 +56,7 @@ const POLL_DATA = [
             yes_count: voteCounts[0],
             no_count: voteCounts[1],
             mode: mode.integer,
-            poll_end: topic.match(/Polling ended (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/)[1]
+            poll_end: topic.match(/Polling ended (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/)[1],
         });
     }
 
