@@ -110,24 +110,24 @@ function cacheTopic(id, content) {
     }
 
     let tsv = [
+        'Poll end time',
+        'Game mode',
         'Beatmapset ID',
         'Topic ID',
-        'Topic title',
         'Yes',
         'No',
-        'Game mode',
-        'Poll end time',
+        'Topic title',
     ].join('\t') + '\n';
 
     for (const poll of polls) {
         tsv += [
+            poll.poll_end,
+            poll.mode,
             poll.beatmapset,
             poll.topic,
-            poll.topic_title,
             poll.yes_count,
             poll.no_count,
-            poll.mode,
-            poll.poll_end,
+            poll.topic_title,
         ].join('\t') + '\n';
     }
 
