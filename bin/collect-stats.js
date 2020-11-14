@@ -38,7 +38,7 @@ function cacheTopic(id, content) {
             topicFresh = true;
         }
 
-        const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title.+?>\s*(.*?)\s*<\/h1>/);
+        const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title[^>]+?>\s*(.*?)\s*<\/h1>/);
 
         if (titleMatch === null) {
             console.error(`Topic #${topicId} exploded`.red);
@@ -82,8 +82,8 @@ function cacheTopic(id, content) {
 
         if (pollMatch === undefined) {
             for (let i = 0; i < 2; i++) {
-                const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*(\d+)\s*<\/div>/);
-                voteCounts.push(parseInt(match[1]));
+                const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*([\d,]+)\s*<\/div>/);
+                voteCounts.push(parseInt(match[1].replace(/,/g, '')));
                 topic = topic.substring(match.index + match[0].length);
             }
         } else {
@@ -91,7 +91,7 @@ function cacheTopic(id, content) {
             voteCounts[1] = pollMatch.no_count;
         }
 
-        const endTimeMatch = topic.match(/<time.+?datetime='(.+?)'/);
+        const endTimeMatch = topic.match(/Polling ended\s+<time[^>]+?datetime='(.+?)'/);
 
         if (endTimeMatch === null) {
             console.error(`Couldn't find poll end time for topic "${title}" (#${topicId})`.red);
