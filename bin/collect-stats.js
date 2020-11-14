@@ -1,9 +1,10 @@
+require('colors');
 const fs = require('fs');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
 const path = require('path');
 
-const POLL_DATA = [
+const pollData = [
     // This poll's online stats are misleading due to a brigade done by banned
     // accounts. peppy decided that this is the most accurate result instead.
     {
@@ -12,36 +13,66 @@ const POLL_DATA = [
         no_count: 127,
     },
 ];
+const topicsCachePath = path.join(__dirname, '../storage/topics-cache.json');
+const topicsCache = fs.existsSync(topicsCachePath)
+    ? JSON.parse(fs.readFileSync(topicsCachePath, 'utf8'))
+    : {};
+
+function cacheTopic(id, content) {
+    topicsCache[id] = content;
+    fs.writeFileSync(topicsCachePath, JSON.stringify(topicsCache));
+}
 
 (async function () {
     const topics = await Forum.getTopics(120);
     const polls = [];
 
     for (let topicId of topics) {
-        let topic = await Forum.getTopic(topicId);
+        let topic = topicsCache[topicId];
+
+        if (topic === undefined) {
+            console.log(`Fetching topic #${topicId}`);
+            topic = await Forum.getTopic(topicId);
+        }
+
+        const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title.+?>\s*(.*?)\s*<\/h1>/);
+
+        if (titleMatch === null) {
+            console.error(`Topic #${topicId} exploded`.red);
+            continue;
+        }
+
+        cacheTopic(topicId, topic);
+        const title = titleMatch[1];
 
         // Sanity check to make sure we're viewing a completed poll
-        if (topic.indexOf('Polling ended ') === -1)
+        if (topic.indexOf('Polling ended ') === -1) {
+            console.log(`Skipping non-poll topic "${title}" (#${topicId})`.yellow);
             continue;
+        }
 
-        const titleGameModeMatch = topic.match(/js-forum-topic-title--title">\n\s*\[([a-z!]+)\]/);
+        const gameModeMatch = title.match(/^\[([a-z!]+)\]/);
 
-        if (titleGameModeMatch === null)
+        if (gameModeMatch === null) {
+            console.error(`Couldn't find game mode for topic "${title}" (#${topicId})`.red);
             continue;
+        }
 
-        topic = topic.substring(titleGameModeMatch.index + titleGameModeMatch[0].length);
+        const mode = new Gamemode(gameModeMatch[1]);
+        topic = topic.substring(gameModeMatch.index + gameModeMatch[0].length);
 
-        if (topic.match(/<tr class="forum-poll-row /g).length !== 2)
+        if (topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">/g).length !== 2) {
+            console.log(`Skipping poll with more than 2 options "${title}" (#${topicId})`.yellow)
             continue;
+        }
 
         const beatmapset = parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1]);
-        const mode = new Gamemode(titleGameModeMatch[1]);
-        const pollMatch = POLL_DATA.find(p => p.beatmapset === beatmapset);
+        const pollMatch = pollData.find(p => p.beatmapset === beatmapset);
         const voteCounts = [];
 
         if (pollMatch === undefined) {
             for (let i = 0; i < 2; i++) {
-                const match = topic.match(/<td class="forum-poll-row__column">\n\s*(\d+)\n\s*<\/td>/);
+                const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*(\d+)\s*<\/div>/);
                 voteCounts.push(parseInt(match[1]));
                 topic = topic.substring(match.index + match[0].length);
             }
@@ -50,13 +81,20 @@ const POLL_DATA = [
             voteCounts[1] = pollMatch.no_count;
         }
 
+        const endTimeMatch = topic.match(/<time.+?datetime='(.+?)'/);
+
+        if (endTimeMatch === null) {
+            console.error(`Couldn't find poll end time for topic "${title}" (#${topicId})`.red);
+            continue;
+        }
+
         polls.push({
             beatmapset: beatmapset,
             topic: parseInt(topicId),
             yes_count: voteCounts[0],
             no_count: voteCounts[1],
             mode: mode.integer,
-            poll_end: topic.match(/Polling ended (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/)[1],
+            poll_end: endTimeMatch[1],
         });
     }
 
