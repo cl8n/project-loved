@@ -29,10 +29,12 @@ function cacheTopic(id, content) {
 
     for (let topicId of topics) {
         let topic = topicsCache[topicId];
+        let topicFresh = false;
 
         if (topic === undefined) {
             console.log(`Fetching topic #${topicId}`);
             topic = await Forum.getTopic(topicId);
+            topicFresh = true;
         }
 
         const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title.+?>\s*(.*?)\s*<\/h1>/);
@@ -42,7 +44,9 @@ function cacheTopic(id, content) {
             continue;
         }
 
-        cacheTopic(topicId, topic);
+        if (topicFresh)
+            cacheTopic(topicId, topic);
+
         const title = titleMatch[1];
 
         // Sanity check to make sure we're viewing a completed poll
