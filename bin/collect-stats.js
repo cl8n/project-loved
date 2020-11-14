@@ -109,7 +109,11 @@ function cacheTopic(id, content) {
         });
     }
 
+    const sortedPolls = polls.sort((a, b) => a.poll_end.localeCompare(b.poll_end));
+    let lastDate = Date.parse(sortedPolls[0].poll_end);
+    let round = 1;
     let tsv = [
+        'Round',
         'Poll end time',
         'Game mode',
         'Beatmapset ID',
@@ -119,8 +123,15 @@ function cacheTopic(id, content) {
         'Topic title',
     ].join('\t') + '\n';
 
-    for (const poll of polls) {
+    for (const poll of sortedPolls) {
+        const date = Date.parse(poll.poll_end);
+
+        if (date - lastDate > 86400000) // 1 day
+            round++;
+
+        lastDate = date;
         tsv += [
+            round,
             poll.poll_end,
             poll.mode,
             poll.beatmapset,
