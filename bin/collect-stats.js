@@ -17,6 +17,7 @@ const topicsCachePath = path.join(__dirname, '../storage/topics-cache.json');
 const topicsCache = fs.existsSync(topicsCachePath)
     ? JSON.parse(fs.readFileSync(topicsCachePath, 'utf8'))
     : {};
+const useCacheOnly = process.argv.includes('--cache-only', 2);
 
 function cacheTopic(id, content) {
     topicsCache[id] = content;
@@ -24,7 +25,7 @@ function cacheTopic(id, content) {
 }
 
 (async function () {
-    const topics = await Forum.getTopics(120);
+    const topics = useCacheOnly ? Object.keys(topicsCache) : await Forum.getTopics(120);
     const polls = [];
 
     for (let topicId of topics) {
