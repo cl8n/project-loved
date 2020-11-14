@@ -95,6 +95,7 @@ function cacheTopic(id, content) {
         polls.push({
             beatmapset: beatmapset,
             topic: parseInt(topicId),
+            topic_title: title,
             yes_count: voteCounts[0],
             no_count: voteCounts[1],
             mode: mode.integer,
@@ -102,8 +103,30 @@ function cacheTopic(id, content) {
         });
     }
 
+    let tsv = [
+        'Beatmapset ID',
+        'Topic ID',
+        'Topic title',
+        'Yes',
+        'No',
+        'Game mode',
+        'Poll end time',
+    ].join('\t') + '\n';
+
+    for (const poll of polls) {
+        tsv += [
+            poll.beatmapset,
+            poll.topic,
+            poll.topic_title,
+            poll.yes_count,
+            poll.no_count,
+            poll.mode,
+            poll.poll_end,
+        ].join('\t') + '\n';
+    }
+
     if (!fs.existsSync(path.join(__dirname, '../output')))
         fs.mkdirSync(path.join(__dirname, '../output'));
 
-    fs.writeFileSync(path.join(__dirname, '../output/poll-info.json'), JSON.stringify(polls));
+    fs.writeFileSync(path.join(__dirname, '../output/poll-stats.tsv'), tsv);
 })();
