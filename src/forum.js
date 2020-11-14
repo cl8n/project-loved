@@ -82,14 +82,14 @@ let requestCounter = 0;
 const requestUnlogged = limiter.wrap(requestWrapped);
 const request = async function (...args) {
     const n = ++requestCounter;
-    console.log(`Making request #${n} to ${args[0].uri}`.green);
+    console.log(`Making request #${n} to ${args[0].uri}`.dim);
 
     try {
         const response = await requestUnlogged(...args);
-        console.log(`Request #${n} to ${args[0].uri} finished`.green);
+        console.log(`Request #${n} to ${args[0].uri} finished`.dim);
         return response;
     } catch (error) {
-        console.error(`Request #${n} to ${args[0].uri} failed: ${error}`.red);
+        console.error(`Request #${n} to ${args[0].uri} failed: ${error}`.red.dim);
         throw error;
     }
 }
