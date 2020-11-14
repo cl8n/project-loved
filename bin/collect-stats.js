@@ -49,6 +49,11 @@ function cacheTopic(id, content) {
 
         const title = titleMatch[1];
 
+        if (topic.match(/js-forum-post--hidden[^>]+?data-post-position="0"/) !== null) {
+            console.log(`Skipping deleted topic "${title}" (#${topicId})`.yellow);
+            continue;
+        }
+
         // Sanity check to make sure we're viewing a completed poll
         if (topic.indexOf('Polling ended ') === -1) {
             console.log(`Skipping non-poll topic "${title}" (#${topicId})`.yellow);
