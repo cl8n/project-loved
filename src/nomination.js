@@ -1,5 +1,18 @@
 const Gamemode = require('./gamemode');
 
+function creatorModeIndicator(creator) {
+    const match = creator.match(/<(\S+) pick>/);
+
+    if (match == null)
+        return null;
+
+    try {
+        return new Gamemode(match[1]);
+    } catch {
+        return null;
+    }
+}
+
 module.exports = class {
     constructor(properties) {
         Object.assign(this, properties);
@@ -32,6 +45,13 @@ module.exports = class {
             this._creators = creators.split(',').map(c => c.trim());
         else
             throw new TypeError('The provided list of creators is neither an Array nor a String');
+
+        const cMI = creatorModeIndicator(this._creators[0]);
+
+        if (cMI != null) {
+            this.hostMode = cMI;
+            this._creators = this._creators.slice(1);
+        }
     }
 
     get description() {
