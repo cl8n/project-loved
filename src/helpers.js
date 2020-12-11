@@ -33,6 +33,17 @@ function escapeHtml(text) {
         .replace(/'/g, '&#039;');
 }
 
+function getExcludedDiffNames(beatmapset, nomination) {
+    const excludedDiffNames = [];
+
+    beatmapset.forEach((beatmap) => {
+        if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id)))
+            excludedDiffNames.push(`[${beatmap.version}]`);
+    });
+
+    return excludedDiffNames;
+}
+
 function getUserLink(name) {
     const user = OsuApi.getUser(name, true);
 
@@ -86,6 +97,7 @@ function textFromTemplate(template, vars) {
 module.exports = {
     convertToMarkdown,
     escapeHtml,
+    getExcludedDiffNames,
     getUserLink,
     joinList,
     mkdirTreeSync,

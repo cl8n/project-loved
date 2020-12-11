@@ -1,6 +1,11 @@
 Hi! Your map of [url=https://osu.ppy.sh/beatmapsets/{{BEATMAPSET_ID}}]{{ARTIST}} - {{TITLE}}[/url] is going to be up for voting in {{MONTH}}'s round of [url=https://osu.ppy.sh/community/forums/120]Project Loved[/url]. A poll will be opened around {{POLL_START}} to see if the community wants your map Loved. If your map receives over {{THRESHOLD}} "Yes" votes by the time polls end, it can be moved to the Loved category!
 
-Please let me know if your mapset has any guest mappers, so I can message them and credit them properly too.<?
+<?
+
+if (vars.EXCLUDED_DIFFS)
+    `The {{EXCLUDED_DIFFS}} ${excludedDiffNames.length > 1 ? 'difficulties' : 'difficulty'} will be left unranked regardless of the voting.\n\n`
+
+?>Please let me know if your mapset has any guest mappers, so I can message them and credit them properly too.<?
 
 if (vars.GUESTS)
     ` I already have {{GUESTS}} written down for this map.`

@@ -4,7 +4,7 @@ const { join } = require('path');
 const OsuApi = require('../src/osu-api');
 const { readDocument } = require('../src/loved-document');
 const { readFileSync } = require('fs');
-const { joinList, textFromTemplate } = require('../src/helpers');
+const { joinList, getExcludedDiffNames, textFromTemplate } = require('../src/helpers');
 
 const guestTemplate = readFileSync(join(__dirname, '../resources/pm-guest-template.bbcode'), 'utf8');
 const metadataTemplate = readFileSync(join(__dirname, '../resources/pm-metadata-template.bbcode'), 'utf8');
@@ -14,7 +14,8 @@ const metadataPm = process.argv.includes('--metadata', 2);
 
 for (const nomination of Object.values(readDocument().nominations)) {
     const hasMetadataChanges = nomination.metadataEdits !== undefined;
-    const apiBeatmap = OsuApi.getBeatmapset(nomination.id)[0];
+    const apiBeatmapset = OsuApi.getBeatmapset(nomination.id);
+    const apiBeatmap = apiBeatmapset[0];
 
     if (metadataPm) {
         if (hasMetadataChanges)
@@ -34,6 +35,7 @@ for (const nomination of Object.values(readDocument().nominations)) {
         continue;
     }
 
+    const excludedDiffNames = getExcludedDiffNames(apiBeatmapset, nomination);
     let guestCreators = nomination.creators.slice(1);
 
     if (guestCreators.length === 1 && guestCreators[0] === 'et al.')
@@ -45,6 +47,7 @@ for (const nomination of Object.values(readDocument().nominations)) {
         textFromTemplate(hostTemplate, {
             ARTIST: apiBeatmap.artist,
             BEATMAPSET_ID: nomination.id,
+            EXCLUDED_DIFFS: excludedDiffNames.length === 0 ? null : joinList(excludedDiffNames),
             GUESTS: guestCreators.length === 0 ? null : joinList(guestCreators),
             MONTH: config.month,
             POLL_START: config.pollStartGuess,
