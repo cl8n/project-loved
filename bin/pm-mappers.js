@@ -54,7 +54,12 @@ for (const nomination of Object.values(readDocument().nominations)) {
         [apiBeatmap.creator_id]
     );
 
-    for (const guest of guestCreators)
+    for (const guest of guestCreators) {
+        const user = OsuApi.getUser(guest, true);
+
+        if (user.banned)
+            continue;
+
         Forum.sendPm(
             config.messages.pmGuest,
             'heart',
@@ -66,6 +71,7 @@ for (const nomination of Object.values(readDocument().nominations)) {
                 TITLE: apiBeatmap.title,
                 THRESHOLD: config.threshold[nomination.mode.shortName],
             }),
-            [OsuApi.getUser(guest, true).user_id]
+            [user.user_id]
         );
+    }
 }
