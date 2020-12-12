@@ -88,6 +88,12 @@ module.exports = class {
             throw new TypeError('The provided ID is not an integer');
     }
 
+    get indexer() {
+        return this.hostMode == null
+            ? this.id
+            : `${this.id}-${this.mode.shortName}`;
+    }
+
     get metadataEdits() {
         return this._metadataEdits;
     }

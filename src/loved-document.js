@@ -152,6 +152,14 @@ module.exports.readDocument = function () {
         }
     }
 
+    for (const nomination of otherModeNominations) {
+        const original = beatmaps[nomination.id];
+
+        nomination.artist = original.artist;
+        nomination.excludedBeatmaps = original.excludedBeatmaps;
+        nomination.title = original.title;
+    }
+
     return {
         header,
         intro,

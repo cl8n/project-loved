@@ -179,7 +179,7 @@ if (generateImages) {
     console.log('Posting threads'.green);
 
     for (let mode of Gamemode.modes().reverse()) {
-      const modeBeatmaps = Object.values(document.nominations)
+      const modeBeatmaps = [...Object.values(document.nominations), ...document.otherModeNominations]
         .filter(bm => bm.mode.integer === mode.integer)
         .sort((a, b) => a.position - b.position)
         .reverse();
@@ -214,14 +214,14 @@ if (generateImages) {
         coverFile = join(__dirname, `../config/${coverFile}`);
 
         let topicId;
-        if (threadIds[beatmap.id] === undefined) {
+        if (threadIds[beatmap.indexer] === undefined) {
           const coverId = await Forum.storeTopicCover(coverFile);
           topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
 
-          threadIds[beatmap.id] = topicId;
+          threadIds[beatmap.indexer] = topicId;
           writeFileSync(join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
         } else
-          topicId = threadIds[beatmap.id];
+          topicId = threadIds[beatmap.indexer];
 
         mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
           BEATMAPSET_ID: beatmap.id,
@@ -241,7 +241,7 @@ if (generateImages) {
 
         const postId = await Forum.findFirstPostId(topicId);
 
-        posts[beatmap.id] = {
+        posts[beatmap.indexer] = {
           id: postId,
           content: postContent
         };
@@ -261,8 +261,8 @@ if (generateImages) {
 
       for (let beatmap of modeBeatmaps) {
         Forum.updatePost(
-          posts[beatmap.id].id,
-          posts[beatmap.id].content.replace('MAIN_TOPIC_ID', mainTopicId)
+          posts[beatmap.indexer].id,
+          posts[beatmap.indexer].content.replace('MAIN_TOPIC_ID', mainTopicId)
         );
       }
 
@@ -281,7 +281,7 @@ if (generateImages) {
   Gamemode.modes().forEach(function (mode) {
     const postBeatmaps = [];
 
-    const modeBeatmaps = Object.values(document.nominations)
+    const modeBeatmaps = [...Object.values(document.nominations), ...document.otherModeNominations]
       .filter(bm => bm.mode.integer === mode.integer)
       .sort((a, b) => a.position - b.position);
 
@@ -292,7 +292,7 @@ if (generateImages) {
         MODE: mode.shortName,
         LINK_MODE: mode.linkName,
         IMAGE: beatmap.imageBasename,
-        TOPIC_ID: threadIds[beatmap.id],
+        TOPIC_ID: threadIds[beatmap.indexer],
         BEATMAP: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
         BEATMAP_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
         BEATMAP_ID: beatmap.id,
