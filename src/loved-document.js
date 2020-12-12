@@ -5,6 +5,7 @@ const Gamemode = require('./gamemode');
 const Nomination = require('./nomination');
 
 const beatmaps = {};
+const otherModeNominations = [];
 
 String.prototype.splitWithLeftOver = function (separator, limit) {
     if (limit <= 1)
@@ -144,14 +145,18 @@ module.exports.readDocument = function () {
                 nomination.metadataEdits = metadataMessage;
             }
 
-            beatmaps[nomination.id] = nomination;
+            if (nomination.hostMode == null)
+                beatmaps[nomination.id] = nomination;
+            else
+                otherModeNominations.push(nomination);
         }
     }
 
     return {
-        header: header,
-        intro: intro,
-        outro: outro,
+        header,
+        intro,
+        otherModeNominations,
+        outro,
         nominations: beatmaps
     };
 }
@@ -159,7 +164,7 @@ module.exports.readDocument = function () {
 module.exports.singleCaptain = function (mode) {
     let captain;
 
-    for (let beatmap of Object.values(beatmaps)) {
+    for (let beatmap of [...Object.values(beatmaps), ...otherModeNominations]) {
         if (beatmap.mode.integer !== mode.integer)
             continue;
 

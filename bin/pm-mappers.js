@@ -12,7 +12,9 @@ const hostTemplate = readFileSync(join(__dirname, '../resources/pm-template.bbco
 
 const metadataPm = process.argv.includes('--metadata', 2);
 
-for (const nomination of Object.values(readDocument().nominations)) {
+const document = readDocument();
+
+for (const nomination of Object.values(document.nominations)) {
     const hasMetadataChanges = nomination.metadataEdits !== undefined;
     const apiBeatmapset = OsuApi.getBeatmapset(nomination.id);
     const apiBeatmap = apiBeatmapset[0];
@@ -36,7 +38,16 @@ for (const nomination of Object.values(readDocument().nominations)) {
     }
 
     const excludedDiffNames = getExcludedDiffNames(apiBeatmapset, nomination);
-    let guestCreators = nomination.creators.slice(1);
+    const creators = nomination.creators;
+
+    document.otherModeNominations.forEach((oMN) => {
+        if (oMN.id !== nomination.id)
+            return;
+
+        creators.push(...oMN.creators);
+    });
+
+    let guestCreators = creators.slice(1);
 
     if (guestCreators.length === 1 && guestCreators[0] === 'et al.')
         guestCreators = [];
