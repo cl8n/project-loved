@@ -59,6 +59,7 @@ for (const nomination of Object.values(document.nominations)) {
             ARTIST: apiBeatmap.artist,
             BEATMAPSET_ID: nomination.id,
             EXCLUDED_DIFFS: excludedDiffNames.length === 0 ? null : joinList(excludedDiffNames),
+            EXCLUDED_DIFFS_LEN: excludedDiffNames.length,
             GUESTS: guestCreators.length === 0 ? null : joinList(guestCreators),
             MONTH: config.month,
             POLL_START: config.pollStartGuess,

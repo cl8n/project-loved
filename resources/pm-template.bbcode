@@ -3,7 +3,7 @@ Hi! Your map of [url=https://osu.ppy.sh/beatmapsets/{{BEATMAPSET_ID}}]{{ARTIST}}
 <?
 
 if (vars.EXCLUDED_DIFFS)
-    `The {{EXCLUDED_DIFFS}} ${excludedDiffNames.length > 1 ? 'difficulties' : 'difficulty'} will be left unranked regardless of the voting.\n\n`
+    `The {{EXCLUDED_DIFFS}} ${vars.EXCLUDED_DIFFS_LEN > 1 ? 'difficulties' : 'difficulty'} will be left unranked regardless of the voting.\n\n`
 
 ?>Please let me know if your mapset has any guest mappers, so I can message them and credit them properly too.<?
 
