@@ -289,9 +289,9 @@ if (generateImages) {
       postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
         DATE: config.date,
         FOLDER: newsFolder,
-        MODE: mode.shortName,
+        MODE: (beatmap.hostMode || mode).shortName, // this is only used in the image link
         LINK_MODE: mode.linkName,
-        IMAGE: beatmap.imageBasename,
+        IMAGE: beatmap.hostMode == null ? beatmap.imageBasename : document.nominations[beatmap.id].imageBasename,
         TOPIC_ID: threadIds[beatmap.indexer],
         BEATMAP: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
         BEATMAP_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
