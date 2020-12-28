@@ -99,7 +99,10 @@ module.exports = class {
     }
 
     set metadataEdits(metadataEdits) {
-        this._metadataEdits = metadataEdits.trim();
+        const trimmed = metadataEdits.trim();
+
+        if (trimmed !== '' && trimmed.toLowerCase() !== 'metadata')
+            this._metadataEdits = trimmed;
     }
 
     get metadataMessageAuthor() {
