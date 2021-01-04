@@ -25,8 +25,11 @@ function cacheTopic(id, content) {
 }
 
 (async function () {
-    const topics = useCacheOnly ? Object.keys(topicsCache) : await Forum.getTopics(120);
+    let topics = Object.keys(topicsCache);
     const polls = [];
+
+    if (!useCacheOnly)
+        topics = [...new Set([...topics, ...await Forum.getTopics(120)])];
 
     for (let topicId of topics) {
         let topic = topicsCache[topicId];
