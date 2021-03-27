@@ -16,10 +16,10 @@ module.exports = class {
         const { nominations, round } = response.body;
 
         return {
-            intro: round.news_intro ?? '',
-            introPreview: round.news_intro_preview ?? '',
+            intro: round.news_intro == null ? '' : round.news_intro,
+            introPreview: round.news_intro_preview == null ? '' : round.news_intro_preview,
             // TODO: does not exist on server yet
-            //outro: round.news_outro ?? '',
+            //outro: round.news_outro == null ? '' : round.news_outro,
             postTime: new Date(round.news_posted_at),
             title: `Project Loved: ${round.name}`,
 
