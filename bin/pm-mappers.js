@@ -1,14 +1,12 @@
-const { readFileSync } = require('fs');
-const { join } = require('path');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { joinList, textFromTemplate, pushUnique } = require('../src/helpers');
+const { joinList, loadTextResource, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
 
-const guestTemplate = readFileSync(join(__dirname, '../resources/pm-guest-template.bbcode'), 'utf8');
-const metadataTemplate = readFileSync(join(__dirname, '../resources/pm-metadata-template.bbcode'), 'utf8');
-const hostTemplate = readFileSync(join(__dirname, '../resources/pm-template.bbcode'), 'utf8');
+const guestTemplate = loadTextResource('pm-guest-template.bbcode');
+const metadataTemplate = loadTextResource('pm-metadata-template.bbcode');
+const hostTemplate = loadTextResource('pm-template.bbcode');
 
 const metadataPm = process.argv.includes('--metadata', 2);
 

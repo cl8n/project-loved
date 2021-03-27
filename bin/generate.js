@@ -1,12 +1,12 @@
 require('colors');
-const { existsSync, readdirSync, readFileSync, statSync, writeFileSync } = require('fs');
+const { existsSync, readdirSync, statSync, writeFileSync } = require('fs');
 const { extname, join } = require('path');
 const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
 const BeatmapImage = require('../src/BeatmapImage');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
-const { convertToMarkdown, getUserLink, joinList, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, getUserLink, joinList, loadTextResource, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedDocument = require('../src/loved-document');
 const OsuApi = require('../src/osu-api');
 
@@ -110,10 +110,6 @@ function osuModernLinks(text) {
     .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/g, (match, p1) => getUserLink(p1))
     .replace(/https\:\/\/osu.ppy.sh\/b\//g, 'https://osu.ppy.sh/beatmaps/')
     .replace(/https\:\/\/osu.ppy.sh\/forum\/t\//g, 'https://osu.ppy.sh/community/forums/topics/');
-}
-
-function loadTextResource(basename) {
-  return readFileSync(join(__dirname, '../resources', basename), 'utf8');
 }
 
 const discordTemplateBeatmap = loadTextResource('discord-template-beatmap.md');

@@ -68,6 +68,10 @@ function joinList(array) {
     return line;
 }
 
+function loadTextResource(basename) {
+    return readFileSync(join(__dirname, '../resources', basename), 'utf8');
+}
+
 function mkdirTreeSync(dir) {
     if (existsSync(dir))
         return;
@@ -106,6 +110,7 @@ module.exports = {
     getExcludedDiffNames,
     getUserLink,
     joinList,
+    loadTextResource,
     mkdirTreeSync,
     pushUnique,
     textFromTemplate,
