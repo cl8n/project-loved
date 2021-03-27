@@ -1,14 +1,5 @@
 {
-  "dependencies": {
-    "bottleneck": "^2.19.5",
-    "canvas": "^2.6.1",
-    "colors": "^1.4.0",
-    "open": "^7.0.4",
-    "request": "^2.88.2",
-    "request-promise-native": "^1.0.8",
-    "sync-request": "^6.1.0",
-    "ws": "^7.3.0"
-  },
+  "name": "project-loved",
   "private": true,
   "scripts": {
     "images": "node bin/generate.js --images",
@@ -21,5 +12,15 @@
     "results": "node bin/results.js --slow-requests",
     "setup": "npm install & sh bin/setup.sh",
     "stats": "node bin/collect-stats.js --slow-requests"
+  },
+  "dependencies": {
+    "bottleneck": "^2.19.5",
+    "canvas": "^2.7.0",
+    "colors": "^1.4.0",
+    "open": "^8.0.4",
+    "request": "^2.88.2",
+    "request-promise-native": "^1.0.8",
+    "sync-request": "^6.1.0",
+    "ws": "^7.4.4"
   }
 }
