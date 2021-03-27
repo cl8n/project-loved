@@ -94,9 +94,9 @@ function textFromTemplate(template, vars) {
         .replace(/<\?(.+?)\?>/gs, (_, script) => {
             let result = eval(script);
 
-            return result === undefined || result === null ? '' : result;
+            return result == null ? '' : result;
         })
-        .replace(/{{(.+?)}}/g, (match, key) => vars[key] === undefined ? match : vars[key])
+        .replace(/{{(.+?)}}/g, (match, key) => vars[key] == null ? match : vars[key])
         .trim();
 }
 

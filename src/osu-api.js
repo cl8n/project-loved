@@ -31,7 +31,7 @@ function osuApiRequestSync(endpoint, params) {
 }
 
 module.exports.getBeatmapset = function (beatmapsetId) {
-    if (beatmapsetStorage.beatmapsets[beatmapsetId] !== undefined)
+    if (beatmapsetStorage.beatmapsets[beatmapsetId] != null)
         return clone(beatmapsetStorage.beatmapsets[beatmapsetId]);
 
     const result = osuApiRequestSync('get_beatmaps', {
@@ -49,9 +49,9 @@ module.exports.getBeatmapset = function (beatmapsetId) {
 }
 
 module.exports.getUser = function (userIdOrName, byName = false) {
-    if (byName && userStorage.ids[userIdOrName] !== undefined)
+    if (byName && userStorage.ids[userIdOrName] != null)
         return clone(userStorage.users[userStorage.ids[userIdOrName]]);
-    if (!byName && userStorage.users[userIdOrName] !== undefined)
+    if (!byName && userStorage.users[userIdOrName] != null)
         return clone(userStorage.users[userIdOrName]);
 
     const result = osuApiRequestSync('get_user', {

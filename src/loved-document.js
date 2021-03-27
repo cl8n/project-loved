@@ -98,7 +98,7 @@ module.exports.readDocument = function () {
             let metadataSender;
             let metadataMessage;
 
-            while ((noteMatch = descriptionSplit[1].match(/^(Noffy|hypercyte|eiri-|Video): /)) !== null) {
+            while ((noteMatch = descriptionSplit[1].match(/^(Noffy|hypercyte|eiri-|Video): /)) != null) {
                 let substringIndex;
 
                 if (noteMatch[1] === 'Video')
@@ -140,7 +140,7 @@ module.exports.readDocument = function () {
             if (infoSplit.length > 4)
                 nomination.excludedBeatmaps = infoSplit[4];
 
-            if (metadataSender !== undefined && metadataMessage !== undefined) {
+            if (metadataSender != null && metadataMessage != null) {
                 nomination.metadataMessageAuthor = metadataSender;
                 nomination.metadataEdits = metadataMessage;
             }
@@ -176,7 +176,7 @@ module.exports.singleCaptain = function (mode) {
         if (beatmap.mode.integer !== mode.integer)
             continue;
 
-        if (captain === undefined) {
+        if (captain == null) {
             captain = beatmap.captain;
             continue;
         }
@@ -185,5 +185,5 @@ module.exports.singleCaptain = function (mode) {
             return null;
     }
 
-    return captain === undefined ? null : captain;
+    return captain == null ? null : captain;
 }

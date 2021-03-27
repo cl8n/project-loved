@@ -39,15 +39,15 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
     if (!keyModes.includes(beatmap.diff_size))
       keyModes.push(beatmap.diff_size);
 
-    if (minBpm === undefined || beatmap.bpm < minBpm)
+    if (minBpm == null || beatmap.bpm < minBpm)
       minBpm = beatmap.bpm;
-    if (maxBpm === undefined || beatmap.bpm > maxBpm)
+    if (maxBpm == null || beatmap.bpm > maxBpm)
       maxBpm = beatmap.bpm;
-    if (maxLength === undefined || beatmap.total_length > maxLength)
+    if (maxLength == null || beatmap.total_length > maxLength)
       maxLength = beatmap.total_length;
-    if (minDiff === undefined || beatmap.difficultyrating < minDiff)
+    if (minDiff == null || beatmap.difficultyrating < minDiff)
       minDiff = beatmap.difficultyrating;
-    if (maxDiff === undefined || beatmap.difficultyrating > maxDiff)
+    if (maxDiff == null || beatmap.difficultyrating > maxDiff)
       maxDiff = beatmap.difficultyrating;
   });
 
@@ -139,7 +139,7 @@ const images =
     .filter(
       f =>
         statSync(join(__dirname, '../config', f)).isFile() &&
-        extname(f).match(/png|jpg|jpeg/i) !== null
+        extname(f).match(/png|jpg|jpeg/i) != null
     );
 
 const threadIds = existsSync(join(__dirname, '../storage/thread-ids.json'))
@@ -158,7 +158,7 @@ if (generateImages) {
     const id = parseInt(imageBasename.split('.')[0]);
     const beatmap = document.nominations[id];
 
-    if (beatmap === undefined) {
+    if (beatmap == null) {
       console.error(`No nomination corresponding to ${imageBasename}`.yellow);
       continue;
     }
@@ -214,7 +214,7 @@ if (generateImages) {
         coverFile = join(__dirname, `../config/${coverFile}`);
 
         let topicId;
-        if (threadIds[beatmap.indexer] === undefined) {
+        if (threadIds[beatmap.indexer] == null) {
           const coverId = await Forum.storeTopicCover(coverFile);
           topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
 

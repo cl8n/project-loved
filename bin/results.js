@@ -37,7 +37,7 @@ function mapResultsToEmbed(beatmapset, passed) {
     const mainTopicsReplies = {};
 
     for (const mode of Gamemode.modes().reverse()) {
-        if (mainTopics[mode.integer] === undefined)
+        if (mainTopics[mode.integer] == null)
             continue;
 
         const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
@@ -48,7 +48,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         while (true) {
             const topicMatch = mainPost.match(/\[url=https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\]Vote for this map here!/);
 
-            if (topicMatch === null)
+            if (topicMatch == null)
                 break;
 
             const postId = await Forum.findFirstPostId(topicMatch[1]);

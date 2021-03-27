@@ -35,7 +35,7 @@ function cacheTopic(id, content) {
         let topic = topicsCache[topicId];
         let topicFresh = false;
 
-        if (topic === undefined) {
+        if (topic == null) {
             console.log(`Fetching topic #${topicId}`);
             topic = await Forum.getTopic(topicId);
             topicFresh = true;
@@ -43,7 +43,7 @@ function cacheTopic(id, content) {
 
         const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title[^>]+?>\s*(.*?)\s*<\/h1>/);
 
-        if (titleMatch === null) {
+        if (titleMatch == null) {
             console.error(`Topic #${topicId} exploded`.red);
             continue;
         }
@@ -53,7 +53,7 @@ function cacheTopic(id, content) {
 
         const title = titleMatch[1];
 
-        if (topic.match(/js-forum-post--hidden[^>]+?data-post-position="0"/) !== null) {
+        if (topic.match(/js-forum-post--hidden[^>]+?data-post-position="0"/) != null) {
             console.log(`Skipping deleted topic "${title}" (#${topicId})`.yellow);
             continue;
         }
@@ -66,7 +66,7 @@ function cacheTopic(id, content) {
 
         const gameModeMatch = title.match(/^\[([a-z!]+)\]/);
 
-        if (gameModeMatch === null) {
+        if (gameModeMatch == null) {
             console.error(`Couldn't find game mode for topic "${title}" (#${topicId})`.red);
             continue;
         }
@@ -83,7 +83,7 @@ function cacheTopic(id, content) {
         const pollMatch = pollData.find(p => p.beatmapset === beatmapset);
         const voteCounts = [];
 
-        if (pollMatch === undefined) {
+        if (pollMatch == null) {
             for (let i = 0; i < 2; i++) {
                 const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*([\d,]+)\s*<\/div>/);
                 voteCounts.push(parseInt(match[1].replace(/,/g, '')));
@@ -96,7 +96,7 @@ function cacheTopic(id, content) {
 
         const endTimeMatch = topic.match(/Polling ended\s+<time[^>]+?datetime='(.+?)'/);
 
-        if (endTimeMatch === null) {
+        if (endTimeMatch == null) {
             console.error(`Couldn't find poll end time for topic "${title}" (#${topicId})`.red);
             continue;
         }

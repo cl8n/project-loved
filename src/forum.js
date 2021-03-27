@@ -216,7 +216,7 @@ module.exports.getPollResult = async function (topicId) {
     for (let i = 0; i < 2; i++) {
         const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*(\d+)\s*<\/div>/);
 
-        if (match === null)
+        if (match == null)
             throw new Error('Forum topic page does not match the expected format');
 
         voteCounts.push(parseInt(match[1]));
@@ -251,7 +251,7 @@ module.exports.getModeTopics = async function (forumId) {
     while (true) {
         const match = body.match(/\[(osu![a-z]+)\] Project Loved: /);
 
-        if (match === null)
+        if (match == null)
             break;
 
         const mode = new Gamemode(match[1]);
@@ -336,7 +336,7 @@ function getIcon(icon) {
  * @param {string} message Message contents.
  * @param {number[]} to Recipients of the message. Must be an array of user IDs.
  * @param {number[]} bcc Blind copy recipients of the message. Must be an array of user IDs.
- * @returns {undefined}
+ * @returns {void}
  */
 module.exports.sendPm = async function (subject, icon, message, to, bcc = []) {
     if (to.length < 1)

@@ -12,11 +12,11 @@ let overlayImage;
 registerFont(join(__dirname, '../resources/Torus-SemiBold.otf'), { family: 'Torus' });
 
 async function getJpegRecompressFilename() {
-    if (jpegRecompressFilename === undefined) {
+    if (jpegRecompressFilename == null) {
         const dirEnts = await readdir(binDir, { withFileTypes: true });
         const exeDirEnt = dirEnts.find((dirEnt) => dirEnt.isFile() && dirEnt.name.includes('jpeg-recompress'));
 
-        if (exeDirEnt !== undefined)
+        if (exeDirEnt != null)
             jpegRecompressFilename = join(binDir, exeDirEnt.name);
         else
             throw 'jpeg-recompress must be in bin/ to generate images';
@@ -26,7 +26,7 @@ async function getJpegRecompressFilename() {
 }
 
 async function getOverlayImage() {
-    if (overlayImage === undefined)
+    if (overlayImage == null)
         overlayImage = await loadImage(join(__dirname, '../resources/banner-overlay.png'));
 
     return overlayImage;
