@@ -24,10 +24,7 @@ A typical round of Project Loved involves:
 
 ### Config
 
-There are two files you can configure:
-
-- `config.json` contains various options listed below
-- `document` should have a content-only copy of the Project Loved Google document
+`config/config.json` contains these options:
 
 | Option | Description |
 | :-- | :-- |
@@ -38,6 +35,8 @@ There are two files you can configure:
 | `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
 | `date` | Publishing date of the news post |
 | `discord.<mode>` | Discord webhooks for announcing new maps and results |
+| `lovedApiKey` | API key for https://loved.sh |
+| `lovedRoundId` | ID of the round on https://loved.sh |
 | `month` | Month of the Project Loved round |
 | `osuApiKey` | API key from https://old.ppy.sh/p/api |
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
@@ -51,4 +50,4 @@ There are two files you can configure:
 | `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
 | `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
 
-In addition to the two config files, you need to provide beatmap backgrounds for each of the sets listed in `document`. Their filenames (not including the extension) must match the beatmapset ID. To speed up the process of collecting backgrounds, you can put all of the OSZ files in the `config` folder and run `npm run images:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
+In addition to `config.json`, you need to provide beatmap backgrounds for each of the mapsets included in the current round. Their filenames (not including the extension) must match the beatmapset ID. To speed up the process of collecting backgrounds, you can put all of the OSZ files in the `config` folder and run `npm run images:unpack`. This will extract backgrounds from beatmapsets where there is only one image.

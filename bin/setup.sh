@@ -1,4 +1,1 @@
-mkdir -p config storage
-
-cp resources/config.json.example config/config.json
-touch config/document
+mkdir -p config storage && cp resources/config.json.example config/config.json
