@@ -13,6 +13,9 @@
     "setup": "npm install & sh bin/setup.sh",
     "stats": "node bin/collect-stats.js --slow-requests"
   },
+  "engines": {
+    "node": ">=12"
+  },
   "dependencies": {
     "bottleneck": "^2.19.5",
     "canvas": "^2.7.0",
