@@ -23,6 +23,7 @@
     "open": "^8.0.4",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
+    "superagent": "^6.1.0",
     "sync-request": "^6.1.0",
     "ws": "^7.4.4"
   }

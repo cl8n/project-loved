@@ -1,4 +1,4 @@
-const request = require('request-promise-native');
+const superagent = require('superagent');
 
 module.exports = class {
     constructor(webhook) {
@@ -9,15 +9,12 @@ module.exports = class {
         if (content.length > 2000)
             throw new Error(`Discord message content is too long (${content.length} characters)`);
 
-        return request({
-            uri: this._webhook,
-            method: 'POST',
-            json: true,
-            body: {
+        return superagent
+            .post(this._webhook)
+            .send({
                 username: name,
                 content: content,
                 embeds: embeds
-            }
-        });
+            });
     }
 }

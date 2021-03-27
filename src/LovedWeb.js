@@ -1,38 +1,37 @@
-const request = require('request-promise-native');
+const superagent = require('superagent');
+
+const baseUrl = 'https://loved.sh/api/local-interop';
 
 module.exports = class {
     constructor(key) {
-        this._request = request.defaults({
-            baseUrl: 'https://loved.sh/api/local-interop',
-            headers: { 'X-Loved-InteropKey': key },
-            json: true,
-            method: 'GET',
-        });
+        this._request = superagent
+            .agent()
+            .set('X-Loved-InteropKey', key);
     }
 
     async getRoundInfo(roundId) {
-        const response = await this._request({
-            qs: { roundId },
-            uri: '/data',
-        });
+        const response = await this._request
+            .get(`${baseUrl}/data`)
+            .query({ roundId });
+        const { nominations, round } = response.body;
 
         return {
-            intro: response.round.news_intro ?? '',
-            introPreview: response.round.news_intro_preview ?? '',
+            intro: round.news_intro ?? '',
+            introPreview: round.news_intro_preview ?? '',
             // TODO: does not exist on server yet
-            //outro: response.round.news_outro ?? '',
-            postTime: new Date(response.round.news_posted_at),
-            title: `Project Loved: ${response.round.name}`,
+            //outro: round.news_outro ?? '',
+            postTime: new Date(round.news_posted_at),
+            title: `Project Loved: ${round.name}`,
 
-            allNominations: response.nominations,
-            childNominations: response.nominations.filter((n) => n.parentId != null),
-            nominations: response.nominations.filter((n) => n.parentId == null),
+            allNominations: nominations,
+            childNominations: nominations.filter((n) => n.parentId != null),
+            nominations: nominations.filter((n) => n.parentId == null),
         };
     }
 
-    getRoundsAvailable() {
-        return this._request({
-            uri: '/rounds-available',
-        });
+    async getRoundsAvailable() {
+        const response = await this._request.get(`${baseUrl}/rounds-available`);
+
+        return response.body;
     }
 };
