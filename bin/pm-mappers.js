@@ -1,10 +1,10 @@
-const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
-const Forum = require('../src/forum');
-const { join } = require('path');
-const OsuApi = require('../src/osu-api');
-const { readDocument } = require('../src/loved-document');
 const { readFileSync } = require('fs');
-const { joinList, getExcludedDiffNames, textFromTemplate } = require('../src/helpers');
+const { join } = require('path');
+const Forum = require('../src/forum');
+const GameMode = require('../src/gamemode');
+const { joinList, textFromTemplate, pushUnique } = require('../src/helpers');
+const LovedWeb = require('../src/LovedWeb');
+const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
 
 const guestTemplate = readFileSync(join(__dirname, '../resources/pm-guest-template.bbcode'), 'utf8');
 const metadataTemplate = readFileSync(join(__dirname, '../resources/pm-metadata-template.bbcode'), 'utf8');
@@ -12,81 +12,102 @@ const hostTemplate = readFileSync(join(__dirname, '../resources/pm-template.bbco
 
 const metadataPm = process.argv.includes('--metadata', 2);
 
-const document = readDocument();
+// TODO: Use new chat
+function sendMetadataPm(nomination) {
+    // TODO: Track maps which have already had this message sent
+    if (nomination.metadata_state !== 1)
+        return;
 
-for (const nomination of Object.values(document.nominations)) {
-    const hasMetadataChanges = nomination.metadataEdits !== undefined;
-    const apiBeatmapset = OsuApi.getBeatmapset(nomination.id);
-    const apiBeatmap = apiBeatmapset[0];
+    Forum.sendPm(
+        config.messages.pmMetadata,
+        'alert',
+        textFromTemplate(metadataTemplate, {
+            ARTIST: nomination.beatmapset.artist,
+            AUTHOR: nomination.metadata_assignee.name,
+            AUTHOR_ID: nomination.metadata_assignee.id,
+            BEATMAPSET_ID: nomination.beatmapset.id,
+            TITLE: nomination.beatmapset.title,
+        }),
+        [nomination.beatmapset.creator_id],
+    );
+}
 
-    if (metadataPm) {
-        if (hasMetadataChanges)
-            Forum.sendPm(
-                config.messages.pmMetadata,
-                'alert',
-                textFromTemplate(metadataTemplate, {
-                    ARTIST: apiBeatmap.artist,
-                    AUTHOR: nomination.metadataMessageAuthor,
-                    BEATMAPSET_ID: nomination.id,
-                    CHANGES: nomination.metadataEdits,
-                    TITLE: apiBeatmap.title,
-                }),
-                [apiBeatmap.creator_id]
-            );
+// TODO: Use new chat
+function sendNotifyPm(nominations) {
+    if (nominations.length === 0)
+        throw 'No nominations provided';
 
-        continue;
+    const beatmapset = nominations[0].beatmapset;
+    const creators = [];
+    const excludedVersions = [];
+    const gameModes = [];
+
+    for (const nomination of nominations) {
+        pushUnique(creators, nomination.beatmapset_creators, (a, b) => a.id === b.id);
+        excludedVersions.push(
+            nomination.beatmaps
+                .filter((beatmap) => beatmap.excluded)
+                .map((beatmap) => `[${beatmap.version}]`)
+        );
+        gameModes.push(new GameMode(nomination.game_mode));
     }
 
-    const excludedDiffNames = getExcludedDiffNames(apiBeatmapset, nomination);
-    const creators = nomination.creators;
-
-    document.otherModeNominations.forEach((oMN) => {
-        if (oMN.id !== nomination.id)
-            return;
-
-        creators.push(...oMN.creators);
-    });
-
-    let guestCreators = creators.slice(1);
-
-    if (guestCreators.length === 1 && guestCreators[0] === 'et al.')
-        guestCreators = [];
+    gameModes.sort((a, b) => a.integer - b.integer);
+    const gameModeVars = gameModes.length > 1
+        ? {
+            GAME_MODES: joinList(gameModes.map((m) => m.longName)),
+            THRESHOLDS: `[list]${gameModes.map((m) => `[*]${m.longName}: ${config.threshold[m.shortName]}`)}[/list]`,
+        } : {
+            GAME_MODE: gameModes[0].longName,
+            THRESHOLD: config.threshold[gameModes[0].shortName],
+        };
+    const guestCreators = creators
+        .filter((creator) => creator.id !== beatmapset.creator_id)
+        .sort((a, b) => a.localeCompare(b));
 
     Forum.sendPm(
         config.messages.pmHost,
         'heart',
         textFromTemplate(hostTemplate, {
-            ARTIST: apiBeatmap.artist,
-            BEATMAPSET_ID: nomination.id,
-            EXCLUDED_DIFFS: excludedDiffNames.length === 0 ? null : joinList(excludedDiffNames),
-            EXCLUDED_DIFFS_LEN: excludedDiffNames.length,
-            GUESTS: guestCreators.length === 0 ? null : joinList(guestCreators),
+            ARTIST: beatmapset.artist,
+            BEATMAPSET_ID: beatmapset.id,
+            EXCLUDED_DIFFS: excludedVersions.length > 0 ? joinList(excludedVersions) : null,
+            GUESTS: guestCreators.length > 0 ? joinList(guestCreators) : null,
             MONTH: config.month,
             POLL_START: config.pollStartGuess,
-            TITLE: apiBeatmap.title,
-            THRESHOLD: config.threshold[nomination.mode.shortName],
+            TITLE: beatmapset.title,
+            ...gameModeVars,
         }),
-        [apiBeatmap.creator_id]
+        [beatmapset.creator_id],
     );
 
     for (const guest of guestCreators) {
-        const user = OsuApi.getUser(guest, true);
-
-        if (user.banned)
+        if (guest.banned)
             continue;
 
         Forum.sendPm(
             config.messages.pmGuest,
             'heart',
             textFromTemplate(guestTemplate, {
-                ARTIST: apiBeatmap.artist,
-                BEATMAPSET_ID: nomination.id,
+                ARTIST: beatmapset.artist,
+                BEATMAPSET_ID: beatmapset.id,
                 MONTH: config.month,
-                POLL_START: config.pollStartGuess,
-                TITLE: apiBeatmap.title,
-                THRESHOLD: config.threshold[nomination.mode.shortName],
+                TITLE: beatmapset.title,
             }),
-            [user.user_id]
+            [guest.id],
         );
     }
 }
+
+(async () => {
+    const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
+
+    for (const nomination of roundInfo.nominations)
+        if (metadataPm)
+            sendMetadataPm(nomination);
+        else
+            sendNotifyPm(
+                roundInfo.allNominations
+                    .filter((n) => n.beatmapset_id === nomination.beatmapset_id)
+            );
+})();

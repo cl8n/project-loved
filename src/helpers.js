@@ -83,6 +83,12 @@ function mkdirTreeSync(dir) {
     }
 }
 
+function pushUnique(array, values, sameFn) {
+    for (const value of values)
+        if (array.find((value2) => sameFn(value, value2)) == null)
+            array.push(value);
+}
+
 function textFromTemplate(template, vars) {
     return template
         .replace(/<\?(.+?)\?>/gs, (_, script) => {
@@ -101,5 +107,6 @@ module.exports = {
     getUserLink,
     joinList,
     mkdirTreeSync,
-    textFromTemplate
+    pushUnique,
+    textFromTemplate,
 };
