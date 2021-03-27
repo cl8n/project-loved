@@ -9,22 +9,19 @@
         "taiko": "https://docs.google.com/spreadsheets/d/1Nk96z_xat_7ypsDF1sCTDO4i_CnHarcrCbGoTmgwHHE/edit",
         "mania": "https://docs.google.com/spreadsheets/d/1sjkTwUSvQ5Me-6rK61rToTg2bU-yX9X29CXdzttvhtM/edit"
     },
+    "messages": {
+        "discordPost": "@everyone {{MAP_COUNT}} new maps have been nominated for Loved, check them out and cast your votes!",
+        "discordResults": "@everyone Results from the polls are in! The maps that passed voting will be moved to Loved soon.",
+        "pmGuest": "Project Loved: Your guest difficulty will be up for voting soon!",
+        "pmHost": "Project Loved: Your map will be up for voting soon!",
+        "pmMetadata": "Project Loved: Changes required on your beatmap",
+        "resultsPassed": "This map passed the voting! It will be moved to Loved soon.",
+        "resultsFailed": "This map did not pass the voting."
+    },
     "threshold": {
         "osu": "85%",
         "taiko": "80%",
         "catch": "80%",
         "mania": "80%"
-    },
-
-    "messages": {
-        "discordPost": "@everyone {{MAP_COUNT}} new maps have been nominated for Loved, check them out and cast your votes!",
-        "discordResults": "@everyone Results from the polls are in! The maps that passed voting will be moved to Loved soon.",
-
-        "pmGuest": "Project Loved: Your guest difficulty will be up for voting soon!",
-        "pmHost": "Project Loved: Your map will be up for voting soon!",
-        "pmMetadata": "Project Loved: Changes required on your beatmap",
-
-        "resultsPassed": "This map passed the voting! It will be moved to Loved soon.",
-        "resultsFailed": "This map did not pass the voting."
     }
 }
