@@ -1,8 +1,5 @@
 const { red, yellow } = require('chalk');
-const config = {
-  ...require('../resources/info.json'),
-  ...require('../config/config.json'),
-};
+const config = require('../config/config.json');
 
 let errors = '';
 const expected = [
@@ -51,4 +48,7 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-module.exports = config;
+module.exports = {
+  ...require('../resources/info.json'),
+  ...config,
+};
