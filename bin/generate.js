@@ -1,4 +1,4 @@
-require('colors');
+const { red, yellow } = require('chalk');
 const { existsSync, readdirSync, statSync, writeFileSync } = require('fs');
 const { extname, join } = require('path');
 const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
@@ -143,7 +143,7 @@ const threadIds = existsSync(join(__dirname, '../storage/thread-ids.json'))
   : {};
 
 if (generateImages) {
-  console.log('Generating images'.green);
+  console.log('Generating images');
 
   const imagesDirname = join(outPath, `wiki/shared/news/${newsFolder}`);
 
@@ -155,7 +155,7 @@ if (generateImages) {
     const beatmap = document.nominations[id];
 
     if (beatmap == null) {
-      console.error(`No nomination corresponding to ${imageBasename}`.yellow);
+      console.error(yellow(`No nomination corresponding to ${imageBasename}`));
       continue;
     }
 
@@ -165,14 +165,14 @@ if (generateImages) {
 
     beatmapImage.createBanner(outputFilename)
       .catch((reason) => {
-        console.error(`Failed to create banner image for ${beatmap.title} (#${beatmap.id}):\n${reason}`.red);
+        console.error(red(`Failed to create banner image for ${beatmap.title} (#${beatmap.id}):\n${reason}`));
       });
   }
 }
 
 (async function () {
   if (generateThreads) {
-    console.log('Posting threads'.green);
+    console.log('Posting threads');
 
     for (let mode of Gamemode.modes().reverse()) {
       const modeBeatmaps = [...Object.values(document.nominations), ...document.otherModeNominations]
@@ -270,7 +270,7 @@ if (generateImages) {
     }
   }
 
-  console.log('Generating news post'.green);
+  console.log('Generating news post');
 
   const beatmapSectionModes = [];
 

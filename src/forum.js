@@ -1,5 +1,5 @@
 const bottleneck = require('bottleneck');
-require('colors');
+const { dim, green, red, yellow } = require('chalk');
 const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
 const WebSocket = require('ws');
@@ -34,7 +34,7 @@ const limiter = new bottleneck({
 });
 
 function handleVerification() {
-    console.log('osu! needs you to verify your account. Click the link in the email you received.'.yellow);
+    console.log(yellow('osu! needs you to verify your account. Click the link in the email you received.'));
 
     const ws = new WebSocket(`wss://notify.ppy.sh/?csrf=${config.csrf}`, {
         headers: {
@@ -82,14 +82,14 @@ let requestCounter = 0;
 const requestUnlogged = limiter.wrap(requestWrapped);
 const request = async function (...args) {
     const n = ++requestCounter;
-    console.log(`Making request #${n} to ${args[0].uri}`.dim);
+    console.log(dim(`Making request #${n} to ${args[0].uri}`));
 
     try {
         const response = await requestUnlogged(...args);
-        console.log(`Request #${n} to ${args[0].uri} finished`.dim);
+        console.log(dim(green(`Request #${n} to ${args[0].uri} finished`)));
         return response;
     } catch (error) {
-        console.error(`Request #${n} to ${args[0].uri} failed: ${error}`.red.dim);
+        console.error(dim(red(`Request #${n} to ${args[0].uri} failed: ${error}`)));
         throw error;
     }
 }
@@ -374,5 +374,5 @@ module.exports.sendPm = async function (subject, icon, message, to, bcc = []) {
     });
 
     if (response.statusCode !== 302)
-        console.error(`Failed to send PM to ${to[0]}: status code ${response.statusCode}`.red);
+        console.error(red(`Failed to send PM to ${to[0]}: status code ${response.statusCode}`));
 }

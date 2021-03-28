@@ -1,4 +1,4 @@
-require('colors');
+const { red, yellow } = require('chalk');
 const fs = require('fs');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
@@ -44,7 +44,7 @@ function cacheTopic(id, content) {
         const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title[^>]+?>\s*(.*?)\s*<\/h1>/);
 
         if (titleMatch == null) {
-            console.error(`Topic #${topicId} exploded`.red);
+            console.error(red(`Topic #${topicId} exploded`));
             continue;
         }
 
@@ -54,20 +54,20 @@ function cacheTopic(id, content) {
         const title = titleMatch[1];
 
         if (topic.match(/js-forum-post--hidden[^>]+?data-post-position="0"/) != null) {
-            console.log(`Skipping deleted topic "${title}" (#${topicId})`.yellow);
+            console.log(yellow(`Skipping deleted topic "${title}" (#${topicId})`));
             continue;
         }
 
         // Sanity check to make sure we're viewing a completed poll
         if (topic.indexOf('Polling ended ') === -1) {
-            console.log(`Skipping non-poll topic "${title}" (#${topicId})`.yellow);
+            console.log(yellow(`Skipping non-poll topic "${title}" (#${topicId})`));
             continue;
         }
 
         const gameModeMatch = title.match(/^\[([a-z!]+)\]/);
 
         if (gameModeMatch == null) {
-            console.error(`Couldn't find game mode for topic "${title}" (#${topicId})`.red);
+            console.error(red(`Couldn't find game mode for topic "${title}" (#${topicId})`));
             continue;
         }
 
@@ -75,7 +75,7 @@ function cacheTopic(id, content) {
         topic = topic.substring(gameModeMatch.index + gameModeMatch[0].length);
 
         if (topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">/g).length !== 2) {
-            console.log(`Skipping poll with more than 2 options "${title}" (#${topicId})`.yellow)
+            console.log(yellow(`Skipping poll with more than 2 options "${title}" (#${topicId})`));
             continue;
         }
 
@@ -97,7 +97,7 @@ function cacheTopic(id, content) {
         const endTimeMatch = topic.match(/Polling ended\s+<time[^>]+?datetime='(.+?)'/);
 
         if (endTimeMatch == null) {
-            console.error(`Couldn't find poll end time for topic "${title}" (#${topicId})`.red);
+            console.error(red(`Couldn't find poll end time for topic "${title}" (#${topicId})`));
             continue;
         }
 
