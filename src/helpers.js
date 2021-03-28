@@ -1,5 +1,5 @@
-const { existsSync, mkdirSync } = require('fs');
-const { dirname } = require('path');
+const { existsSync, mkdirSync, readFileSync } = require('fs');
+const { dirname, join } = require('path');
 const OsuApi = require('./osu-api');
 
 function convertToMarkdown(bbcode) {
