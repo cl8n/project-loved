@@ -34,9 +34,9 @@ for (const configKey of Object.keys(config)) {
   if (unused.includes(configKey)) {
     addError(yellow(`"${configKey}" is no longer used`));
   } else if (moved[configKey] != null) {
-    addError(red(`"${configKey}" has been renamed to "${moved[configKey]}"`));
+    addError(yellow(`"${configKey}" has been renamed to "${moved[configKey]}"`));
   } else if (!expected.includes(configKey)) {
-    addError(red(`Unrecognized option "${configKey}"`));
+    addError(yellow(`Unrecognized option "${configKey}"`));
   }
 }
 
