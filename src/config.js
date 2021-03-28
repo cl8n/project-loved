@@ -10,7 +10,6 @@ const expected = [
   'cloudflare',
   'csrf',
   'csrfOld',
-  'date',
   'discord',
   'lovedApiKey',
   'lovedRoundId',
@@ -25,7 +24,7 @@ const expected = [
   'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
-const unused = ['time', 'title'];
+const unused = ['date', 'time', 'title'];
 
 function addError(message) {
   errors += `  ${message}\n`;

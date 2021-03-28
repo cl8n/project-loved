@@ -33,7 +33,6 @@ A typical round of Project Loved involves:
 | `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie |
 | `csrf` | https://osu.ppy.sh's `XSRF-TOKEN` cookie |
 | `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
-| `date` | Publishing date of the news post |
 | `discord.<mode>` | Discord webhooks for announcing new maps and results |
 | `lovedApiKey` | API key for https://loved.sh |
 | `lovedRoundId` | ID of the round on https://loved.sh |
