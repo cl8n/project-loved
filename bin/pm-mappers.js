@@ -42,7 +42,7 @@ function sendNotifyPm(nominations) {
     for (const nomination of nominations) {
         pushUnique(creators, nomination.beatmapset_creators, (a, b) => a.id === b.id);
         excludedVersions.push(
-            nomination.beatmaps
+            ...nomination.beatmaps
                 .filter((beatmap) => beatmap.excluded)
                 .map((beatmap) => `[${beatmap.version}]`)
         );
