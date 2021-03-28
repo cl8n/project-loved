@@ -1,8 +1,8 @@
 const { red, yellow } = require('chalk');
 const { existsSync, readdirSync, statSync, writeFileSync } = require('fs');
 const { extname, join } = require('path');
-const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
 const BeatmapImage = require('../src/BeatmapImage');
+const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');

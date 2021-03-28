@@ -3,7 +3,7 @@ const { dim, green, red, yellow } = require('chalk');
 const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
 const WebSocket = require('ws');
-const config = require('../config/config.json');
+const config = require('./config');
 const Gamemode = require('./gamemode');
 
 const OSU_SERVER = 'https://osu.ppy.sh/';

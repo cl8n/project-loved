@@ -1,8 +1,8 @@
+const config = require('../src/config');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
 const { joinList, loadTextResource, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
-const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
 
 const guestTemplate = loadTextResource('pm-guest-template.bbcode');
 const metadataTemplate = loadTextResource('pm-metadata-template.bbcode');

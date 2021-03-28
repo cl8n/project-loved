@@ -1,5 +1,5 @@
 const open = require('open');
-const config = { ...require('../resources/info.json'), ...require('../config/config.json') };
+const config = require('../src/config');
 const LovedWeb = require('../src/LovedWeb');
 
 (async () => {

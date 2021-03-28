@@ -1,7 +1,7 @@
-const config = require('../config/config.json');
+const { writeFileSync } = require('fs');
 const path = require('path');
 const syncRequest = require('sync-request');
-const {writeFileSync} = require('fs');
+const config = require('./config');
 
 let beatmapsetStorage;
 try { beatmapsetStorage = require('../storage/beatmapsets.json') }

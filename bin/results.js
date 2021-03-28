@@ -1,4 +1,4 @@
-const config = {...require('../resources/info.json'), ...require('../config/config.json')};
+const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
