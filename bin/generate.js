@@ -87,31 +87,6 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   return info;
 }
 
-function fixCommonMistakes(text) {
-  return text.toString()
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/…/g, '...')
-    .replace(/½/g, '1/2')
-    .replace(/⅓/g, '1/3')
-    .replace(/¼/g, '1/4')
-    .replace(/⅙/g, '1/6')
-    .replace(/⅛/g, '1/8')
-
-    .replace(/(\d+) ?k(?<=\s)/gi, '$1K')
-    .replace(/(\d+) ?bpm/gi, '$1 BPM')
-    .replace(/o2jam/gi, 'O2Jam');
-}
-
-function osuModernLinks(text) {
-  return text.toString()
-    .replace(/https\:\/\/osu.ppy.sh\/s\//g, 'https://osu.ppy.sh/beatmapsets/')
-    .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9]+)/g, 'https://osu.ppy.sh/users/$1')
-    .replace(/https\:\/\/osu.ppy.sh\/u\/([0-9A-Za-z-_%\[\]]+)/g, (match, p1) => getUserLink(p1))
-    .replace(/https\:\/\/osu.ppy.sh\/b\//g, 'https://osu.ppy.sh/beatmaps/')
-    .replace(/https\:\/\/osu.ppy.sh\/forum\/t\//g, 'https://osu.ppy.sh/community/forums/topics/');
-}
-
 const discordTemplateBeatmap = loadTextResource('discord-template-beatmap.md');
 const mainThreadTemplate = loadTextResource('main-thread-template.bbcode');
 const mainThreadTemplateBeatmap = loadTextResource('main-thread-template-beatmap.bbcode');
@@ -200,7 +175,7 @@ if (generateImages) {
           BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
           CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
           CAPTAIN: beatmap.captain,
-          DESCRIPTION: fixCommonMistakes(osuModernLinks(beatmap.description)),
+          DESCRIPTION: beatmap.description,
           LINK_MODE: mode.linkName
         });
 
@@ -296,7 +271,7 @@ if (generateImages) {
         CAPTAIN: convertToMarkdown(beatmap.captain),
         CAPTAIN_LINK: getUserLink(beatmap.captain),
         CONSISTENT_CAPTAIN: LovedDocument.singleCaptain(mode),
-        DESCRIPTION: fixCommonMistakes(osuModernLinks(convertToMarkdown(beatmap.description)))
+        DESCRIPTION: convertToMarkdown(beatmap.description)
       }));
     }
 

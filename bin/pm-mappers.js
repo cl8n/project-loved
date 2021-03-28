@@ -1,6 +1,5 @@
 const config = require('../src/config');
 const Forum = require('../src/forum');
-const GameMode = require('../src/gamemode');
 const { joinList, loadTextResource, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
@@ -47,7 +46,7 @@ function sendNotifyPm(nominations) {
                 .filter((beatmap) => beatmap.excluded)
                 .map((beatmap) => `[${beatmap.version}]`)
         );
-        gameModes.push(new GameMode(nomination.game_mode));
+        gameModes.push(nomination.game_mode);
     }
 
     gameModes.sort((a, b) => a.integer - b.integer);
