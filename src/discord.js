@@ -11,10 +11,11 @@ module.exports = class {
 
         return superagent
             .post(this._webhook)
+            .query({ wait: true })
             .send({
-                username: name,
                 content: content,
-                embeds: embeds
+                embeds: embeds,
+                username: name,
             });
     }
 }
