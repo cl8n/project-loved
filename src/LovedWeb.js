@@ -18,6 +18,16 @@ module.exports = class {
 
         for (const nomination of nominations) {
             // TODO: Should be done on website
+            nomination.beatmapset_creators.sort((a, b) => {
+                if (a.id === nomination.beatmapset.creator_id)
+                    return -1;
+
+                if (b.id === nomination.beatmapset.creator_id)
+                    return 1;
+
+                return a.name.localeCompare(b.name);
+            });
+            // TODO: Should be done on website
             nomination.description = nomination.description == null ? '' :
                 nomination.description
                     .trim()

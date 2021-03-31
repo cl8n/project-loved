@@ -60,7 +60,7 @@ function sendNotifyPm(nominations) {
         };
     const guestCreators = creators
         .filter((creator) => creator.id !== beatmapset.creator_id)
-        .sort((a, b) => a.localeCompare(b));
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     Forum.sendPm(
         config.messages.pmHost,
