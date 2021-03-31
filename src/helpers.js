@@ -33,6 +33,17 @@ function escapeHtml(text) {
         .replace(/'/g, '&#039;');
 }
 
+function escapeMarkdown(text) {
+    return text.toString()
+        .replace(/\\/g, '\\\\')
+        .replace(/\*/g, '\\*')
+        .replace(/\[(.+?)\]\(/g, '\\[$1\\](')
+        .replace(/~/g, '\\~')
+        .replace(/(\s|^|\[)_/g, '$1\\_')
+        .replace(/_(\s|$|\])/g, '\\_$1')
+        .replace(/(?<!\\)\[(.*?[^\\])\](?!\()/g, '\\[$1\\]');
+}
+
 function getExcludedDiffNames(beatmapset, nomination) {
     const excludedDiffNames = [];
 
@@ -107,6 +118,7 @@ function textFromTemplate(template, vars) {
 module.exports = {
     convertToMarkdown,
     escapeHtml,
+    escapeMarkdown,
     getExcludedDiffNames,
     getUserLink,
     joinList,
