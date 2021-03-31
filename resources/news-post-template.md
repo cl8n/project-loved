@@ -12,10 +12,10 @@ if (vars.INTRO) {
 
 ${vars.INTRO}`
 } ?><?
-if (vars.VIDEO.intro) {
+if (vars.VIDEO) {
 `
 
-<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO.intro}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/${vars.VIDEO}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 } ?>
 
 ### Navigation
@@ -25,7 +25,7 @@ if (vars.VIDEO.intro) {
 - [osu!catch](#catch)
 - [osu!mania](#mania)
 
-{{BEATMAPS}}
+{{NOMINATIONS}}
 
 ---
 

@@ -1,16 +1,212 @@
-const { red, yellow } = require('chalk');
-const { existsSync, readdirSync, statSync, writeFileSync } = require('fs');
-const { extname, join } = require('path');
-const BeatmapImage = require('../src/BeatmapImage');
+const { dim, green, red } = require('chalk');
+const { existsSync } = require('fs');
+const { readdir, writeFile } = require('fs').promises;
+const { join } = require('path');
+const BeatmapsetBanner = require('../src/BeatmapsetBanner');
 const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
-const Gamemode = require('../src/gamemode');
-const { convertToMarkdown, getUserLink, joinList, loadTextResource, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
-const LovedDocument = require('../src/loved-document');
-const OsuApi = require('../src/osu-api');
+const GameMode = require('../src/gamemode');
+const { convertToMarkdown, escapeMarkdown, getUserLink, joinList, loadTextResource, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const LovedWeb = require('../src/LovedWeb');
+const { getBeatmapset } = require('../src/osu-api');
 
-function getExtraBeatmapsetInfo(beatmapset, nomination) {
+// TODO: Move to file dedicated to topic storage (also see topics-cache)
+const topicIds = existsSync(join(__dirname, '../storage/topic-ids.json'))
+  ? require('../storage/topic-ids.json')
+  : {};
+
+async function generateBanners(bannersPath, beatmapsets) {
+  console.log('Generating beatmapset banners');
+
+  mkdirTreeSync(bannersPath);
+
+  const bannerPromises = [];
+
+  for (const beatmapset of beatmapsets) {
+    const banner = new BeatmapsetBanner(beatmapset);
+    const bannerPath = join(bannersPath, `${beatmapset.id}.jpg`);
+    const bannerPromise = banner.createBanner(bannerPath)
+      .then(() => {
+        console.log(dim(green(`Created banner for ${beatmapset.title} [#${beatmapset.id}]`)));
+      })
+      .catch((reason) => {
+        console.error(dim(red(`Failed to create banner for ${beatmapset.title} [#${beatmapset.id}]:\n${dim(reason)}`)));
+      });
+
+    bannerPromises.push(bannerPromise);
+  }
+
+  await Promise.all(bannerPromises);
+}
+
+async function generateTopics(nominations, roundTitle) {
+  const discordBeatmapsetTemplate = loadTextResource('discord-template-beatmap.md');
+  const mainPostTemplate = loadTextResource('main-thread-template.bbcode');
+  const mainPostBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
+  const votingPostTemplate = loadTextResource('voting-thread-template.bbcode');
+
+  // Post in reverse so that it looks in-order on the topic listing
+  for (const gameMode of GameMode.modes().reverse()) {
+    console.log(`Posting ${gameMode.longName} forum topics`);
+
+    const discordBeatmapsetStrings = [];
+    const mainPostBeatmapsetStrings = [];
+    const mainTopicTitle = `[${gameMode.longName}] ${roundTitle}`;
+    const nominationsForMode = nominations
+      .filter((n) => n.game_mode.integer === gameMode.integer)
+      .reverse();
+    const postsByNominationId = {};
+
+    for (const nomination of nominationsForMode) {
+      const beatmapset = nomination.beatmapset;
+      const artistAndTitle = `${beatmapset.artist} - ${beatmapset.title}`;
+      const creatorsBbcode = joinList(nomination.beatmapset_creators.map((c) => `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
+      const postContent = textFromTemplate(votingPostTemplate, {
+        BEATMAPSET: artistAndTitle,
+        BEATMAPSET_EXTRAS: getExtraBeatmapsetInfo(nomination),
+        BEATMAPSET_ID: beatmapset.id,
+        CAPTAIN: nomination.description_author.name,
+        CAPTAIN_ID: nomination.description_author.id,
+        CREATORS: creatorsBbcode,
+        DESCRIPTION: nomination.description,
+        LINK_MODE: gameMode.linkName,
+        MAIN_TOPIC_TITLE: mainTopicTitle,
+      });
+      let topicId = topicIds[nomination.id];
+
+      if (topicId == null) {
+        const coverId = await Forum.storeTopicCover(beatmapset.bgPath);
+        const pollTitle = `Should ${artistAndTitle} be Loved?`;
+        let postTitle = `[${gameMode.longName}] ${artistAndTitle} by ${beatmapset.creator_name}`;
+
+        if (postTitle.length > 100) {
+          const longerMeta = beatmapset.title.length > beatmapset.artist.length ? beatmapset.title : beatmapset.artist;
+
+          // TODO: Could break if `longerMeta` appears more than once in the post title
+          //       Also could break if both artist and title are very long
+          postTitle = postTitle.replace(
+            longerMeta,
+            longerMeta.slice(0, longerMeta.length - postTitle.length + 97) + '...',
+          );
+        }
+
+        topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
+        topicIds[nomination.id] = topicId;
+
+        await writeFile(join(__dirname, '../storage/topic-ids.json'), JSON.stringify(topicIds));
+      }
+
+      postsByNominationId[nomination.id] = {
+        id: await Forum.findFirstPostId(topicId),
+        content: postContent,
+      };
+
+      mainPostBeatmapsetStrings.push(textFromTemplate(mainPostBeatmapsetTemplate, {
+        BEATMAPSET: artistAndTitle,
+        BEATMAPSET_ID: beatmapset.id,
+        CREATORS: creatorsBbcode,
+        LINK_MODE: gameMode.linkName,
+        TOPIC_ID: topicId,
+      }));
+
+      discordBeatmapsetStrings.push(textFromTemplate(discordBeatmapsetTemplate, {
+        BEATMAPSET_ID: beatmapset.id,
+        BEATMAPSET: escapeMarkdown(artistAndTitle),
+        CREATORS: joinList(nomination.beatmapset_creators.map((c) => `[${escapeMarkdown(c.name)}](<https://osu.ppy.sh/users/${c.id}>)`)),
+        LINK_MODE: gameMode.linkName,
+        TOPIC_ID: topicId,
+      }));
+    }
+
+    const mainTopicId = await Forum.storeTopic(mainTopicTitle, textFromTemplate(mainPostTemplate, {
+      BEATMAPS: mainPostBeatmapsetStrings.reverse().join('\n\n'),
+      CAPTAINS: joinList(config.captains[gameMode.shortName].map((c) => `[url=${getUserLink(c)}]${c}[/url]`)),
+      GOOGLE_FORM: config.googleForm[gameMode.shortName] || config.googleForm.main,
+      GOOGLE_SHEET: config.googleSheet[gameMode.shortName] || config.googleSheet.main,
+      RESULTS_POST: config.resultsPost[gameMode.shortName],
+      THRESHOLD: config.threshold[gameMode.shortName],
+    }));
+
+    Forum.pinTopic(mainTopicId, 'announce');
+
+    for (const nomination of nominationsForMode) {
+      const postInfo = postsByNominationId[nomination.id];
+
+      Forum.updatePost(postInfo.id, postInfo.content.replace('MAIN_TOPIC_ID', mainTopicId));
+    }
+
+    const discordWebhook = config.discord[gameMode.shortName];
+
+    if (discordWebhook) {
+      new Discord(discordWebhook).post(
+        `Project Loved: ${gameMode.longName}`,
+        // TODO: Why is this not a normal template
+        textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length })
+          + '\n\n'
+          + discordBeatmapsetStrings.reverse().join('\n\n'),
+      );
+    }
+  }
+}
+
+async function generateNews(newsPath, roundInfo) {
+  console.log('Generating news post');
+
+  const gameModeSectionStrings = [];
+  const newsGameModeTemplate = loadTextResource('news-post-template-mode.md');
+  const newsNominationTemplate = loadTextResource('news-post-template-beatmap.md');
+  const newsTemplate = loadTextResource('news-post-template.md');
+
+  for (const gameMode of GameMode.modes()) {
+    const extraInfo = roundInfo.extraGameModeInfo[gameMode.integer];
+    const nominationStrings = [];
+    const nominationsForMode = roundInfo.allNominations
+      .filter((n) => n.game_mode.integer === gameMode.integer);
+
+    for (const nomination of nominationsForMode) {
+      nominationStrings.push(textFromTemplate(newsNominationTemplate, {
+        BEATMAPSET: escapeMarkdown(`${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`),
+        BEATMAPSET_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(nomination)),
+        BEATMAPSET_ID: nomination.beatmapset.id,
+        CAPTAIN: escapeMarkdown(nomination.description_author.name),
+        CAPTAIN_ID: nomination.description_author.id,
+        CONSISTENT_CAPTAIN: extraInfo.descriptionAuthors.length === 1,
+        CREATORS: joinList(nomination.beatmapset_creators.map((c) => `[${escapeMarkdown(c.name)}](https://osu.ppy.sh/users/${c.id})`)),
+        DESCRIPTION: convertToMarkdown(nomination.description),
+        FOLDER: roundInfo.newsDirname,
+        LINK_MODE: gameMode.linkName,
+        TOPIC_ID: topicIds[nomination.id],
+      }));
+    }
+
+    gameModeSectionStrings.push(textFromTemplate(newsGameModeTemplate, {
+      // TODO: This should use extraInfo.nominators.sort(...), not config. Website needs support for either setting this explicitly or setting multiple nominators per map
+      ALL_CAPTAINS: joinList(config.captains[gameMode.shortName].map((c) => `[${escapeMarkdown(c)}](${getUserLink(c)})`)),
+      CONSISTENT_CAPTAIN: extraInfo.descriptionAuthors.length === 1 ? escapeMarkdown(extraInfo.descriptionAuthors[0].name) : null,
+      CONSISTENT_CAPTAIN_ID: extraInfo.descriptionAuthors.length === 1 ? extraInfo.descriptionAuthors[0].id : null,
+      MODE_LONG: gameMode.longName,
+      MODE_SHORT: gameMode.shortName,
+      NOMINATIONS: nominationStrings.join('\n\n'),
+      VIDEO: config.videos[gameMode.shortName],
+    }));
+  }
+
+  await writeFile(newsPath, textFromTemplate(newsTemplate, {
+    AUTHOR: config.username,
+    DATE: roundInfo.postDateString,
+    HEADER: roundInfo.introPreview,
+    INTRO: roundInfo.intro,
+    NOMINATIONS: gameModeSectionStrings.join('\n\n'),
+    OUTRO: roundInfo.outro,
+    TIME: roundInfo.postTimeString,
+    TITLE: roundInfo.title,
+    VIDEO: config.videos.intro,
+  }) + '\n');
+}
+
+// TODO: This should not depend on API v1 and shouldn't need to fetch extra data at all
+function getExtraBeatmapsetInfo(nomination) {
   let minBpm;
   let maxBpm;
   let maxLength;
@@ -20,14 +216,14 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   const keyModes = [];
   const excludedDiffNames = [];
 
-  beatmapset.forEach(beatmap => {
-    if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id))) {
+  getBeatmapset(nomination.beatmapset.id).forEach(beatmap => {
+    if (parseInt(beatmap.mode) !== nomination.game_mode.integer)
+      return;
+
+    if (nomination.beatmaps.find((b) => b.id === parseInt(beatmap.beatmap_id)).excluded) {
       excludedDiffNames.push(`[${beatmap.version}]`);
       return;
     }
-
-    if (parseInt(beatmap.mode) !== nomination.mode.integer)
-      return;
 
     beatmap.diff_size = parseInt(beatmap.diff_size);
     beatmap.bpm = Math.round(parseFloat(beatmap.bpm));
@@ -69,16 +265,16 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
     diffs = filteredDiffs;
 
   if (diffs.length > 5) {
-    if (nomination.mode.integer === 3)
+    if (nomination.game_mode.integer === 3)
       info += keyModes.sort((a, b) => a - b).map(k => `[${k}K]`).join(' ') + ', ';
 
     info += `${minDiff.toFixed(2)}★ – ${maxDiff.toFixed(2)}★`
   } else {
     diffs = diffs.sort((a, b) => a[1] - b[1]);
-    if (nomination.mode.integer === 3)
+    if (nomination.game_mode.integer === 3)
       diffs = diffs.sort((a, b) => a[0] - b[0]);
 
-    info += diffs.map(d => (nomination.mode.integer === 3 ? `[${d[0]}K] ` : '') + `${d[1].toFixed(2)}★`).join(', ');
+    info += diffs.map(d => (nomination.game_mode.integer === 3 ? `[${d[0]}K] ` : '') + `${d[1].toFixed(2)}★`).join(', ');
   }
 
   if (excludedDiffNames.length > 0)
@@ -87,213 +283,72 @@ function getExtraBeatmapsetInfo(beatmapset, nomination) {
   return info;
 }
 
-const discordTemplateBeatmap = loadTextResource('discord-template-beatmap.md');
-const mainThreadTemplate = loadTextResource('main-thread-template.bbcode');
-const mainThreadTemplateBeatmap = loadTextResource('main-thread-template-beatmap.bbcode');
-const newsPostTemplate = loadTextResource('news-post-template.md');
-const newsPostTemplateBeatmap = loadTextResource('news-post-template-beatmap.md');
-const newsPostTemplateMode = loadTextResource('news-post-template-mode.md');
-const votingThreadTemplate = loadTextResource('voting-thread-template.bbcode');
+async function loadBeatmapsetBgPaths(beatmapsetIds) {
+  const dirents = await readdir(join(__dirname, '../config'), { withFileTypes: true });
+  const paths = {};
 
-const generateImages = process.argv.includes('--images', 2);
-const generateThreads = process.argv.includes('--threads', 2);
-
-const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-')) || join(__dirname, '../output');
-
-mkdirTreeSync(join(outPath, 'news'));
-
-const newsFolder = `${config.date}-${config.title.toLowerCase().replace(/\W+/g, '-')}`;
-const document = LovedDocument.readDocument();
-
-const images =
-  readdirSync(join(__dirname, '../config'))
-    .filter(
-      f =>
-        statSync(join(__dirname, '../config', f)).isFile() &&
-        extname(f).match(/png|jpg|jpeg/i) != null
-    );
-
-const threadIds = existsSync(join(__dirname, '../storage/thread-ids.json'))
-  ? require('../storage/thread-ids.json')
-  : {};
-
-if (generateImages) {
-  console.log('Generating images');
-
-  const imagesDirname = join(outPath, `wiki/shared/news/${newsFolder}`);
-
-  for (const mode of Gamemode.modes())
-    mkdirTreeSync(join(imagesDirname, mode.shortName));
-
-  for (const imageBasename of images) {
-    const id = parseInt(imageBasename.split('.')[0]);
-    const beatmap = document.nominations[id];
-
-    if (beatmap == null) {
-      console.error(yellow(`No nomination corresponding to ${imageBasename}`));
+  for (const dirent of dirents) {
+    if (!dirent.isFile())
       continue;
-    }
 
-    const imageFilename = join(__dirname, '../config', imageBasename);
-    const outputFilename = join(imagesDirname, `${beatmap.mode.shortName}/${beatmap.imageBasename}`);
-    const beatmapImage = new BeatmapImage(beatmap, imageFilename);
+    const filenameMatch = dirent.name.match(/(\d+)\.(?:jpeg|jpg|png)/i);
 
-    beatmapImage.createBanner(outputFilename)
-      .catch((reason) => {
-        console.error(red(`Failed to create banner image for ${beatmap.title} (#${beatmap.id}):\n${reason}`));
-      });
+    if (filenameMatch != null)
+      paths[parseInt(filenameMatch[1])] = join(__dirname, '../config', filenameMatch[0]);
   }
+
+  let error = false;
+
+  for (const beatmapsetId of beatmapsetIds) {
+    if (paths[beatmapsetId] == null) {
+      console.error(red(`Missing background image for beatmapset #${beatmapsetId}`));
+      error = true;
+    }
+  }
+
+  if (error)
+    throw new Error();
+
+  return paths;
 }
 
-(async function () {
-  if (generateThreads) {
-    console.log('Posting threads');
+(async () => {
+  const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-')) || join(__dirname, '../output');
+  const shouldGenerateBanners = process.argv.includes('--images', 2);
+  const shouldGenerateTopics = process.argv.includes('--threads', 2);
+  const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
 
-    for (let mode of Gamemode.modes().reverse()) {
-      const modeBeatmaps = [...Object.values(document.nominations), ...document.otherModeNominations]
-        .filter(bm => bm.mode.integer === mode.integer)
-        .sort((a, b) => a.position - b.position)
-        .reverse();
-      const posts = {};
-      const mainPostTitle = `[${mode.longName}] ${config.title}`;
-      const mainPostBeatmaps = [];
-      const discordBeatmaps = [];
+  if (shouldGenerateBanners || shouldGenerateTopics) {
+    const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset.id);
+    const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsetIds)
+      .catch(() => process.exit(1));
 
-      for (let beatmap of modeBeatmaps) {
-        let postTitle = `[${mode.longName}] ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]}`;
-
-        if (postTitle.length > 100) {
-          const longerMeta = beatmap.title.length > beatmap.artist.length ? beatmap.title : beatmap.artist;
-
-          postTitle = postTitle.replace(longerMeta, longerMeta.slice(0, longerMeta.length - postTitle.length + 100 - 4) + ' ...');
-        }
-
-        const postContent = textFromTemplate(votingThreadTemplate, {
-          MAIN_THREAD_TITLE: mainPostTitle,
-          BEATMAP_EXTRAS: getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap),
-          BEATMAPSET_ID: beatmap.id,
-          BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
-          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
-          CAPTAIN: beatmap.captain,
-          DESCRIPTION: beatmap.description,
-          LINK_MODE: mode.linkName
-        });
-
-        const pollTitle = `Should ${beatmap.artist} - ${beatmap.title} by ${beatmap.creators[0]} be Loved?`;
-
-        let coverFile = images.find(f => parseInt(f.split('.')[0]) === beatmap.id);
-        coverFile = join(__dirname, `../config/${coverFile}`);
-
-        let topicId;
-        if (threadIds[beatmap.indexer] == null) {
-          const coverId = await Forum.storeTopicCover(coverFile);
-          topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
-
-          threadIds[beatmap.indexer] = topicId;
-          writeFileSync(join(__dirname, '../storage/thread-ids.json'), JSON.stringify(threadIds, null, 4));
-        } else
-          topicId = threadIds[beatmap.indexer];
-
-        mainPostBeatmaps.push(textFromTemplate(mainThreadTemplateBeatmap, {
-          BEATMAPSET_ID: beatmap.id,
-          BEATMAPSET: `${beatmap.artist} - ${beatmap.title}`,
-          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[url=${getUserLink(name)}]${name}[/url]`)),
-          LINK_MODE: mode.linkName,
-          THREAD_ID: topicId
-        }));
-
-        discordBeatmaps.push(textFromTemplate(discordTemplateBeatmap, {
-          BEATMAPSET_ID: beatmap.id,
-          BEATMAPSET: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-          CREATORS: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](<${getUserLink(name)}>)`)),
-          LINK_MODE: mode.linkName,
-          THREAD_ID: topicId
-        }));
-
-        const postId = await Forum.findFirstPostId(topicId);
-
-        posts[beatmap.indexer] = {
-          id: postId,
-          content: postContent
-        };
-      }
-
-      const mainPostContent = textFromTemplate(mainThreadTemplate, {
-        GOOGLE_FORM: config.googleForm[mode.shortName] || config.googleForm.main,
-        GOOGLE_SHEET: config.googleSheet[mode.shortName] || config.googleSheet.main,
-        RESULTS_POST: config.resultsPost[mode.shortName],
-        THRESHOLD: config.threshold[mode.shortName],
-        CAPTAINS: joinList(config.captains[mode.shortName].map((name) => `[url=${getUserLink(name)}]${name}[/url]`)),
-        BEATMAPS: mainPostBeatmaps.reverse().join('\n\n')
-      });
-
-      const mainTopicId = await Forum.storeTopic(mainPostTitle, mainPostContent);
-      Forum.pinTopic(mainTopicId, 'announce');
-
-      for (let beatmap of modeBeatmaps) {
-        Forum.updatePost(
-          posts[beatmap.indexer].id,
-          posts[beatmap.indexer].content.replace('MAIN_TOPIC_ID', mainTopicId)
-        );
-      }
-
-      if (config.discord[mode.shortName])
-        new Discord(config.discord[mode.shortName]).post(
-          `Project Loved: ${mode.longName}`,
-          `${textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmaps.length })}\n\n${discordBeatmaps.reverse().join('\n\n')}`
-        );
+    for (const nomination of roundInfo.allNominations) {
+      nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
     }
   }
 
-  console.log('Generating news post');
+  const postTimeIsoString = roundInfo.postTime.toISOString();
+  roundInfo.postDateString = postTimeIsoString.slice(0, 10);
+  roundInfo.postTimeString = postTimeIsoString.slice(11, 19);
+  roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
 
-  const beatmapSectionModes = [];
+  if (shouldGenerateBanners) {
+    await generateBanners(
+      join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
+      roundInfo.nominations.map((n) => n.beatmapset),
+    );
+  }
 
-  Gamemode.modes().forEach(function (mode) {
-    const postBeatmaps = [];
+  if (shouldGenerateTopics) {
+    await generateTopics(roundInfo.allNominations, roundInfo.title);
+  }
 
-    const modeBeatmaps = [...Object.values(document.nominations), ...document.otherModeNominations]
-      .filter(bm => bm.mode.integer === mode.integer)
-      .sort((a, b) => a.position - b.position);
+  // TODO: Rewrite with async functions?
+  mkdirTreeSync(join(outPath, 'news'));
 
-    for (let beatmap of modeBeatmaps) {
-      postBeatmaps.push(textFromTemplate(newsPostTemplateBeatmap, {
-        DATE: config.date,
-        FOLDER: newsFolder,
-        MODE: (beatmap.hostMode || mode).shortName, // this is only used in the image link
-        LINK_MODE: mode.linkName,
-        IMAGE: beatmap.hostMode == null ? beatmap.imageBasename : document.nominations[beatmap.id].imageBasename,
-        TOPIC_ID: threadIds[beatmap.indexer],
-        BEATMAP: convertToMarkdown(`${beatmap.artist} - ${beatmap.title}`),
-        BEATMAP_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(OsuApi.getBeatmapset(beatmap.id), beatmap)),
-        BEATMAP_ID: beatmap.id,
-        CREATORS_MD: joinList(beatmap.creators.map((name) => name === 'et al.' ? name : `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
-        CAPTAIN: convertToMarkdown(beatmap.captain),
-        CAPTAIN_LINK: getUserLink(beatmap.captain),
-        CONSISTENT_CAPTAIN: LovedDocument.singleCaptain(mode),
-        DESCRIPTION: convertToMarkdown(beatmap.description)
-      }));
-    }
-
-    beatmapSectionModes.push(textFromTemplate(newsPostTemplateMode, {
-      MODE_SHORT: mode.shortName,
-      MODE_LONG: mode.longName,
-      VIDEO: config.videos[mode.shortName],
-      ALL_CAPTAINS: joinList(config.captains[mode.shortName].map((name) => `[${convertToMarkdown(name)}](${getUserLink(name)})`)),
-      CONSISTENT_CAPTAINS: LovedDocument.singleCaptain(mode),
-      BEATMAPS: postBeatmaps.join('\n\n')
-    }));
-  });
-
-  writeFileSync(join(outPath, `news/${newsFolder}.md`), textFromTemplate(newsPostTemplate, {
-    TITLE: config.title,
-    DATE: config.date,
-    TIME: config.time,
-    HEADER: document.header,
-    INTRO: document.intro,
-    VIDEO: config.videos,
-    OUTRO: document.outro,
-    BEATMAPS: beatmapSectionModes.join('\n\n'),
-    AUTHOR: config.username
-  }) + '\n');
+  await generateNews(
+    join(outPath, `news/${roundInfo.newsDirname}.md`),
+    roundInfo,
+  );
 })();

@@ -1,10 +1,10 @@
-[![](/wiki/shared/news/{{FOLDER}}/{{MODE}}/{{IMAGE}})](https://osu.ppy.sh/community/forums/topics/{{TOPIC_ID}})
+[![](/wiki/shared/news/{{FOLDER}}/{{BEATMAPSET_ID}}.jpg)](https://osu.ppy.sh/community/forums/topics/{{TOPIC_ID}})
 
-[{{BEATMAP}}](https://osu.ppy.sh/beatmapsets/{{BEATMAP_ID}}#{{LINK_MODE}}) by {{CREATORS_MD}}\
-{{BEATMAP_EXTRAS}}<?
+[{{BEATMAPSET}}](https://osu.ppy.sh/beatmapsets/{{BEATMAPSET_ID}}#{{LINK_MODE}}) by {{CREATORS}}\
+{{BEATMAPSET_EXTRAS}}<?
 if (!vars.CONSISTENT_CAPTAIN) {
 `\\
-*description written by [${vars.CAPTAIN}](${vars.CAPTAIN_LINK})*`
+*description written by [${vars.CAPTAIN}](https://osu.ppy.sh/users/${vars.CAPTAIN_ID})*`
 } ?>
 
 {{DESCRIPTION}}

@@ -15,6 +15,14 @@ module.exports = class {
             .get(`${baseUrl}/data`)
             .query({ roundId });
         const { nominations, round } = response.body;
+        const extraGameModeInfo = {};
+
+        for (const gameMode of GameMode.modes()) {
+            extraGameModeInfo[gameMode.integer] = {
+                descriptionAuthors: [],
+                nominators: [],
+            };
+        }
 
         for (const nomination of nominations) {
             // TODO: Should be done on website
@@ -45,19 +53,26 @@ module.exports = class {
                     .replace(/\b(\d+) ?bpm\b/gi, '$1 BPM')
                     .replace(/o2jam/gi, 'O2Jam');
             nomination.game_mode = new GameMode(nomination.game_mode);
+
+            const extras = extraGameModeInfo[nomination.game_mode.integer];
+
+            if (extras.descriptionAuthors.find((a) => a.id === nomination.description_author.id) == null)
+                extras.descriptionAuthors.push(nomination.description_author);
+
+            if (extras.nominators.find((n) => n.id === nomination.nominator.id) == null)
+                extras.nominators.push(nomination.nominator);
         }
 
         return {
-            intro: round.news_intro == null ? '' : round.news_intro,
-            introPreview: round.news_intro_preview == null ? '' : round.news_intro_preview,
-            // TODO: does not exist on server yet
-            //outro: round.news_outro == null ? '' : round.news_outro,
-            postTime: new Date(round.news_posted_at),
-            title: `Project Loved: ${round.name}`,
-
             allNominations: nominations,
             childNominations: nominations.filter((n) => n.parentId != null),
+            extraGameModeInfo,
+            intro: round.news_intro == null ? '' : round.news_intro,
+            introPreview: round.news_intro_preview == null ? '' : round.news_intro_preview,
             nominations: nominations.filter((n) => n.parentId == null),
+            outro: round.news_outro == null ? '' : round.news_outro,
+            postTime: new Date(round.news_posted_at),
+            title: `Project Loved: ${round.name}`,
         };
     }
 
