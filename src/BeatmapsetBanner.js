@@ -53,19 +53,18 @@ function drawImageCoverParams(image, parentWidth, parentHeight) {
 }
 
 module.exports = class {
-    constructor(beatmap, filename) {
-        this.beatmap = beatmap;
-        this.sourceFilename = filename;
+    constructor(beatmapset) {
+        this.beatmapset = beatmapset;
     }
 
-    async createBanner(outputFilename) {
+    async createBanner(outputPath) {
         const canvas = createCanvas(bannerWidth, bannerHeight);
         const context = canvas.getContext('2d', { alpha: false });
-        const beatmapImage = await loadImage(this.sourceFilename);
+        const backgroundImage = await loadImage(this.beatmapset.bgPath);
         const overlayImage = await getOverlayImage();
 
         context.quality = 'best';
-        context.drawImage(...drawImageCoverParams(beatmapImage, bannerWidth, bannerHeight));
+        context.drawImage(...drawImageCoverParams(backgroundImage, bannerWidth, bannerHeight));
         context.drawImage(overlayImage, 0, 0);
         context.fillStyle = '#fff';
         context.font = '21px Torus';
@@ -74,7 +73,7 @@ module.exports = class {
         context.shadowOffsetY = 1;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.fillText(this.beatmap.title, bannerWidth / 2, bannerHeight - 26);
+        context.fillText(this.beatmapset.title, bannerWidth / 2, bannerHeight - 26);
 
         const jpegStream = canvas.createJPEGStream({ chromaSubsampling: false, quality: 1 });
         const jpegRecompressFilename = await getJpegRecompressFilename();
@@ -84,7 +83,7 @@ module.exports = class {
                 '--accurate',
                 '--strip',
                 '-',
-                outputFilename,
+                outputPath,
             ], (error, _, stderr) => {
                 if (error)
                     reject(`jpeg-recompress exited with code ${error.code}:\n${stderr}`);
