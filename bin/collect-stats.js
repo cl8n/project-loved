@@ -13,6 +13,9 @@ const pollData = [
         no_count: 127,
     },
 ];
+// These polls were cut off early, but not deleted for whatever reason.
+const skipTopics = [699504, 904545];
+
 const topicsCachePath = path.join(__dirname, '../storage/topics-cache.json');
 const topicsCache = fs.existsSync(topicsCachePath)
     ? JSON.parse(fs.readFileSync(topicsCachePath, 'utf8'))
@@ -32,6 +35,9 @@ function cacheTopic(id, content) {
         topics = [...new Set([...topics, ...await Forum.getTopics(120)])];
 
     for (let topicId of topics) {
+        if (skipTopics.includes(parseInt(topicId)))
+            continue;
+
         let topic = topicsCache[topicId];
         let topicFresh = false;
 
@@ -58,9 +64,15 @@ function cacheTopic(id, content) {
             continue;
         }
 
-        // Sanity check to make sure we're viewing a completed poll
-        if (topic.indexOf('Polling ended ') === -1) {
+        if (topic.indexOf('<div class="forum-poll">') === -1) {
             console.log(yellow(`Skipping non-poll topic "${title}" (#${topicId})`));
+            continue;
+        }
+
+        const endTimeMatch = topic.match(/Polling ended\s+<time[^>]+?datetime='(.+?)'/);
+
+        if (endTimeMatch == null) {
+            console.error(yellow(`Skipping incomplete poll topic "${title}" (#${topicId})`));
             continue;
         }
 
@@ -92,13 +104,6 @@ function cacheTopic(id, content) {
         } else {
             voteCounts[0] = pollMatch.yes_count;
             voteCounts[1] = pollMatch.no_count;
-        }
-
-        const endTimeMatch = topic.match(/Polling ended\s+<time[^>]+?datetime='(.+?)'/);
-
-        if (endTimeMatch == null) {
-            console.error(red(`Couldn't find poll end time for topic "${title}" (#${topicId})`));
-            continue;
         }
 
         polls.push({
