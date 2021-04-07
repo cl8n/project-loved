@@ -40,7 +40,7 @@ module.exports = class {
                 return a.name.localeCompare(b.name);
             });
             // TODO: Should be done on website
-            nomination.description = nomination.description == null ? '' :
+            nomination.description = nomination.description == null ? null :
                 nomination.description
                     .trim()
                     .replace(/\r\n?/g, '\n')
