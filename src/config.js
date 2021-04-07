@@ -3,7 +3,6 @@ const config = require('../config/config.json');
 
 let errors = '';
 const expected = [
-  'captains',
   'cloudflare',
   'csrf',
   'csrfOld',
@@ -21,7 +20,7 @@ const expected = [
   'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
-const unused = ['date', 'time', 'title'];
+const unused = ['captains', 'date', 'time', 'title'];
 
 function addError(message) {
   errors += `  ${message}\n`;

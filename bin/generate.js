@@ -1,4 +1,4 @@
-const { dim, green, red } = require('chalk');
+const { dim, green, red, yellow } = require('chalk');
 const { existsSync } = require('fs');
 const { readdir, writeFile } = require('fs').promises;
 const { join } = require('path');
@@ -7,7 +7,7 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { convertToMarkdown, escapeMarkdown, getUserLink, joinList, loadTextResource, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, escapeMarkdown, joinList, loadTextResource, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 const { getBeatmapset } = require('../src/osu-api');
 
@@ -40,7 +40,27 @@ async function generateBanners(bannersPath, beatmapsets) {
   await Promise.all(bannerPromises);
 }
 
-async function generateTopics(nominations, roundTitle) {
+async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
+  console.log('Generating forum topics');
+
+  let error = false;
+
+  // TODO: Check states instead
+  for (const nomination of nominations) {
+    if (nomination.description == null) {
+      console.error(red(`Missing description for nomination #${nomination.id}`));
+      error = true;
+    }
+
+    if (nomination.beatmapset_creators.length === 0) {
+      console.error(red(`Missing creators for nomination #${nomination.id}`));
+      error = true;
+    }
+  }
+
+  if (error)
+    process.exit(1);
+
   const discordBeatmapsetTemplate = loadTextResource('discord-template-beatmap.md');
   const mainPostTemplate = loadTextResource('main-thread-template.bbcode');
   const mainPostBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
@@ -51,6 +71,7 @@ async function generateTopics(nominations, roundTitle) {
     console.log(`Posting ${gameMode.longName} forum topics`);
 
     const discordBeatmapsetStrings = [];
+    const extraInfo = extraGameModeInfo[gameMode.integer];
     const mainPostBeatmapsetStrings = [];
     const mainTopicTitle = `[${gameMode.longName}] ${roundTitle}`;
     const nominationsForMode = nominations
@@ -121,7 +142,7 @@ async function generateTopics(nominations, roundTitle) {
 
     const mainTopicId = await Forum.storeTopic(mainTopicTitle, textFromTemplate(mainPostTemplate, {
       BEATMAPS: mainPostBeatmapsetStrings.reverse().join('\n\n'),
-      CAPTAINS: joinList(config.captains[gameMode.shortName].map((c) => `[url=${getUserLink(c)}]${c}[/url]`)),
+      CAPTAINS: joinList(extraInfo.nominators.map((n) => `[url=https://osu.ppy.sh/users/${n.id}]${n.name}[/url]`)),
       GOOGLE_FORM: config.googleForm[gameMode.shortName] || config.googleForm.main,
       GOOGLE_SHEET: config.googleSheet[gameMode.shortName] || config.googleSheet.main,
       RESULTS_POST: config.resultsPost[gameMode.shortName],
@@ -165,6 +186,22 @@ async function generateNews(newsPath, roundInfo) {
       .filter((n) => n.game_mode.integer === gameMode.integer);
 
     for (const nomination of nominationsForMode) {
+      const errors = [];
+
+      // TODO: check states instead
+      if (nomination.description == null) {
+        errors.push('missing description');
+      }
+
+      if (nomination.beatmapset_creators.length === 0) {
+        errors.push('missing creators');
+      }
+
+      if (errors.length > 0) {
+        console.error(yellow(`Skipping nomination #${nomination.id} with ${joinList(errors)}`));
+        continue;
+      }
+
       nominationStrings.push(textFromTemplate(newsNominationTemplate, {
         BEATMAPSET: escapeMarkdown(`${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`),
         BEATMAPSET_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(nomination)),
@@ -181,8 +218,7 @@ async function generateNews(newsPath, roundInfo) {
     }
 
     gameModeSectionStrings.push(textFromTemplate(newsGameModeTemplate, {
-      // TODO: This should use extraInfo.nominators.sort(...), not config. Website needs support for either setting this explicitly or setting multiple nominators per map
-      ALL_CAPTAINS: joinList(config.captains[gameMode.shortName].map((c) => `[${escapeMarkdown(c)}](${getUserLink(c)})`)),
+      ALL_CAPTAINS: joinList(extraInfo.nominators.map((n) => `[${escapeMarkdown(n.name)}](https://osu.ppy.sh/users/${n.id})`)),
       CONSISTENT_CAPTAIN: extraInfo.descriptionAuthors.length === 1 ? escapeMarkdown(extraInfo.descriptionAuthors[0].name) : null,
       CONSISTENT_CAPTAIN_ID: extraInfo.descriptionAuthors.length === 1 ? extraInfo.descriptionAuthors[0].id : null,
       MODE_LONG: gameMode.longName,
@@ -307,7 +343,7 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   }
 
   if (error)
-    throw new Error();
+    process.exit(1);
 
   return paths;
 }
@@ -342,8 +378,7 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
 
   if (shouldGenerateBanners || shouldGenerateTopics) {
     const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset.id);
-    const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsetIds)
-      .catch(() => process.exit(1));
+    const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsetIds);
 
     for (const nomination of roundInfo.allNominations) {
       nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
@@ -363,7 +398,7 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   }
 
   if (shouldGenerateTopics) {
-    await generateTopics(roundInfo.allNominations, roundInfo.title);
+    await generateTopics(roundInfo.allNominations, roundInfo.title, roundInfo.extraGameModeInfo);
   }
 
   // TODO: Rewrite with async functions?

@@ -69,6 +69,10 @@ module.exports = class {
             }
         }
 
+        for (const gameMode of GameMode.modes()) {
+            extraGameModeInfo[gameMode.integer].nominators.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
         return {
             allNominations: nominations,
             childNominations: nominations.filter((n) => n.parentId != null),

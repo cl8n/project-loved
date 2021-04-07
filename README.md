@@ -28,7 +28,6 @@ A typical round of Project Loved involves:
 
 | Option | Description |
 | :-- | :-- |
-| `captains.<mode>` | Captains credited for selecting the maps |
 | `cloudflare.id` | https://osu.ppy.sh's `__cfduid` cookie |
 | `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie |
 | `csrf` | https://osu.ppy.sh's `XSRF-TOKEN` cookie |
