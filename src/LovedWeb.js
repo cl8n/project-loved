@@ -1,3 +1,4 @@
+const { yellow } = require('chalk');
 const superagent = require('superagent');
 const GameMode = require('./gamemode');
 
@@ -18,6 +19,9 @@ module.exports = class {
         const extraGameModeInfo = {};
 
         for (const gameMode of GameMode.modes()) {
+            if (!round.game_modes[gameMode.integer].nominations_locked)
+                console.error(yellow(`${gameMode.longName} nominations are not locked on loved.sh`));
+
             extraGameModeInfo[gameMode.integer] = {
                 descriptionAuthors: [],
                 nominators: [],
@@ -56,11 +60,13 @@ module.exports = class {
 
             const extras = extraGameModeInfo[nomination.game_mode.integer];
 
-            if (extras.descriptionAuthors.find((a) => a.id === nomination.description_author.id) == null)
+            if (nomination.description_author != null && extras.descriptionAuthors.find((a) => a.id === nomination.description_author.id) == null)
                 extras.descriptionAuthors.push(nomination.description_author);
 
-            if (extras.nominators.find((n) => n.id === nomination.nominator.id) == null)
-                extras.nominators.push(nomination.nominator);
+            for (const nominator of nomination.nominators) {
+                if (extras.nominators.find((n) => n.id === nominator.id) == null)
+                    extras.nominators.push(nominator);
+            }
         }
 
         return {
@@ -78,6 +84,14 @@ module.exports = class {
 
     async getRoundsAvailable() {
         const response = await this._request.get(`${baseUrl}/rounds-available`);
+
+        return response.body;
+    }
+
+    async updateBeatmapsets(roundId) {
+        const response = await this._request
+            .post(`${baseUrl}/update-beatmapsets`)
+            .send({ roundId });
 
         return response.body;
     }

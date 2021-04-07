@@ -316,7 +316,29 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-')) || join(__dirname, '../output');
   const shouldGenerateBanners = process.argv.includes('--images', 2);
   const shouldGenerateTopics = process.argv.includes('--threads', 2);
-  const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
+  const lovedWeb = new LovedWeb(config.lovedApiKey);
+
+  if (shouldGenerateTopics) {
+    console.log('Updating beatmapsets on loved.sh');
+
+    let error = false;
+    const messages = await lovedWeb.updateBeatmapsets(config.lovedRoundId);
+
+    for (const message of messages) {
+      if (message.startsWith('Failed')) {
+        console.error(red(message));
+        error = true;
+      } else {
+        console.log(dim(green(message)));
+      }
+    }
+
+    if (error) {
+      process.exit(1);
+    }
+  }
+
+  const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
 
   if (shouldGenerateBanners || shouldGenerateTopics) {
     const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset.id);
