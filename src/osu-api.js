@@ -7,10 +7,6 @@ let beatmapsetStorage;
 try { beatmapsetStorage = require('../storage/beatmapsets.json') }
 catch { beatmapsetStorage = {beatmapsets: {}} }
 
-let userStorage;
-try { userStorage = require('../storage/users.json') }
-catch { userStorage = {users: {}, ids: {}} }
-
 function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
@@ -46,29 +42,4 @@ module.exports.getBeatmapset = function (beatmapsetId) {
     writeFileSync(path.join(__dirname, '../storage/beatmapsets.json'), JSON.stringify(beatmapsetStorage, null, 4));
 
     return clone(result);
-}
-
-module.exports.getUser = function (userIdOrName, byName = false) {
-    if (byName && userStorage.ids[userIdOrName] != null)
-        return clone(userStorage.users[userStorage.ids[userIdOrName]]);
-    if (!byName && userStorage.users[userIdOrName] != null)
-        return clone(userStorage.users[userIdOrName]);
-
-    const result = osuApiRequestSync('get_user', {
-        u: userIdOrName,
-        type: byName ? 'string' : 'id'
-    });
-
-    if (result.length === 0)
-        throw new Error(`User not found: ${userIdOrName}`);
-
-    // We will never need to work with events, and they take up a lot of space
-    delete result[0].events;
-
-    userStorage.users[result[0].user_id] = result[0];
-    userStorage.ids[result[0].username] = result[0].user_id;
-
-    writeFileSync(path.join(__dirname, '../storage/users.json'), JSON.stringify(userStorage, null, 4));
-
-    return clone(result[0]);
 }

@@ -1,6 +1,5 @@
 const { existsSync, mkdirSync, readFileSync } = require('fs');
 const { dirname, join } = require('path');
-const OsuApi = require('./osu-api');
 
 function convertToMarkdown(bbcode) {
     return bbcode.toString()
@@ -52,12 +51,6 @@ function getExcludedDiffNames(beatmapset, nomination) {
     });
 
     return excludedDiffNames;
-}
-
-function getUserLink(name) {
-    const user = OsuApi.getUser(name, true);
-
-    return `https://osu.ppy.sh/users/${user.user_id}`;
 }
 
 function joinList(array) {
@@ -119,7 +112,6 @@ module.exports = {
     escapeHtml,
     escapeMarkdown,
     getExcludedDiffNames,
-    getUserLink,
     joinList,
     loadTextResource,
     mkdirTreeSync,
