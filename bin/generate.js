@@ -85,7 +85,7 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
       const creatorsBbcode = joinList(nomination.beatmapset_creators.map((c) => `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
       const postContent = textFromTemplate(votingPostTemplate, {
         BEATMAPSET: artistAndTitle,
-        BEATMAPSET_EXTRAS: getExtraBeatmapsetInfo(nomination),
+        BEATMAPSET_EXTRAS: await getExtraBeatmapsetInfo(nomination),
         BEATMAPSET_ID: beatmapset.id,
         CAPTAIN: nomination.description_author.name,
         CAPTAIN_ID: nomination.description_author.id,
@@ -204,7 +204,7 @@ async function generateNews(newsPath, roundInfo) {
 
       nominationStrings.push(textFromTemplate(newsNominationTemplate, {
         BEATMAPSET: escapeMarkdown(`${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`),
-        BEATMAPSET_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(nomination)),
+        BEATMAPSET_EXTRAS: convertToMarkdown(await getExtraBeatmapsetInfo(nomination)),
         BEATMAPSET_ID: nomination.beatmapset.id,
         CAPTAIN: escapeMarkdown(nomination.description_author.name),
         CAPTAIN_ID: nomination.description_author.id,
@@ -242,7 +242,7 @@ async function generateNews(newsPath, roundInfo) {
 }
 
 // TODO: This should not depend on API v1 and shouldn't need to fetch extra data at all
-function getExtraBeatmapsetInfo(nomination) {
+async function getExtraBeatmapsetInfo(nomination) {
   let minBpm;
   let maxBpm;
   let maxLength;
@@ -252,7 +252,7 @@ function getExtraBeatmapsetInfo(nomination) {
   const keyModes = [];
   const excludedDiffNames = [];
 
-  getBeatmapset(nomination.beatmapset.id).forEach(beatmap => {
+  (await getBeatmapset(nomination.beatmapset.id)).forEach(beatmap => {
     if (parseInt(beatmap.mode) !== nomination.game_mode.integer)
       return;
 

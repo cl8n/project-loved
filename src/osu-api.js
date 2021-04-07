@@ -1,6 +1,6 @@
-const { writeFileSync } = require('fs');
+const { writeFile } = require('fs').promises;
 const path = require('path');
-const syncRequest = require('sync-request');
+const superagent = require('superagent');
 const config = require('./config');
 
 let beatmapsetStorage;
@@ -11,35 +11,31 @@ function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
-function osuApiRequestSync(endpoint, params) {
-    let url = `https://osu.ppy.sh/api/${endpoint}?k=${config.osuApiKey}`;
+async function osuApiRequest(endpoint, params) {
+    const response = await superagent
+        .get(`https://osu.ppy.sh/api/${endpoint}`)
+        .query({ ...params, k: config.osuApiKey })
+        .ok((response) => response.status === 200 || response.status === 401);
 
-    Object.keys(params).forEach(key => {
-        url += `&${key}=${params[key]}`;
-    });
-
-    const response = syncRequest('GET', url);
-
-    if (response.statusCode === 401)
+    if (response.status === 401) {
         throw new Error('Invalid osu! API key');
+    }
 
-    return JSON.parse(response.getBody());
+    return response.body;
 }
 
-module.exports.getBeatmapset = function (beatmapsetId) {
+module.exports.getBeatmapset = async function (beatmapsetId) {
     if (beatmapsetStorage.beatmapsets[beatmapsetId] != null)
         return clone(beatmapsetStorage.beatmapsets[beatmapsetId]);
 
-    const result = osuApiRequestSync('get_beatmaps', {
-        s: beatmapsetId
-    });
+    const result = await osuApiRequest('get_beatmaps', { s: beatmapsetId });
 
     if (result.length === 0)
         throw new Error(`Beatmapset not found: ${beatmapsetId}`);
 
     beatmapsetStorage.beatmapsets[result[0].beatmapset_id] = result;
 
-    writeFileSync(path.join(__dirname, '../storage/beatmapsets.json'), JSON.stringify(beatmapsetStorage, null, 4));
+    await writeFile(path.join(__dirname, '../storage/beatmapsets.json'), JSON.stringify(beatmapsetStorage, null, 4));
 
     return clone(result);
 }
