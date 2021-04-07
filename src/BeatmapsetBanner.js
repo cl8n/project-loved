@@ -52,7 +52,7 @@ function drawImageCoverParams(image, parentWidth, parentHeight) {
     ];
 }
 
-module.exports = class {
+module.exports = class BeatmapsetBanner {
     constructor(beatmapset) {
         this.beatmapset = beatmapset;
     }

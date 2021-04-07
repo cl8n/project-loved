@@ -4,15 +4,17 @@ const GameMode = require('./gamemode');
 
 const baseUrl = 'https://loved.sh/api/local-interop';
 
-module.exports = class {
+module.exports = class LovedWeb {
+    #request;
+
     constructor(key) {
-        this._request = superagent
+        this.#request = superagent
             .agent()
             .set('X-Loved-InteropKey', key);
     }
 
     async getRoundInfo(roundId) {
-        const response = await this._request
+        const response = await this.#request
             .get(`${baseUrl}/data`)
             .query({ roundId });
         const { nominations, round } = response.body;
@@ -87,13 +89,13 @@ module.exports = class {
     }
 
     async getRoundsAvailable() {
-        const response = await this._request.get(`${baseUrl}/rounds-available`);
+        const response = await this.#request.get(`${baseUrl}/rounds-available`);
 
         return response.body;
     }
 
     async updateBeatmapsets(roundId) {
-        const response = await this._request
+        const response = await this.#request
             .post(`${baseUrl}/update-beatmapsets`)
             .send({ roundId });
 
