@@ -45,6 +45,15 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
 
   let error = false;
 
+  for (const gameMode of GameMode.modes()) {
+    const nominationsForMode = nominations.filter((n) => n.game_mode.integer === gameMode.integer);
+
+    if (nominationsForMode.length === 0) {
+      console.error(red(`No nominations for ${gameMode.longName}`));
+      error = true;
+    }
+  }
+
   // TODO: Check states instead
   for (const nomination of nominations) {
     if (nomination.description == null) {
@@ -184,6 +193,11 @@ async function generateNews(newsPath, roundInfo) {
     const nominationStrings = [];
     const nominationsForMode = roundInfo.allNominations
       .filter((n) => n.game_mode.integer === gameMode.integer);
+
+    if (nominationsForMode.length === 0) {
+      console.error(yellow(`Skipping ${gameMode.longName}, there are no nominations`));
+      continue;
+    }
 
     for (const nomination of nominationsForMode) {
       const errors = [];
