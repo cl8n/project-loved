@@ -76,13 +76,13 @@ function loadTextResource(basename) {
 }
 
 function maxOf(array, key) {
-    const reducer = (prev, curr) => prev[key] > curr[key] ? prev[key] : curr[key];
+    const reducer = (prev, curr) => prev[key] > curr[key] ? prev : curr;
 
     return array.reduce(reducer)[key];
 }
 
 function minOf(array, key) {
-    const reducer = (prev, curr) => prev[key] < curr[key] ? prev[key] : curr[key];
+    const reducer = (prev, curr) => prev[key] < curr[key] ? prev : curr;
 
     return array.reduce(reducer)[key];
 }
