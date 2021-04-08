@@ -21,12 +21,16 @@ module.exports = class LovedWeb {
         const extraGameModeInfo = {};
 
         for (const gameMode of GameMode.modes()) {
-            if (!round.game_modes[gameMode.integer].nominations_locked)
+            const gameModeInfo = round.game_modes[gameMode.integer];
+
+            if (!gameModeInfo.nominations_locked)
                 console.error(yellow(`${gameMode.longName} nominations are not locked on loved.sh`));
 
             extraGameModeInfo[gameMode.integer] = {
                 descriptionAuthors: [],
                 nominators: [],
+                threshold: gameModeInfo.voting_threshold,
+                thresholdFormatted: (gameModeInfo.voting_threshold * 100).toFixed() + '%',
             };
         }
 

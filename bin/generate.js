@@ -154,7 +154,7 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
       GOOGLE_FORM: config.googleForm[gameMode.shortName] || config.googleForm.main,
       GOOGLE_SHEET: config.googleSheet[gameMode.shortName] || config.googleSheet.main,
       RESULTS_POST: config.resultsPost[gameMode.shortName],
-      THRESHOLD: config.threshold[gameMode.shortName],
+      THRESHOLD: extraInfo.thresholdFormatted,
     }));
 
     Forum.pinTopic(mainTopicId, 'announce');

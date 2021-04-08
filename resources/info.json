@@ -17,11 +17,5 @@
         "pmMetadata": "Project Loved: Changes required on your beatmap",
         "resultsPassed": "This map passed the voting! It will be moved to Loved soon.",
         "resultsFailed": "This map did not pass the voting."
-    },
-    "threshold": {
-        "osu": "85%",
-        "taiko": "80%",
-        "catch": "80%",
-        "mania": "80%"
     }
 }

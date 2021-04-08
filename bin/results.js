@@ -3,6 +3,7 @@ const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
 const { loadTextResource, textFromTemplate } = require('../src/helpers');
+const LovedWeb = require('../src/LovedWeb');
 
 const keepWatches = process.argv.includes('--keep-watches', 2);
 const resultsPostTemplate = loadTextResource('results-post-template.bbcode');
@@ -30,6 +31,7 @@ function mapResultsToEmbed(beatmapset, passed) {
 (async function () {
     console.log('Posting results');
 
+    const { extraGameModeInfo } = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
     const mainTopics = await Forum.getModeTopics(120);
     const mainTopicsReplies = {};
 
@@ -37,6 +39,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         if (mainTopics[mode.integer] == null)
             continue;
 
+        const extraInfo = extraGameModeInfo[mode.integer];
         const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
         let mainPost = await Forum.getPostContent(mainPostId);
 
@@ -54,7 +57,7 @@ function mapResultsToEmbed(beatmapset, passed) {
             const postLineEnding = post.includes('\r\n') ? '\r\n' : '\n';
 
             beatmapsets.push({
-                passed: parseFloat(pollResult.percent) >= parseInt(config.threshold[mode.shortName]),
+                passed: parseFloat(pollResult.percent) >= extraInfo.threshold * 100,
                 result: pollResult,
                 title: post.split(postLineEnding)[2],
                 topicId: topicMatch[1]
@@ -79,7 +82,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         mainTopicsReplies[mode.integer] = textFromTemplate(resultsPostTemplate, {
             PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
             FAILED_BEATMAPSETS: failedBeatmapsets.map(b => mapResultsToText(b, false)).join('\n'),
-            THRESHOLD: config.threshold[mode.shortName]
+            THRESHOLD: extraInfo.thresholdFormatted,
         });
 
         Forum.lockTopic(mainTopics[mode.integer]);

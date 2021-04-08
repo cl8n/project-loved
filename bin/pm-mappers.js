@@ -30,7 +30,7 @@ function sendMetadataPm(nomination) {
 }
 
 // TODO: Use new chat
-function sendNotifyPm(nominations) {
+function sendNotifyPm(nominations, extraGameModeInfo) {
     if (nominations.length === 0)
         throw 'No nominations provided';
 
@@ -53,10 +53,10 @@ function sendNotifyPm(nominations) {
     const gameModeVars = gameModes.length > 1
         ? {
             GAME_MODES: joinList(gameModes.map((m) => m.longName)),
-            THRESHOLDS: `[list]${gameModes.map((m) => `[*]${m.longName}: ${config.threshold[m.shortName]}`)}[/list]`,
+            THRESHOLDS: `[list]${gameModes.map((m) => `[*]${m.longName}: ${extraGameModeInfo[m.integer].thresholdFormatted}`)}[/list]`,
         } : {
             GAME_MODE: gameModes[0].longName,
-            THRESHOLD: config.threshold[gameModes[0].shortName],
+            THRESHOLD: extraGameModeInfo[gameModes[0].integer].thresholdFormatted,
         };
     const guestCreators = creators
         .filter((creator) => creator.id !== beatmapset.creator_id)
@@ -105,6 +105,7 @@ function sendNotifyPm(nominations) {
         else
             sendNotifyPm(
                 roundInfo.allNominations
-                    .filter((n) => n.beatmapset_id === nomination.beatmapset_id)
+                    .filter((n) => n.beatmapset_id === nomination.beatmapset_id),
+                roundInfo.extraGameModeInfo,
             );
 })();
