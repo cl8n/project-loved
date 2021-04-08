@@ -7,7 +7,7 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { convertToMarkdown, escapeMarkdown, joinList, loadTextResource, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, escapeMarkdown, joinList, loadTextResource, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 const { getBeatmapset } = require('../src/osu-api');
 
@@ -94,7 +94,7 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
       const creatorsBbcode = joinList(nomination.beatmapset_creators.map((c) => `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
       const postContent = textFromTemplate(votingPostTemplate, {
         BEATMAPSET: artistAndTitle,
-        BEATMAPSET_EXTRAS: await getExtraBeatmapsetInfo(nomination),
+        BEATMAPSET_EXTRAS: getExtraBeatmapsetInfo(nomination),
         BEATMAPSET_ID: beatmapset.id,
         CAPTAIN: nomination.description_author.name,
         CAPTAIN_ID: nomination.description_author.id,
@@ -218,7 +218,7 @@ async function generateNews(newsPath, roundInfo) {
 
       nominationStrings.push(textFromTemplate(newsNominationTemplate, {
         BEATMAPSET: escapeMarkdown(`${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`),
-        BEATMAPSET_EXTRAS: convertToMarkdown(await getExtraBeatmapsetInfo(nomination)),
+        BEATMAPSET_EXTRAS: convertToMarkdown(getExtraBeatmapsetInfo(nomination)),
         BEATMAPSET_ID: nomination.beatmapset.id,
         CAPTAIN: escapeMarkdown(nomination.description_author.name),
         CAPTAIN_ID: nomination.description_author.id,
@@ -255,51 +255,35 @@ async function generateNews(newsPath, roundInfo) {
   }) + '\n');
 }
 
-// TODO: This should not depend on API v1 and shouldn't need to fetch extra data at all
-async function getExtraBeatmapsetInfo(nomination) {
-  let minBpm;
-  let maxBpm;
-  let maxLength;
-  let diffs = [];
-  let minDiff;
-  let maxDiff;
-  const keyModes = [];
+function getExtraBeatmapsetInfo(nomination) {
+  const beatmaps = [];
   const excludedDiffNames = [];
 
-  (await getBeatmapset(nomination.beatmapset.id)).forEach(beatmap => {
-    if (parseInt(beatmap.mode) !== nomination.game_mode.integer)
-      return;
+  for (const beatmap of nomination.beatmaps) {
+    if (beatmap.game_mode !== nomination.game_mode.integer)
+      continue;
 
-    if (nomination.beatmaps.find((b) => b.id === parseInt(beatmap.beatmap_id)).excluded) {
+    if (beatmap.excluded) {
       excludedDiffNames.push(`[${beatmap.version}]`);
-      return;
+      continue;
     }
 
-    beatmap.diff_size = parseInt(beatmap.diff_size);
-    beatmap.bpm = Math.round(parseFloat(beatmap.bpm));
-    beatmap.difficultyrating = parseFloat(beatmap.difficultyrating);
-    beatmap.total_length = parseInt(beatmap.total_length);
+    beatmaps.push(beatmap);
+  }
 
-    diffs.push([beatmap.diff_size, beatmap.difficultyrating]);
+  if (beatmaps.length === 0)
+    throw new Error('No beatmaps for this nomination');
 
-    if (!keyModes.includes(beatmap.diff_size))
-      keyModes.push(beatmap.diff_size);
+  // TODO: should be done on website
+  beatmaps
+    .sort((a, b) => a.star_rating - b.star_rating)
+    .sort((a, b) => a.key_mode - b.key_mode);
 
-    if (minBpm == null || beatmap.bpm < minBpm)
-      minBpm = beatmap.bpm;
-    if (maxBpm == null || beatmap.bpm > maxBpm)
-      maxBpm = beatmap.bpm;
-    if (maxLength == null || beatmap.total_length > maxLength)
-      maxLength = beatmap.total_length;
-    if (minDiff == null || beatmap.difficultyrating < minDiff)
-      minDiff = beatmap.difficultyrating;
-    if (maxDiff == null || beatmap.difficultyrating > maxDiff)
-      maxDiff = beatmap.difficultyrating;
-  });
-
+  const maxBpm = maxOf(beatmaps, 'bpm');
+  const minBpm = minOf(beatmaps, 'bpm');
+  const maxLength = maxOf(beatmaps, 'total_length');
   const lengthMinutes = Math.floor(maxLength / 60);
   const lengthSeconds = (maxLength % 60).toString().padStart(2, '0');
-
   let info = '';
 
   if (minBpm === maxBpm)
@@ -309,22 +293,28 @@ async function getExtraBeatmapsetInfo(nomination) {
 
   info += ` BPM, ${lengthMinutes}:${lengthSeconds} | `;
 
-  const filteredDiffs = diffs.filter(d => d[1] !== 0);
+  if (beatmaps.length > 5) {
+    const maxSr = maxOf(beatmaps, 'star_rating');
+    const minSr = minOf(beatmaps, 'star_rating');
 
-  if (filteredDiffs.length > 0)
-    diffs = filteredDiffs;
+    if (nomination.game_mode.integer === 3) {
+      const keyModes = [...new Set(beatmaps.map((beatmap) => beatmap.key_mode))]
+        .filter((keyMode) => keyMode != null)
+        .sort((a, b) => a - b);
 
-  if (diffs.length > 5) {
-    if (nomination.game_mode.integer === 3)
-      info += keyModes.sort((a, b) => a - b).map(k => `[${k}K]`).join(' ') + ', ';
+      info += keyModes
+        .map((k) => `${k}K, `)
+        .join('');
+    }
 
-    info += `${minDiff.toFixed(2)}★ – ${maxDiff.toFixed(2)}★`
+    info += `${minSr.toFixed(2)}★ – ${maxSr.toFixed(2)}★`;
   } else {
-    diffs = diffs.sort((a, b) => a[1] - b[1]);
-    if (nomination.game_mode.integer === 3)
-      diffs = diffs.sort((a, b) => a[0] - b[0]);
-
-    info += diffs.map(d => (nomination.game_mode.integer === 3 ? `[${d[0]}K] ` : '') + `${d[1].toFixed(2)}★`).join(', ');
+    info += beatmaps
+      .map((beatmap) => (
+        (beatmap.key_mode == null ? '' : `[${beatmap.key_mode}K] `) +
+        `${beatmap.star_rating.toFixed(2)}★`
+      ))
+      .join(', ');
   }
 
   if (excludedDiffNames.length > 0)

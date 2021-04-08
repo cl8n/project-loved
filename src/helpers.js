@@ -75,6 +75,18 @@ function loadTextResource(basename) {
     return readFileSync(join(__dirname, '../resources', basename), 'utf8');
 }
 
+function maxOf(array, key) {
+    const reducer = (prev, curr) => prev[key] > curr[key] ? prev[key] : curr[key];
+
+    return array.reduce(reducer)[key];
+}
+
+function minOf(array, key) {
+    const reducer = (prev, curr) => prev[key] < curr[key] ? prev[key] : curr[key];
+
+    return array.reduce(reducer)[key];
+}
+
 function mkdirTreeSync(dir) {
     if (existsSync(dir))
         return;
@@ -114,6 +126,8 @@ module.exports = {
     getExcludedDiffNames,
     joinList,
     loadTextResource,
+    maxOf,
+    minOf,
     mkdirTreeSync,
     pushUnique,
     textFromTemplate,
