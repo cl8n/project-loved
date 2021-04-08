@@ -36,7 +36,6 @@ A typical round of Project Loved involves:
 | `lovedApiKey` | API key for https://loved.sh |
 | `lovedRoundId` | ID of the round on https://loved.sh |
 | `month` | Month of the Project Loved round |
-| `osuApiKey` | API key from https://old.ppy.sh/p/api |
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
 | `resultsPost.<mode>` | Previous round's results forum posts |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |

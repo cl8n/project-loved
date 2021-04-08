@@ -10,7 +10,6 @@ const expected = [
   'lovedApiKey',
   'lovedRoundId',
   'month',
-  'osuApiKey',
   'pollStartGuess',
   'resultsPost',
   'session',
@@ -20,7 +19,7 @@ const expected = [
   'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
-const unused = ['captains', 'date', 'time', 'title'];
+const unused = ['captains', 'date', 'osuApiKey', 'time', 'title'];
 
 function addError(message) {
   errors += `  ${message}\n`;
@@ -32,7 +31,7 @@ for (const configKey of Object.keys(config)) {
   } else if (moved[configKey] != null) {
     addError(yellow(`"${configKey}" has been renamed to "${moved[configKey]}"`));
   } else if (!expected.includes(configKey)) {
-    addError(yellow(`Unrecognized option "${configKey}"`));
+    addError(red(`Unrecognized option "${configKey}"`));
   }
 }
 

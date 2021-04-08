@@ -9,7 +9,6 @@ const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
 const { convertToMarkdown, escapeMarkdown, joinList, loadTextResource, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
-const { getBeatmapset } = require('../src/osu-api');
 
 // TODO: Move to file dedicated to topic storage (also see topics-cache)
 const topicIds = existsSync(join(__dirname, '../storage/topic-ids.json'))
