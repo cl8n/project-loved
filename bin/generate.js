@@ -39,7 +39,7 @@ async function generateBanners(bannersPath, beatmapsets) {
   await Promise.all(bannerPromises);
 }
 
-async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
+async function generateTopics(nominations, roundTitle, extraGameModeInfo, resultsPosts, discordWebhooks) {
   console.log('Generating forum topics');
 
   let error = false;
@@ -153,7 +153,7 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
       CAPTAINS: joinList(extraInfo.nominators.map((n) => `[url=https://osu.ppy.sh/users/${n.id}]${n.name}[/url]`)),
       GOOGLE_FORM: config.googleForm[gameMode.shortName] || config.googleForm.main,
       GOOGLE_SHEET: config.googleSheet[gameMode.shortName] || config.googleSheet.main,
-      RESULTS_POST: config.resultsPost[gameMode.shortName],
+      RESULTS_POST: resultsPosts[gameMode.integer],
       THRESHOLD: extraInfo.thresholdFormatted,
     }));
 
@@ -165,9 +165,9 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo) {
       Forum.updatePost(postInfo.id, postInfo.content.replace('MAIN_TOPIC_ID', mainTopicId));
     }
 
-    const discordWebhook = config.discord[gameMode.shortName];
+    const discordWebhook = discordWebhooks[gameMode.integer];
 
-    if (discordWebhook) {
+    if (discordWebhook != null) {
       new Discord(discordWebhook).post(
         `Project Loved: ${gameMode.longName}`,
         // TODO: Why is this not a normal template
@@ -401,7 +401,14 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   }
 
   if (shouldGenerateTopics) {
-    await generateTopics(roundInfo.allNominations, roundInfo.title, roundInfo.extraGameModeInfo);
+    // TODO: probably just pass roundInfo...
+    await generateTopics(
+      roundInfo.allNominations,
+      roundInfo.title,
+      roundInfo.extraGameModeInfo,
+      roundInfo.resultsPosts,
+      roundInfo.discordWebhooks,
+    );
   }
 
   // TODO: Rewrite with async functions?

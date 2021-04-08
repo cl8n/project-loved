@@ -6,12 +6,10 @@ const expected = [
   'cloudflare',
   'csrf',
   'csrfOld',
-  'discord',
   'lovedApiKey',
   'lovedRoundId',
   'month',
   'pollStartGuess',
-  'resultsPost',
   'session',
   'sessionOld',
   'userAgent',
@@ -19,7 +17,15 @@ const expected = [
   'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
-const unused = ['captains', 'date', 'osuApiKey', 'time', 'title'];
+const unused = [
+  'captains',
+  'date',
+  'discord',
+  'osuApiKey',
+  'resultsPost',
+  'time',
+  'title',
+];
 
 function addError(message) {
   errors += `  ${message}\n`;

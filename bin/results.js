@@ -31,7 +31,7 @@ function mapResultsToEmbed(beatmapset, passed) {
 (async function () {
     console.log('Posting results');
 
-    const { extraGameModeInfo } = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
+    const { discordWebhooks, extraGameModeInfo } = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
     const mainTopics = await Forum.getModeTopics(120);
     const mainTopicsReplies = {};
 
@@ -90,8 +90,8 @@ function mapResultsToEmbed(beatmapset, passed) {
         if (!keepWatches)
             Forum.watchTopic(mainTopics[mode.integer], false);
 
-        if (config.discord[mode.shortName])
-            new Discord(config.discord[mode.shortName]).post(
+        if (discordWebhooks[mode.integer] != null)
+            new Discord(discordWebhooks[mode.integer]).post(
                 `Project Loved: ${mode.longName}`,
                 config.messages.discordResults,
                 passedBeatmapsets.map(b => mapResultsToEmbed(b, true))

@@ -5,22 +5,10 @@
     },
     "csrf": "",
     "csrfOld": "",
-    "discord": {
-        "osu": "",
-        "taiko": "",
-        "catch": "",
-        "mania": ""
-    },
     "lovedApiKey": "",
     "lovedRoundId": 0,
     "month": "January",
     "pollStartGuess": "next weekend",
-    "resultsPost": {
-        "osu": "",
-        "taiko": "",
-        "catch": "",
-        "mania": ""
-    },
     "session": "",
     "sessionOld": "",
     "userAgent": "",

@@ -17,7 +17,12 @@ module.exports = class LovedWeb {
         const response = await this.#request
             .get(`${baseUrl}/data`)
             .query({ roundId });
-        const { nominations, round } = response.body;
+        const {
+            discord_webhooks: discordWebhooks,
+            nominations,
+            results_posts: resultsPosts,
+            round,
+        } = response.body;
         const extraGameModeInfo = {};
 
         for (const gameMode of GameMode.modes()) {
@@ -81,12 +86,14 @@ module.exports = class LovedWeb {
 
         return {
             allNominations: nominations,
+            discordWebhooks,
             extraGameModeInfo,
             intro: round.news_intro == null ? '' : round.news_intro,
             introPreview: round.news_intro_preview == null ? '' : round.news_intro_preview,
             nominations: nominations.filter((n) => n.parent_id == null),
             outro: round.news_outro == null ? '' : round.news_outro,
             postTime: new Date(round.news_posted_at),
+            resultsPosts,
             title: `Project Loved: ${round.name}`,
         };
     }

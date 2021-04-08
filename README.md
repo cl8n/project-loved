@@ -32,12 +32,10 @@ A typical round of Project Loved involves:
 | `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie |
 | `csrf` | https://osu.ppy.sh's `XSRF-TOKEN` cookie |
 | `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
-| `discord.<mode>` | Discord webhooks for announcing new maps and results |
 | `lovedApiKey` | API key for https://loved.sh |
 | `lovedRoundId` | ID of the round on https://loved.sh |
 | `month` | Month of the Project Loved round |
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
-| `resultsPost.<mode>` | Previous round's results forum posts |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
 | `sessionOld` | https://old.ppy.sh's `phpbb3_2cjk5_sid` cookie |
 | `userAgent` | `User-Agent` header of the browser used to obtain Cloudflare cookies |
