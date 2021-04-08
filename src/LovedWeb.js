@@ -81,11 +81,10 @@ module.exports = class LovedWeb {
 
         return {
             allNominations: nominations,
-            childNominations: nominations.filter((n) => n.parentId != null),
             extraGameModeInfo,
             intro: round.news_intro == null ? '' : round.news_intro,
             introPreview: round.news_intro_preview == null ? '' : round.news_intro_preview,
-            nominations: nominations.filter((n) => n.parentId == null),
+            nominations: nominations.filter((n) => n.parent_id == null),
             outro: round.news_outro == null ? '' : round.news_outro,
             postTime: new Date(round.news_posted_at),
             title: `Project Loved: ${round.name}`,
