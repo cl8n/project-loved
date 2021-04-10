@@ -60,13 +60,9 @@ function joinList(array) {
     let line = array[0];
 
     for (let i = 1; i < array.length; i++)
-        if (i === array.length - 1)
-            if (array[i].includes('et al.'))
-                line += ' et al.';
-            else
-                line += ` and ${array[i]}`;
-        else
-            line += `, ${array[i]}`;
+        line += i === array.length - 1
+          ? ` and ${array[i]}`
+          : `, ${array[i]}`;
 
     return line;
 }
