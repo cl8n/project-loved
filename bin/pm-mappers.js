@@ -69,7 +69,7 @@ function sendNotifyPm(nominations, extraGameModeInfo) {
             ARTIST: beatmapset.artist,
             BEATMAPSET_ID: beatmapset.id,
             EXCLUDED_DIFFS: excludedVersions.length > 0 ? joinList(excludedVersions) : null,
-            GUESTS: guestCreators.length > 0 ? joinList(guestCreators) : null,
+            GUESTS: guestCreators.length > 0 ? joinList(guestCreators.map((c) => c.name)) : null,
             MONTH: config.month,
             POLL_START: config.pollStartGuess,
             TITLE: beatmapset.title,
