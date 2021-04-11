@@ -272,7 +272,7 @@ module.exports.getTopic = function (topicId) {
 }
 
 // Note: This excludes pinned topics
-module.exports.getTopics = async function (forumId) {
+module.exports.getTopics = async function (forumId, untilTopicId) {
     const topics = [];
     let idx;
 
@@ -292,7 +292,12 @@ module.exports.getTopics = async function (forumId) {
 
         do {
             listing = listing.substring(idx + 20);
-            topics.push(listing.match(/data-topic-id="(\d+)"/)[1]);
+            const topicId = parseInt(listing.match(/data-topic-id="(\d+)"/)[1]);
+
+            if (topicId === untilTopicId)
+                return topics;
+
+            topics.push(topicId);
         } while ((idx = listing.indexOf('js-forum-topic-entry')) !== -1);
     }
 

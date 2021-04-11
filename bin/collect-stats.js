@@ -1,61 +1,23 @@
 const { red, yellow } = require('chalk');
-const fs = require('fs');
+const config = require('../src/config');
 const Forum = require('../src/forum');
 const Gamemode = require('../src/gamemode');
-const path = require('path');
-
-const pollData = [
-    // This poll's online stats are misleading due to a brigade done by banned
-    // accounts. peppy decided that this is the most accurate result instead.
-    {
-        beatmapset: 339222,
-        yes_count: 504,
-        no_count: 127,
-    },
-];
-// These polls were cut off early, but not deleted for whatever reason.
-const skipTopics = [699504, 904545];
-
-const topicsCachePath = path.join(__dirname, '../storage/topics-cache.json');
-const topicsCache = fs.existsSync(topicsCachePath)
-    ? JSON.parse(fs.readFileSync(topicsCachePath, 'utf8'))
-    : {};
-const useCacheOnly = process.argv.includes('--cache-only', 2);
-
-function cacheTopic(id, content) {
-    topicsCache[id] = content;
-    fs.writeFileSync(topicsCachePath, JSON.stringify(topicsCache));
-}
+const LovedWeb = require('../src/LovedWeb');
 
 (async function () {
-    let topics = Object.keys(topicsCache);
-    const polls = [];
+    const lovedWeb = new LovedWeb(config.lovedApiKey);
+    const lastPoll = await lovedWeb.getLastPollResult();
+    const newTopicIds = await Forum.getTopics(120, lastPoll.topic_id);
+    const results = [];
 
-    if (!useCacheOnly)
-        topics = [...new Set([...topics, ...await Forum.getTopics(120)])];
-
-    for (let topicId of topics) {
-        if (skipTopics.includes(parseInt(topicId)))
-            continue;
-
-        let topic = topicsCache[topicId];
-        let topicFresh = false;
-
-        if (topic == null) {
-            console.log(`Fetching topic #${topicId}`);
-            topic = await Forum.getTopic(topicId);
-            topicFresh = true;
-        }
-
+    for (const topicId of newTopicIds) {
+        let topic = await Forum.getTopic(topicId);
         const titleMatch = topic.match(/<h1\s+class="forum-topic-title__title[^>]+?>\s*(.*?)\s*<\/h1>/);
 
         if (titleMatch == null) {
-            console.error(red(`Topic #${topicId} exploded`));
+            console.error(red(`Couldn't parse topic #${topicId}`));
             continue;
         }
-
-        if (topicFresh)
-            cacheTopic(topicId, topic);
 
         const title = titleMatch[1];
 
@@ -72,7 +34,7 @@ function cacheTopic(id, content) {
         const endTimeMatch = topic.match(/Polling ended\s+<time[^>]+?datetime='(.+?)'/);
 
         if (endTimeMatch == null) {
-            console.error(yellow(`Skipping incomplete poll topic "${title}" (#${topicId})`));
+            console.log(yellow(`Skipping incomplete poll topic "${title}" (#${topicId})`));
             continue;
         }
 
@@ -83,7 +45,6 @@ function cacheTopic(id, content) {
             continue;
         }
 
-        const mode = new Gamemode(gameModeMatch[1]);
         topic = topic.substring(gameModeMatch.index + gameModeMatch[0].length);
 
         if (topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">/g).length !== 2) {
@@ -91,67 +52,44 @@ function cacheTopic(id, content) {
             continue;
         }
 
-        const beatmapset = parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/(?:beatmapset)?s\/(\d+)/)[1]);
-        const pollMatch = pollData.find(p => p.beatmapset === beatmapset);
+        const beatmapsetId = parseInt(topic.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/(\d+)/)[1]);
         const voteCounts = [];
 
-        if (pollMatch == null) {
-            for (let i = 0; i < 2; i++) {
-                const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*([\d,]+)\s*<\/div>/);
-                voteCounts.push(parseInt(match[1].replace(/,/g, '')));
-                topic = topic.substring(match.index + match[0].length);
-            }
-        } else {
-            voteCounts[0] = pollMatch.yes_count;
-            voteCounts[1] = pollMatch.no_count;
+        for (let i = 0; i < 2; i++) {
+            const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*([\d,]+)\s*<\/div>/);
+            voteCounts.push(parseInt(match[1].replace(/,/g, '')));
+            topic = topic.substring(match.index + match[0].length);
         }
 
-        polls.push({
-            beatmapset: beatmapset,
-            topic: parseInt(topicId),
-            topic_title: title,
-            yes_count: voteCounts[0],
-            no_count: voteCounts[1],
-            mode: mode.integer,
-            poll_end: endTimeMatch[1],
+        results.push({
+            beatmapsetId,
+            endedAt: new Date(endTimeMatch[1]),
+            gameMode: new Gamemode(gameModeMatch[1]).integer,
+            no: voteCounts[1],
+            yes: voteCounts[0],
+            topicId,
         });
     }
 
-    const sortedPolls = polls.sort((a, b) => a.poll_end.localeCompare(b.poll_end));
-    let lastDate = Date.parse(sortedPolls[0].poll_end);
-    let round = 1;
-    let tsv = [
-        'Round',
-        'Poll end time',
-        'Game mode',
-        'Beatmapset ID',
-        'Topic ID',
-        'Yes',
-        'No',
-        'Topic title',
-    ].join('\t') + '\n';
-
-    for (const poll of sortedPolls) {
-        const date = Date.parse(poll.poll_end);
-
-        if (date - lastDate > 86400000) // 1 day
-            round++;
-
-        lastDate = date;
-        tsv += [
-            round,
-            poll.poll_end,
-            poll.mode,
-            poll.beatmapset,
-            poll.topic,
-            poll.yes_count,
-            poll.no_count,
-            poll.topic_title,
-        ].join('\t') + '\n';
+    if (results.length === 0) {
+        console.log('No new poll results to add');
+        return;
     }
 
-    if (!fs.existsSync(path.join(__dirname, '../output')))
-        fs.mkdirSync(path.join(__dirname, '../output'));
+    results.sort((a, b) => a.endedAt - b.endedAt);
 
-    fs.writeFileSync(path.join(__dirname, '../output/poll-stats.tsv'), tsv);
+    let lastEndedAt = results[0].endedAt;
+    let round = lastPoll.round + 1;
+
+    for (const result of results) {
+        if (result.endedAt - lastEndedAt > 86400000) // 1 day
+            round++;
+
+        lastEndedAt = result.endedAt;
+        result.roundId = round;
+    }
+
+    console.log('Adding new poll results to loved.sh');
+
+    await lovedWeb.updatePollResults(results);
 })();

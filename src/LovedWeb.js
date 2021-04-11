@@ -13,6 +13,12 @@ module.exports = class LovedWeb {
             .set('X-Loved-InteropKey', key);
     }
 
+    async getLastPollResult() {
+        const response = await this.#request.get(`${baseUrl}/poll-result-recent`);
+
+        return response.body;
+    }
+
     async getRoundInfo(roundId) {
         const response = await this.#request
             .get(`${baseUrl}/data`)
@@ -110,5 +116,11 @@ module.exports = class LovedWeb {
             .send({ roundId });
 
         return response.body;
+    }
+
+    async updatePollResults(results) {
+        await this.#request
+            .post(`${baseUrl}/poll-results`)
+            .send(results);
     }
 };
