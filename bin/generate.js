@@ -362,7 +362,8 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   const shouldGenerateTopics = process.argv.includes('--threads', 2);
   const lovedWeb = new LovedWeb(config.lovedApiKey);
 
-  if (shouldGenerateTopics) {
+  // TODO: Request times out
+  if (false && shouldGenerateTopics) {
     console.log('Updating beatmapsets on loved.sh');
 
     let error = false;
