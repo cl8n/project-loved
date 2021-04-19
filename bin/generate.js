@@ -263,7 +263,12 @@ function getExtraBeatmapsetInfo(nomination) {
       continue;
 
     if (beatmap.excluded) {
-      excludedDiffNames.push(`[${beatmap.version}]`);
+      const versionMatch = beatmap.version.match(/(?:\[\d+K\] )?(.+)/i);
+
+      if (versionMatch == null)
+        throw new Error('Excluded beatmap version match failed');
+
+      excludedDiffNames.push(`[${versionMatch[1]}]`);
       continue;
     }
 
