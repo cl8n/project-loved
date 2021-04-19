@@ -7,11 +7,11 @@ module.exports = class Discord {
         this.#webhook = webhook;
     }
 
-    post(name, content, embeds = null) {
+    async post(name, content, embeds = null) {
         if (content.length > 2000)
             throw new Error(`Discord message content is too long (${content.length} characters)`);
 
-        return superagent
+        return await superagent
             .post(this.#webhook)
             .query({ wait: true })
             .send({
