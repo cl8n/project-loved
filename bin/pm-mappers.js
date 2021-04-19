@@ -19,11 +19,11 @@ function sendMetadataPm(nomination) {
         config.messages.pmMetadata,
         'alert',
         textFromTemplate(metadataTemplate, {
-            ARTIST: nomination.beatmapset.artist,
+            ARTIST: nomination.beatmapset.original_artist,
             AUTHOR: nomination.metadata_assignee.name,
             AUTHOR_ID: nomination.metadata_assignee.id,
             BEATMAPSET_ID: nomination.beatmapset.id,
-            TITLE: nomination.beatmapset.title,
+            TITLE: nomination.beatmapset.original_title,
         }),
         [nomination.beatmapset.creator_id],
     );

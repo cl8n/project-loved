@@ -84,6 +84,11 @@ module.exports = class LovedWeb {
                 if (extras.nominators.find((n) => n.id === nominator.id) == null)
                     extras.nominators.push(nominator);
             }
+
+            nomination.beatmapset.original_artist = nomination.beatmapset.artist;
+            nomination.beatmapset.original_title = nomination.beatmapset.title;
+            nomination.beatmapset.artist = nomination.overwrite_artist || nomination.beatmapset.artist;
+            nomination.beatmapset.title = nomination.overwrite_title || nomination.beatmapset.title;
         }
 
         for (const gameMode of GameMode.modes()) {
