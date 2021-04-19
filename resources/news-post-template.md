@@ -20,7 +20,7 @@ if (vars.VIDEO) {
 
 ### Navigation
 
-- [osu!standard](#osu)
+- [osu!](#osu)
 - [osu!taiko](#taiko)
 - [osu!catch](#catch)
 - [osu!mania](#mania)
