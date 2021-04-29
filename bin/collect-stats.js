@@ -38,7 +38,7 @@ const LovedWeb = require('../src/LovedWeb');
             continue;
         }
 
-        const gameModeMatch = title.match(/^\[([a-z!]+)\]/);
+        const gameModeMatch = title.match(/^\[(osu![a-z]*)\]/);
 
         if (gameModeMatch == null) {
             console.error(red(`Couldn't find game mode for topic "${title}" (#${topicId})`));

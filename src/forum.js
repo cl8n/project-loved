@@ -249,7 +249,7 @@ module.exports.getModeTopics = async function (forumId) {
     body = body.substring(body.indexOf('Pinned Topics'), body.indexOf('id="topics"'));
 
     while (true) {
-        const match = body.match(/\[(osu![a-z]+)\] Project Loved: /);
+        const match = body.match(/\[(osu![a-z]*)\] Project Loved: /);
 
         if (match == null)
             break;
