@@ -1,3 +1,4 @@
+const { yellow } = require('chalk');
 const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
@@ -36,8 +37,10 @@ function mapResultsToEmbed(beatmapset, passed) {
     const mainTopicsReplies = {};
 
     for (const mode of Gamemode.modes().reverse()) {
-        if (mainTopics[mode.integer] == null)
+        if (mainTopics[mode.integer] == null) {
+            console.error(yellow(`Skipping ${mode.longName}, no main topic found`));
             continue;
+        }
 
         const extraInfo = extraGameModeInfo[mode.integer];
         const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
@@ -100,6 +103,9 @@ function mapResultsToEmbed(beatmapset, passed) {
     }
 
     for (const mode of Gamemode.modes().reverse()) {
+        if (mainTopics[mode.integer] == null)
+            continue;
+
         await Forum.reply(mainTopics[mode.integer], mainTopicsReplies[mode.integer]);
         Forum.pinTopic(mainTopics[mode.integer], false);
     }
