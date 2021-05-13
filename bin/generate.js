@@ -201,9 +201,10 @@ async function generateNews(newsPath, roundInfo) {
     for (const nomination of nominationsForMode) {
       const errors = [];
 
-      // TODO: check states instead
       if (nomination.description == null) {
         errors.push('missing description');
+      } else if (nomination.description_state === 0) {
+        errors.push('unreviewed description');
       }
 
       if (nomination.beatmapset_creators.length === 0) {
