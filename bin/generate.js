@@ -235,7 +235,6 @@ async function generateNews(newsPath, roundInfo) {
       CONSISTENT_CAPTAIN: extraInfo.descriptionAuthors.length === 1 ? escapeMarkdown(extraInfo.descriptionAuthors[0].name) : null,
       CONSISTENT_CAPTAIN_ID: extraInfo.descriptionAuthors.length === 1 ? extraInfo.descriptionAuthors[0].id : null,
       MODE_LONG: gameMode.longName,
-      MODE_SHORT: gameMode.shortName,
       NOMINATIONS: nominationStrings.join('\n\n'),
       VIDEO: config.videos[gameMode.shortName],
     }));

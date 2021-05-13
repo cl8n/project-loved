@@ -20,10 +20,10 @@ if (vars.VIDEO) {
 
 ### Navigation
 
-- [osu!](#osu)
-- [osu!taiko](#taiko)
-- [osu!catch](#catch)
-- [osu!mania](#mania)
+- [osu!](#osu!)
+- [osu!taiko](#osu!taiko)
+- [osu!catch](#osu!catch)
+- [osu!mania](#osu!mania)
 
 {{NOMINATIONS}}
 

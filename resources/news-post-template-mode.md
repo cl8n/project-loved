@@ -1,4 +1,4 @@
-## <a id="{{MODE_SHORT}}"></a>{{MODE_LONG}}<?
+## {{MODE_LONG}}<?
 if (vars.VIDEO) {
 `
 
