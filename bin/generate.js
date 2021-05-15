@@ -358,7 +358,6 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
 
 (async () => {
   const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-')) || join(__dirname, '../output');
-  const shouldGenerateBanners = process.argv.includes('--images', 2);
   const shouldGenerateTopics = process.argv.includes('--threads', 2);
   const lovedWeb = new LovedWeb(config.lovedApiKey);
 
@@ -384,27 +383,23 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   }
 
   const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
-
-  if (shouldGenerateBanners || shouldGenerateTopics) {
-    const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset.id);
-    const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsetIds);
-
-    for (const nomination of roundInfo.allNominations) {
-      nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
-    }
-  }
-
   const postTimeIsoString = roundInfo.postTime.toISOString();
+
   roundInfo.postDateString = postTimeIsoString.slice(0, 10);
   roundInfo.postTimeString = postTimeIsoString.slice(11, 19);
   roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
 
-  if (shouldGenerateBanners) {
-    await generateBanners(
-      join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
-      roundInfo.nominations.map((n) => n.beatmapset),
-    );
+  const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset.id);
+  const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsetIds);
+
+  for (const nomination of roundInfo.allNominations) {
+    nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
   }
+
+  await generateBanners(
+    join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
+    roundInfo.nominations.map((n) => n.beatmapset),
+  );
 
   if (shouldGenerateTopics) {
     // TODO: probably just pass roundInfo...

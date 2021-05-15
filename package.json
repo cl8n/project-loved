@@ -2,13 +2,12 @@
   "name": "project-loved",
   "private": true,
   "scripts": {
-    "images": "node bin/generate.js --images",
-    "images:unpack": "sh bin/get-images.sh",
+    "maps:open": "node bin/open-maps.js",
+    "maps:unpack": "sh bin/get-images.sh",
     "messages": "node bin/pm-mappers.js --messages",
     "messages:metadata": "node bin/pm-mappers.js --messages --metadata",
     "news": "node bin/generate.js",
     "news:forum": "node bin/generate.js --threads --slow-requests",
-    "open-maps": "node bin/open-maps.js",
     "results": "node bin/results.js --slow-requests",
     "setup": "npm install & sh bin/setup.sh",
     "stats": "node bin/collect-stats.js --slow-requests"
