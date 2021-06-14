@@ -30,7 +30,7 @@ async function generateBanners(bannersPath, beatmapsets) {
         console.log(dim(green(`Created banner for ${beatmapset.title} [#${beatmapset.id}]`)));
       })
       .catch((reason) => {
-        console.error(dim(red(`Failed to create banner for ${beatmapset.title} [#${beatmapset.id}]:\n${dim(reason)}`)));
+        console.error(dim(red(`Failed to create banner for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`)));
       });
 
     bannerPromises.push(bannerPromise);
