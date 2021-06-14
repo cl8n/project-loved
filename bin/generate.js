@@ -256,23 +256,23 @@ async function generateNews(newsPath, roundInfo) {
 
 function getExtraBeatmapsetInfo(nomination) {
   const beatmaps = [];
+  const beatmapsForMode = nomination.beatmaps
+    .filter((b) => b.game_mode === nomination.game_mode.integer);
   const excludedDiffNames = [];
+  const reverseExclude = beatmapsForMode.filter((b) => b.excluded).length / beatmapsForMode.length > 0.5;
 
-  for (const beatmap of nomination.beatmaps) {
-    if (beatmap.game_mode !== nomination.game_mode.integer)
-      continue;
-
-    if (beatmap.excluded) {
+  for (const beatmap of beatmapsForMode) {
+    if (reverseExclude != beatmap.excluded) {
       const versionMatch = beatmap.version.match(/(?:\[\d+K\] )?(.+)/i);
 
       if (versionMatch == null)
         throw new Error('Excluded beatmap version match failed');
 
       excludedDiffNames.push(`[${versionMatch[1]}]`);
-      continue;
     }
 
-    beatmaps.push(beatmap);
+    if (!beatmap.excluded)
+      beatmaps.push(beatmap);
   }
 
   if (beatmaps.length === 0)
@@ -321,8 +321,13 @@ function getExtraBeatmapsetInfo(nomination) {
       .join(', ');
   }
 
-  if (excludedDiffNames.length > 0)
-    info += `\nThe ${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties are' : 'difficulty is'} [i]not[/i] being nominated for Loved.`;
+  if (excludedDiffNames.length > 0) {
+    const part = `${joinList(excludedDiffNames)} ${excludedDiffNames.length > 1 ? 'difficulties are' : 'difficulty is'}`;
+
+    info += reverseExclude
+      ? `\nOnly the ${part} being nominated for Loved.`
+      : `\nThe ${part} [i]not[/i] being nominated for Loved.`;
+  }
 
   return info;
 }
