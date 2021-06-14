@@ -78,6 +78,12 @@ module.exports = class BeatmapsetBanner {
         context.textBaseline = 'middle';
         context.fillText(this.beatmapset.title, bannerWidth / 2, bannerHeight - 26);
 
+        const titleMaxWidth = bannerWidth - 20;
+        const titleOverflow = context.measureText(this.beatmapset.title).width - titleMaxWidth;
+
+        if (titleOverflow > 0)
+            throw new Error(`Beatmapset title is too long (${titleOverflow}px / ${titleMaxWidth}px)`);
+
         const jpegStream = canvas.createJPEGStream({ chromaSubsampling: false, quality: 1 });
         const jpegRecompressFilename = await getJpegRecompressFilename();
 
