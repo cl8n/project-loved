@@ -58,6 +58,9 @@ module.exports = class BeatmapsetBanner {
     }
 
     async createBanner(outputPath) {
+        if (this.beatmapset.bgPath == null)
+            throw new Error('Background path not set');
+
         const canvas = createCanvas(bannerWidth, bannerHeight);
         const context = canvas.getContext('2d', { alpha: false });
         const backgroundImage = await loadImage(this.beatmapset.bgPath);

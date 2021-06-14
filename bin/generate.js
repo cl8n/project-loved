@@ -332,7 +332,7 @@ function getExtraBeatmapsetInfo(nomination) {
   return info;
 }
 
-async function loadBeatmapsetBgPaths(beatmapsetIds) {
+async function loadBeatmapsetBgPaths(beatmapsets) {
   const dirents = await readdir(join(__dirname, '../config'), { withFileTypes: true });
   const paths = {};
 
@@ -348,15 +348,12 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
 
   let error = false;
 
-  for (const beatmapsetId of beatmapsetIds) {
-    if (paths[beatmapsetId] == null) {
-      console.error(red(`Missing background image for beatmapset #${beatmapsetId}`));
+  for (const beatmapset of beatmapsets) {
+    if (paths[beatmapset.id] == null) {
+      console.error(red(`Missing background image for ${beatmapset.title} [#${beatmapset.id}]`));
       error = true;
     }
   }
-
-  if (error)
-    process.exit(1);
 
   return paths;
 }
@@ -394,8 +391,8 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
   roundInfo.postTimeString = postTimeIsoString.slice(11, 19);
   roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
 
-  const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset.id);
-  const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsetIds);
+  const beatmapsets = roundInfo.nominations.map((n) => n.beatmapset);
+  const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsets);
 
   for (const nomination of roundInfo.allNominations) {
     nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
@@ -403,7 +400,7 @@ async function loadBeatmapsetBgPaths(beatmapsetIds) {
 
   await generateBanners(
     join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
-    roundInfo.nominations.map((n) => n.beatmapset),
+    beatmapsets,
   );
 
   if (shouldGenerateTopics) {
