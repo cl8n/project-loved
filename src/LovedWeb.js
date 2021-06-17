@@ -26,7 +26,7 @@ module.exports = class LovedWeb {
         const {
             discord_webhooks: discordWebhooks,
             nominations,
-            results_posts: resultsPosts,
+            results_post_ids: resultsPostIds,
             round,
         } = response.body;
         const extraGameModeInfo = {};
@@ -43,6 +43,9 @@ module.exports = class LovedWeb {
                 threshold: gameModeInfo.voting_threshold,
                 thresholdFormatted: (gameModeInfo.voting_threshold * 100).toFixed() + '%',
             };
+
+            if (resultsPostIds[gameMode.integer] == null)
+                console.error(yellow(`${gameMode.longName} last round results post is not set`));
         }
 
         for (const nomination of nominations) {
@@ -104,7 +107,7 @@ module.exports = class LovedWeb {
             nominations: nominations.filter((n) => n.parent_id == null),
             outro: round.news_outro == null ? '' : round.news_outro,
             postTime: new Date(round.news_posted_at),
-            resultsPosts,
+            resultsPostIds,
             title: `Project Loved: ${round.name}`,
         };
     }

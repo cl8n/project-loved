@@ -39,7 +39,7 @@ async function generateBanners(bannersPath, beatmapsets) {
   await Promise.all(bannerPromises);
 }
 
-async function generateTopics(nominations, roundTitle, extraGameModeInfo, resultsPosts, discordWebhooks) {
+async function generateTopics(nominations, roundTitle, extraGameModeInfo, resultsPostIds, discordWebhooks) {
   console.log('Generating forum topics');
 
   let error = false;
@@ -153,7 +153,7 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo, result
       CAPTAINS: joinList(extraInfo.nominators.map((n) => `[url=https://osu.ppy.sh/users/${n.id}]${n.name}[/url]`)),
       GOOGLE_FORM: config.googleForm[gameMode.shortName] || config.googleForm.main,
       GOOGLE_SHEET: config.googleSheet[gameMode.shortName] || config.googleSheet.main,
-      RESULTS_POST: resultsPosts[gameMode.integer],
+      RESULTS_POST: `https://osu.ppy.sh/community/forums/posts/${resultsPostIds[gameMode.integer]}`,
       THRESHOLD: extraInfo.thresholdFormatted,
     }));
 
@@ -409,7 +409,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
       roundInfo.allNominations,
       roundInfo.title,
       roundInfo.extraGameModeInfo,
-      roundInfo.resultsPosts,
+      roundInfo.resultsPostIds,
       roundInfo.discordWebhooks,
     );
   }
