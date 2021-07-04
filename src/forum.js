@@ -232,13 +232,15 @@ module.exports.getPollResult = async function (topicId) {
     };
 }
 
-module.exports.reply = function (topicId, content) {
-    return request({
+module.exports.reply = async function (topicId, content) {
+    const body = await request({
         uri: `/community/forums/topics/${topicId}/reply`,
         form: {
             body: content
         }
     });
+
+    return firstPostIdFromTopicView(body);
 }
 
 module.exports.getModeTopics = async function (forumId) {
