@@ -131,4 +131,10 @@ module.exports = class LovedWeb {
             .post(`${baseUrl}/poll-results`)
             .send(results);
     }
+
+    async updateResultsPosts(roundId, replyIdsByGamemode) {
+        await this.#request
+            .post(`${baseUrl}/results-post-ids`)
+            .send({ roundId, replies: replyIdsByGamemode });
+    }
 };

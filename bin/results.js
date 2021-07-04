@@ -32,7 +32,8 @@ function mapResultsToEmbed(beatmapset, passed) {
 (async function () {
     console.log('Posting results');
 
-    const { discordWebhooks, extraGameModeInfo } = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
+    const lovedWeb = new LovedWeb(config.lovedApiKey);
+    const { discordWebhooks, extraGameModeInfo } = await lovedWeb.getRoundInfo(config.lovedRoundId);
     const mainTopics = await Forum.getModeTopics(120);
     const mainTopicsReplies = {};
 
@@ -102,11 +103,18 @@ function mapResultsToEmbed(beatmapset, passed) {
             );
     }
 
+    const replyIdsByGamemode = {};
+
     for (const mode of Gamemode.modes().reverse()) {
         if (mainTopics[mode.integer] == null)
             continue;
 
-        await Forum.reply(mainTopics[mode.integer], mainTopicsReplies[mode.integer]);
         Forum.pinTopic(mainTopics[mode.integer], false);
+
+        replyIdsByGamemode[mode.integer] = await Forum.reply(mainTopics[mode.integer], mainTopicsReplies[mode.integer]);
     }
+
+    console.log('Submitting results posts to loved.sh');
+
+    await lovedWeb.updateResultsPosts(config.lovedRoundId, replyIdsByGamemode);
 })();
