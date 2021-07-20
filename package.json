@@ -17,12 +17,12 @@
   },
   "dependencies": {
     "bottleneck": "^2.19.5",
-    "canvas": "^2.7.0",
-    "chalk": "^4.1.0",
-    "open": "^8.0.4",
+    "canvas": "^2.8.0",
+    "chalk": "^4.1.1",
+    "open": "^8.2.1",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
     "superagent": "^6.1.0",
-    "ws": "^7.4.4"
+    "ws": "^7.5.3"
   }
 }
