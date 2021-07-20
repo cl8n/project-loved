@@ -7,16 +7,17 @@ const bannerWidth = 670;
 const bannerHeight = 200;
 const binDir = join(__dirname, '../bin');
 const clickNoticeIcon = '';
-const clickNoticeIconFont = '14px FontAwesome';
+const clickNoticeIconFont = '14px "Font Awesome 5 Free Solid"';
 const clickNoticeText = ' Click here to vote!';
 const clickNoticeTextFont = '14px Torus';
 const clickNoticeY = bannerHeight - 11;
+const titleFont = '21px Torus';
 const titleY = bannerHeight - 42;
 let jpegRecompressFilename;
 let overlayImage;
 
 registerFont(join(__dirname, '../resources/Torus-SemiBold.otf'), { family: 'Torus' });
-registerFont(join(__dirname, '../resources/Font Awesome 5 Free-Solid-900.otf'), { family: 'FontAwesome' });
+registerFont(join(__dirname, '../resources/FontAwesome5-FreeSolid.otf'), { family: 'Font Awesome 5 Free' });
 
 async function getJpegRecompressFilename() {
     if (jpegRecompressFilename == null) {
@@ -77,7 +78,7 @@ module.exports = class BeatmapsetBanner {
         context.drawImage(...drawImageCoverParams(backgroundImage, bannerWidth, bannerHeight));
         context.drawImage(overlayImage, 0, 0);
         context.fillStyle = '#fff';
-        context.font = '21px Torus';
+        context.font = titleFont;
         context.shadowBlur = 2;
         context.shadowColor = '#0007';
         context.shadowOffsetY = 1;
@@ -98,7 +99,7 @@ module.exports = class BeatmapsetBanner {
         context.font = clickNoticeTextFont;
         context.fillText(clickNoticeText, startX + clickNoticeIconWidth, clickNoticeY);
 
-        context.font = '21px Torus';
+        context.font = titleFont;
         const titleMaxWidth = bannerWidth - 20;
         const titleOverflow = context.measureText(this.beatmapset.title).width - titleMaxWidth;
 
