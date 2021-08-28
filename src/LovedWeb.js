@@ -118,14 +118,6 @@ module.exports = class LovedWeb {
         return response.body;
     }
 
-    async updateBeatmapsets(roundId) {
-        const response = await this.#request
-            .post(`${baseUrl}/update-beatmapsets`)
-            .send({ roundId });
-
-        return response.body;
-    }
-
     async updatePollResults(results) {
         await this.#request
             .post(`${baseUrl}/poll-results`)

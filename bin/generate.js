@@ -363,27 +363,6 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   const shouldGenerateTopics = process.argv.includes('--threads', 2);
   const lovedWeb = new LovedWeb(config.lovedApiKey);
 
-  // TODO: Request times out
-  if (false && shouldGenerateTopics) {
-    console.log('Updating beatmapsets on loved.sh');
-
-    let error = false;
-    const messages = await lovedWeb.updateBeatmapsets(config.lovedRoundId);
-
-    for (const message of messages) {
-      if (message.startsWith('Failed')) {
-        console.error(red(message));
-        error = true;
-      } else {
-        console.log(dim(green(message)));
-      }
-    }
-
-    if (error) {
-      process.exit(1);
-    }
-  }
-
   const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
   const postTimeIsoString = roundInfo.postTime.toISOString();
 
