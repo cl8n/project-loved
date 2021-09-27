@@ -1,3 +1,7 @@
+// TODO polls are added alongside forum posts now, but need to be completed in results.js
+console.error('ask clayton to fix this before using it');
+process.exit(1);
+
 const { red, yellow } = require('chalk');
 const config = require('../src/config');
 const Forum = require('../src/forum');

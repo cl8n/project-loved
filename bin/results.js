@@ -1,3 +1,7 @@
+// TODO complete polls on loved.sh
+console.error('ask clayton to fix this before using it');
+process.exit(1);
+
 const { yellow } = require('chalk');
 const config = require('../src/config');
 const Discord = require('../src/discord');
