@@ -79,7 +79,7 @@ const LovedWeb = require('../src/LovedWeb');
     results.sort((a, b) => a.endedAt - b.endedAt);
 
     let lastEndedAt = results[0].endedAt;
-    let round = lastPoll.round + 1;
+    let round = lastPoll.round_id + 1;
 
     for (const result of results) {
         if (result.endedAt - lastEndedAt > 86400000) // 1 day
