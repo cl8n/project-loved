@@ -14,6 +14,9 @@ const LovedWeb = require('../src/LovedWeb');
 const topicIds = existsSync(join(__dirname, '../storage/topic-ids.json'))
   ? require('../storage/topic-ids.json')
   : {};
+const topicTimes = existsSync(join(__dirname, '../storage/topic-times.json'))
+  ? require('../storage/topic-times.json')
+  : {};
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.log('Generating beatmapset banners');
@@ -39,7 +42,7 @@ async function generateBanners(bannersPath, beatmapsets) {
   await Promise.all(bannerPromises);
 }
 
-async function generateTopics(nominations, roundTitle, extraGameModeInfo, resultsPostIds, discordWebhooks) {
+async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeInfo, resultsPostIds, discordWebhooks) {
   console.log('Generating forum topics');
 
   let error = false;
@@ -73,6 +76,7 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo, result
   const mainPostTemplate = loadTextResource('main-thread-template.bbcode');
   const mainPostBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
   const votingPostTemplate = loadTextResource('voting-thread-template.bbcode');
+  const polls = [];
 
   // Post in reverse so that it looks in-order on the topic listing
   for (const gameMode of GameMode.modes().reverse()) {
@@ -123,7 +127,17 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo, result
         topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
         topicIds[nomination.id] = topicId;
 
+        const postTimeMatch = (await Forum.getTopic(topicId)).match(/forum-topic-title__post-time[^<]+<time[^>]+?datetime='([^']+)'/);
+
+        if (postTimeMatch == null) {
+          console.log(yellow('Failed getting topic post time, using current time instead'));
+          topicTimes[nomination.id] = new Date().toISOString();
+        } else {
+          topicTimes[nomination.id] = postTimeMatch[1];
+        }
+
         await writeFile(join(__dirname, '../storage/topic-ids.json'), JSON.stringify(topicIds));
+        await writeFile(join(__dirname, '../storage/topic-times.json'), JSON.stringify(topicTimes));
       }
 
       postsByNominationId[nomination.id] = {
@@ -146,6 +160,15 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo, result
         LINK_MODE: gameMode.linkName,
         TOPIC_ID: topicId,
       }));
+
+      polls.push({
+        beatmapsetId: beatmapset.id,
+        endedAt: new Date(new Date(topicTimes[nomination.id]).getTime() + 864000000/* 10 days, TODO dont hardcode */), // TODO: not technically the poll time but should be the same
+        gameMode: gameMode.integer,
+        roundId: config.lovedRoundId,
+        startedAt: new Date(topicTimes[nomination.id]), // TODO: not technically the poll time but should be the same
+        topicId,
+      });
     }
 
     const mainTopicId = await Forum.storeTopic(mainTopicTitle, textFromTemplate(mainPostTemplate, {
@@ -177,6 +200,9 @@ async function generateTopics(nominations, roundTitle, extraGameModeInfo, result
       );
     }
   }
+
+  console.log('Submitting polls to loved.sh')
+  lovedWeb.addPolls(polls);
 }
 
 async function generateNews(newsPath, roundInfo) {
@@ -385,6 +411,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   if (shouldGenerateTopics) {
     // TODO: probably just pass roundInfo...
     await generateTopics(
+      lovedWeb,
       roundInfo.allNominations,
       roundInfo.title,
       roundInfo.extraGameModeInfo,

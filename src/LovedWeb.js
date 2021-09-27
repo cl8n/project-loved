@@ -118,10 +118,22 @@ module.exports = class LovedWeb {
         return response.body;
     }
 
-    async updatePollResults(results) {
+    async addPolls(polls) {
         await this.#request
-            .post(`${baseUrl}/poll-results`)
-            .send(results);
+            .post(`${baseUrl}/polls`)
+            .send(polls);
+    }
+
+    async getIncompletePolls() {
+        const response = await this.#request.get(`${baseUrl}/polls/incomplete`);
+
+        return response.body;
+    }
+
+    async updatePollsWithResults(pollResults) {
+        await this.#request
+            .post(`${baseUrl}/polls/complete`)
+            .send(pollResults);
     }
 
     async updateResultsPosts(roundId, replyIdsByGamemode) {
