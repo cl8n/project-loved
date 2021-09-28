@@ -12,7 +12,7 @@
     "messages": {
         "discordPost": "@everyone {{MAP_COUNT}} new maps have been nominated for Loved, check them out and cast your votes!",
         "discordResults": "@everyone Results from the polls are in! The maps that passed voting will be moved to Loved soon.",
-        "pmGuest": "Project Loved: Your guest difficulty will be up for voting soon!",
+        "pmGuest": "Project Loved: Your guest/collab difficulty will be up for voting soon!",
         "pmHost": "Project Loved: Your map will be up for voting soon!",
         "pmMetadata": "Project Loved: Changes required on your beatmap",
         "resultsPassed": "This map passed the voting! It will be moved to Loved soon.",
