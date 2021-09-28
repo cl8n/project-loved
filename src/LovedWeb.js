@@ -10,7 +10,8 @@ module.exports = class LovedWeb {
     constructor(key) {
         this.#request = superagent
             .agent()
-            .set('X-Loved-InteropKey', key);
+            .set('X-Loved-InteropKey', key)
+            .set('X-Loved-InteropVersion', '1');
     }
 
     async getLastPollResult() {
