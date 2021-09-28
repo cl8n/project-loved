@@ -1,14 +1,4 @@
 {
-    "googleForm": {
-        "main": "https://docs.google.com/forms/d/e/1FAIpQLSdbgHOVqMF8wQQKSdddW1JhC10ff6C7fb4JbEW7PBQTn9gAqg/viewform",
-        "taiko": "https://docs.google.com/forms/d/e/1FAIpQLSclPWyjFByhHP45AtKD49y0RSl1TK5UOzD4dVdvjfJJQ1aCXQ/viewform",
-        "mania": "https://docs.google.com/forms/d/e/1FAIpQLSeaGfoQNGMqw4qQcqRPItUZILh2fGwJR6ly6cZNY9OWPXkFhw/viewform"
-    },
-    "googleSheet": {
-        "main": "https://docs.google.com/spreadsheets/d/1HgHwtO3kIzT8R4ocEJMZTosADrGJRJOFL-TZI97tZS4/edit",
-        "taiko": "https://docs.google.com/spreadsheets/d/1Nk96z_xat_7ypsDF1sCTDO4i_CnHarcrCbGoTmgwHHE/edit",
-        "mania": "https://docs.google.com/spreadsheets/d/1sjkTwUSvQ5Me-6rK61rToTg2bU-yX9X29CXdzttvhtM/edit"
-    },
     "messages": {
         "discordPost": "@everyone {{MAP_COUNT}} new maps have been nominated for Loved, check them out and cast your votes!",
         "discordResults": "@everyone Results from the polls are in! The maps that passed voting will be moved to Loved soon.",

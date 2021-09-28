@@ -174,8 +174,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
     const mainTopicId = await Forum.storeTopic(mainTopicTitle, textFromTemplate(mainPostTemplate, {
       BEATMAPS: mainPostBeatmapsetStrings.reverse().join('\n\n'),
       CAPTAINS: joinList(extraInfo.nominators.map((n) => `[url=https://osu.ppy.sh/users/${n.id}]${n.name}[/url]`)),
-      GOOGLE_FORM: config.googleForm[gameMode.shortName] || config.googleForm.main,
-      GOOGLE_SHEET: config.googleSheet[gameMode.shortName] || config.googleSheet.main,
+      GAME_MODE_LINK_NAME: gameMode.linkName,
       RESULTS_POST: `https://osu.ppy.sh/community/forums/posts/${resultsPostIds[gameMode.integer]}`,
       THRESHOLD: extraInfo.thresholdFormatted,
     }));
