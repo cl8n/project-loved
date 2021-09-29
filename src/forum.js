@@ -95,7 +95,12 @@ const request = async function (...args) {
 }
 
 function idFromUrl(url) {
-    return (url.match(/\/(\d+)\s*$/) || [, null])[1];
+    const match = url.match(/\/(\d+)\s*$/);
+
+    if (match == null)
+        return null;
+
+    return parseInt(match[1], 10);
 }
 
 function firstPostIdFromTopicView(body) {
