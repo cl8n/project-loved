@@ -165,18 +165,6 @@ module.exports.storeTopicWithPoll = async function (title, content, coverId, pol
     return idFromUrl(response.headers.location);
 }
 
-module.exports.findFirstPostId = async function (topicId) {
-    const body = await request({
-        uri: `/community/forums/topics/${topicId}`,
-        method: 'GET',
-        qs: {
-            skip_layout: 1
-        }
-    });
-
-    return firstPostIdFromTopicView(body);
-}
-
 module.exports.updatePost = function (postId, content) {
     return request({
         uri: `/community/forums/posts/${postId}`,
@@ -205,13 +193,6 @@ module.exports.lockTopic = function (topicId) {
         qs: {
             lock: 1
         }
-    });
-}
-
-module.exports.getPostContent = function (postId) {
-    return request({
-        uri: `/community/forums/posts/${postId}/raw`,
-        method: 'GET'
     });
 }
 
@@ -274,13 +255,6 @@ module.exports.getModeTopics = async function (forumId) {
     }
 
     return topics;
-}
-
-module.exports.getTopic = function (topicId) {
-    return request({
-        uri: `/community/forums/topics/${topicId}`,
-        method: 'GET'
-    });
 }
 
 // Note: This excludes pinned topics

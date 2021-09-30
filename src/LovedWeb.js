@@ -1,4 +1,4 @@
-const { yellow } = require('chalk');
+const { dim, green, red, yellow } = require('chalk');
 const superagent = require('superagent');
 const GameMode = require('./gamemode');
 
@@ -12,6 +12,22 @@ module.exports = class LovedWeb {
             .agent()
             .set('X-Loved-InteropKey', key)
             .set('X-Loved-InteropVersion', '1');
+    }
+
+    async getForumTopic(topicId) {
+        console.log(dim(`[loved.sh] Getting forum topic #${topicId}`));
+
+        try {
+            const response = await this.#request
+                .get(`${baseUrl}/forum-topic`)
+                .query({ topicId });
+
+            console.log(dim(green(`[loved.sh] Got forum topic #${topicId}`)));
+            return response.body;
+        } catch (error) {
+            console.error(dim(red(`[loved.sh] Failed to get forum topic #${topicId}`)));
+            throw error;
+        }
     }
 
     async getLastPollResult() {

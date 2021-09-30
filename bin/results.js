@@ -48,8 +48,7 @@ function mapResultsToEmbed(beatmapset, passed) {
         }
 
         const extraInfo = extraGameModeInfo[mode.integer];
-        const mainPostId = await Forum.findFirstPostId(mainTopics[mode.integer]);
-        let mainPost = await Forum.getPostContent(mainPostId);
+        let mainPost = (await lovedWeb.getForumTopic(mainTopics[mode.integer])).first_post_body;
 
         const beatmapsets = [];
 
@@ -59,8 +58,7 @@ function mapResultsToEmbed(beatmapset, passed) {
             if (topicMatch == null)
                 break;
 
-            const postId = await Forum.findFirstPostId(topicMatch[1]);
-            const post = await Forum.getPostContent(postId);
+            const post = (await lovedWeb.getForumTopic(topicMatch[1])).first_post_body;
             const pollResult = await Forum.getPollResult(topicMatch[1]);
             const postLineEnding = post.includes('\r\n') ? '\r\n' : '\n';
 

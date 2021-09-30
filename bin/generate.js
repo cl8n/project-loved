@@ -107,6 +107,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
         MAIN_TOPIC_TITLE: mainTopicTitle,
       });
       let topicId = topicIds[nomination.id];
+      let topicFromLovedWeb;
 
       if (topicId == null) {
         const coverId = await Forum.storeTopicCover(beatmapset.bgPath);
@@ -126,22 +127,17 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
         topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
         topicIds[nomination.id] = topicId;
-
-        const postTimeMatch = (await Forum.getTopic(topicId)).match(/forum-topic-title__post-time[^<]+<time[^>]+?datetime='([^']+)'/);
-
-        if (postTimeMatch == null) {
-          console.log(yellow('Failed getting topic post time, using current time instead'));
-          topicTimes[nomination.id] = new Date().toISOString();
-        } else {
-          topicTimes[nomination.id] = postTimeMatch[1];
-        }
+        topicFromLovedWeb = await lovedWeb.getForumTopic(topicId);
+        topicTimes[nomination.id] = topicFromLovedWeb.created_at;
 
         await writeFile(join(__dirname, '../storage/topic-ids.json'), JSON.stringify(topicIds));
         await writeFile(join(__dirname, '../storage/topic-times.json'), JSON.stringify(topicTimes));
+      } else {
+        topicFromLovedWeb = await lovedWeb.getForumTopic(topicId);
       }
 
       postsByNominationId[nomination.id] = {
-        id: await Forum.findFirstPostId(topicId),
+        id: topicFromLovedWeb.first_post_id,
         content: postContent,
       };
 
