@@ -104,9 +104,12 @@ function idFromUrl(url) {
 }
 
 function firstPostIdFromTopicView(body) {
-    const maybeId = (body.match(/data-post-id="(\d+)"/) || [, null])[1];
+    const match = body.match(/data-post-id="(\d+)"/);
 
-    return maybeId == null ? null : parseInt(maybeId, 10);
+    if (match == null)
+        return null;
+
+    return parseInt(match[1], 10);
 }
 
 module.exports.storeTopicCover = async function (filename) {
