@@ -2,15 +2,15 @@
   "name": "project-loved",
   "private": true,
   "scripts": {
-    "maps:open": "node bin/open-maps.js",
+    "maps:open": "FORCE_COLOR=1 node bin/open-maps.js",
     "maps:unpack": "sh bin/get-images.sh",
-    "messages": "node bin/pm-mappers.js --messages",
-    "messages:metadata": "node bin/pm-mappers.js --messages --metadata",
-    "news": "node bin/generate.js",
-    "news:forum": "node bin/generate.js --threads --slow-requests",
-    "results": "node bin/results.js --slow-requests",
+    "messages": "FORCE_COLOR=1 node bin/pm-mappers.js --messages",
+    "messages:metadata": "FORCE_COLOR=1 node bin/pm-mappers.js --messages --metadata",
+    "news": "FORCE_COLOR=1 node bin/generate.js",
+    "news:forum": "FORCE_COLOR=1 node bin/generate.js --threads --slow-requests",
+    "results": "FORCE_COLOR=1 node bin/results.js --slow-requests",
     "setup": "npm install & sh bin/setup.sh",
-    "stats": "node bin/collect-stats.js --slow-requests"
+    "stats": "FORCE_COLOR=1 node bin/collect-stats.js --slow-requests"
   },
   "engines": {
     "node": ">=12"
