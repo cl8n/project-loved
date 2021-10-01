@@ -66,6 +66,12 @@ module.exports = class LovedWeb {
         }
 
         for (const nomination of nominations) {
+            for (const creator of nomination.beatmapset_creators) {
+                if (creator.id >= 4294000000) {
+                    console.error(yellow(`Creator ${creator.name} on nomination #${nomination.id} has placeholder ID (#${creator.id})`));
+                }
+            }
+
             // TODO: Should be done on website
             nomination.beatmapset_creators.sort((a, b) => {
                 if (a.id === nomination.beatmapset.creator_id)

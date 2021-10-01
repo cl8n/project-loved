@@ -94,7 +94,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
     for (const nomination of nominationsForMode) {
       const beatmapset = nomination.beatmapset;
       const artistAndTitle = `${beatmapset.artist} - ${beatmapset.title}`;
-      const creatorsBbcode = joinList(nomination.beatmapset_creators.map((c) => `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
+      const creatorsBbcode = joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? c.name : `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
       const postContent = textFromTemplate(votingPostTemplate, {
         BEATMAPSET: artistAndTitle,
         BEATMAPSET_EXTRAS: getExtraBeatmapsetInfo(nomination),
@@ -152,7 +152,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
       discordBeatmapsetStrings.push(textFromTemplate(discordBeatmapsetTemplate, {
         BEATMAPSET_ID: beatmapset.id,
         BEATMAPSET: escapeMarkdown(artistAndTitle),
-        CREATORS: joinList(nomination.beatmapset_creators.map((c) => `[${escapeMarkdown(c.name)}](<https://osu.ppy.sh/users/${c.id}>)`)),
+        CREATORS: joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? escapeMarkdown(c.name) : `[${escapeMarkdown(c.name)}](<https://osu.ppy.sh/users/${c.id}>)`)),
         LINK_MODE: gameMode.linkName,
         TOPIC_ID: topicId,
       }));
@@ -244,7 +244,7 @@ async function generateNews(newsPath, roundInfo) {
         CAPTAIN: escapeMarkdown(nomination.description_author.name),
         CAPTAIN_ID: nomination.description_author.id,
         CONSISTENT_CAPTAIN: extraInfo.descriptionAuthors.length === 1,
-        CREATORS: joinList(nomination.beatmapset_creators.map((c) => `[${escapeMarkdown(c.name)}](https://osu.ppy.sh/users/${c.id})`)),
+        CREATORS: joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? escapeMarkdown(c.name) : `[${escapeMarkdown(c.name)}](https://osu.ppy.sh/users/${c.id})`)),
         DESCRIPTION: convertToMarkdown(nomination.description),
         FOLDER: roundInfo.newsDirname,
         LINK_MODE: gameMode.linkName,
