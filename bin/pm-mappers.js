@@ -9,6 +9,12 @@ const hostTemplate = loadTextResource('pm-template.bbcode');
 
 const metadataPm = process.argv.includes('--metadata', 2);
 
+if (metadataPm) {
+    // TODO: doesn't work because metadata assignees are a one-to-many relationship now
+    console.error('ask clayton to fix this before using it');
+    process.exit(1);
+}
+
 // TODO: Use new chat
 function sendMetadataPm(nomination) {
     // TODO: Track maps which have already had this message sent
