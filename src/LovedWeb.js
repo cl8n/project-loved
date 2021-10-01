@@ -4,6 +4,18 @@ const GameMode = require('./gamemode');
 
 const baseUrl = 'https://loved.sh/api/local-interop';
 
+function handleLovedWebError(error) {
+    if (typeof error === 'object' && error.response != null && error.response.body != null && error.response.body.error != null) {
+        console.error(red(`[loved.sh] ${error.response.body.error}`));
+
+        if (error.response.body.error === 'Unsupported program version') {
+            process.exit(1);
+        }
+    }
+
+    throw error;
+}
+
 module.exports = class LovedWeb {
     #request;
 
@@ -11,7 +23,7 @@ module.exports = class LovedWeb {
         this.#request = superagent
             .agent()
             .set('X-Loved-InteropKey', key)
-            .set('X-Loved-InteropVersion', '1');
+            .set('X-Loved-InteropVersion', '2');
     }
 
     async getForumTopic(topicId) {
@@ -20,7 +32,8 @@ module.exports = class LovedWeb {
         try {
             const response = await this.#request
                 .get(`${baseUrl}/forum-topic`)
-                .query({ topicId });
+                .query({ topicId })
+                .catch(handleLovedWebError);
 
             console.log(dim(green(`[loved.sh] Got forum topic #${topicId}`)));
             return response.body;
@@ -31,7 +44,9 @@ module.exports = class LovedWeb {
     }
 
     async getLastPollResult() {
-        const response = await this.#request.get(`${baseUrl}/poll-result-recent`);
+        const response = await this.#request
+            .get(`${baseUrl}/poll-result-recent`)
+            .catch(handleLovedWebError);
 
         return response.body;
     }
@@ -39,7 +54,8 @@ module.exports = class LovedWeb {
     async getRoundInfo(roundId) {
         const response = await this.#request
             .get(`${baseUrl}/data`)
-            .query({ roundId });
+            .query({ roundId })
+            .catch(handleLovedWebError);
         const {
             discord_webhooks: discordWebhooks,
             nominations,
@@ -138,7 +154,9 @@ module.exports = class LovedWeb {
     }
 
     async getRoundsAvailable() {
-        const response = await this.#request.get(`${baseUrl}/rounds-available`);
+        const response = await this.#request
+            .get(`${baseUrl}/rounds-available`)
+            .catch(handleLovedWebError);
 
         return response.body;
     }
@@ -146,11 +164,14 @@ module.exports = class LovedWeb {
     async addPolls(polls) {
         await this.#request
             .post(`${baseUrl}/polls`)
-            .send(polls);
+            .send(polls)
+            .catch(handleLovedWebError);
     }
 
     async getIncompletePolls() {
-        const response = await this.#request.get(`${baseUrl}/polls/incomplete`);
+        const response = await this.#request
+            .get(`${baseUrl}/polls/incomplete`)
+            .catch(handleLovedWebError);
 
         return response.body;
     }
@@ -158,12 +179,14 @@ module.exports = class LovedWeb {
     async updatePollsWithResults(pollResults) {
         await this.#request
             .post(`${baseUrl}/polls/complete`)
-            .send(pollResults);
+            .send(pollResults)
+            .catch(handleLovedWebError);
     }
 
     async updateResultsPosts(roundId, replyIdsByGamemode) {
         await this.#request
             .post(`${baseUrl}/results-post-ids`)
-            .send({ roundId, replies: replyIdsByGamemode });
+            .send({ roundId, replies: replyIdsByGamemode })
+            .catch(handleLovedWebError);
     }
 };
