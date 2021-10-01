@@ -33,7 +33,6 @@ A typical round of Project Loved involves:
 | `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
 | `lovedApiKey` | API key for https://loved.sh |
 | `lovedRoundId` | ID of the round on https://loved.sh |
-| `month` | Month of the Project Loved round |
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
 | `sessionOld` | https://old.ppy.sh's `phpbb3_2cjk5_sid` cookie |

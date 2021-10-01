@@ -121,6 +121,7 @@ module.exports = class LovedWeb {
             extraGameModeInfo,
             intro: round.news_intro == null ? '' : round.news_intro,
             introPreview: round.news_intro_preview == null ? '' : round.news_intro_preview,
+            name: round.name,
             nominations: nominations.filter((n) => n.parent_id == null),
             outro: round.news_outro == null ? '' : round.news_outro,
             postTime: new Date(round.news_posted_at),

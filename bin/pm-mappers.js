@@ -30,7 +30,7 @@ function sendMetadataPm(nomination) {
 }
 
 // TODO: Use new chat
-function sendNotifyPm(nominations, extraGameModeInfo) {
+function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     if (nominations.length === 0)
         throw 'No nominations provided';
 
@@ -70,8 +70,8 @@ function sendNotifyPm(nominations, extraGameModeInfo) {
             BEATMAPSET_ID: beatmapset.id,
             EXCLUDED_DIFFS: excludedVersions.length > 0 ? joinList(excludedVersions) : null,
             GUESTS: guestCreators.length > 0 ? joinList(guestCreators.map((c) => c.name)) : null,
-            MONTH: config.month,
             POLL_START: config.pollStartGuess,
+            ROUND_NAME: roundName,
             TITLE: beatmapset.title,
             ...gameModeVars,
         }),
@@ -88,7 +88,7 @@ function sendNotifyPm(nominations, extraGameModeInfo) {
             textFromTemplate(guestTemplate, {
                 ARTIST: beatmapset.artist,
                 BEATMAPSET_ID: beatmapset.id,
-                MONTH: config.month,
+                ROUND_NAME: roundName,
                 TITLE: beatmapset.title,
             }),
             [guest.id],
@@ -107,5 +107,6 @@ function sendNotifyPm(nominations, extraGameModeInfo) {
                 roundInfo.allNominations
                     .filter((n) => n.beatmapset_id === nomination.beatmapset_id),
                 roundInfo.extraGameModeInfo,
+                roundInfo.name,
             );
 })();
