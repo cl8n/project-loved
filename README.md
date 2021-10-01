@@ -37,7 +37,6 @@ A typical round of Project Loved involves:
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
 | `sessionOld` | https://old.ppy.sh's `phpbb3_2cjk5_sid` cookie |
 | `userAgent` | `User-Agent` header of the browser used to obtain Cloudflare cookies |
-| `username` | Author of the news post |
 | `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
 | `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
 

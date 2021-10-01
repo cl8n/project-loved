@@ -263,7 +263,7 @@ async function generateNews(newsPath, roundInfo) {
   }
 
   await writeFile(newsPath, textFromTemplate(newsTemplate, {
-    AUTHOR: config.username,
+    AUTHOR: roundInfo.newsAuthorName,
     DATE: roundInfo.postDateString,
     HEADER: roundInfo.introPreview,
     INTRO: roundInfo.intro,

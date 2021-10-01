@@ -12,7 +12,6 @@ const expected = [
   'session',
   'sessionOld',
   'userAgent',
-  'username',
   'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
@@ -25,6 +24,7 @@ const unused = [
   'resultsPost',
   'time',
   'title',
+  'username',
 ];
 
 function addError(message) {
