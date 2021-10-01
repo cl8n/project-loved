@@ -128,7 +128,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
         topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
         topicIds[nomination.id] = topicId;
         topicFromLovedWeb = await lovedWeb.getForumTopic(topicId);
-        topicTimes[nomination.id] = topicFromLovedWeb.created_at;
+        topicTimes[nomination.id] = topicFromLovedWeb.first_post_created_at;
 
         await writeFile(join(__dirname, '../storage/topic-ids.json'), JSON.stringify(topicIds));
         await writeFile(join(__dirname, '../storage/topic-times.json'), JSON.stringify(topicTimes));
