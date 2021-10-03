@@ -43,14 +43,6 @@ module.exports = class LovedWeb {
         }
     }
 
-    async getLastPollResult() {
-        const response = await this.#request
-            .get(`${baseUrl}/poll-result-recent`)
-            .catch(handleLovedWebError);
-
-        return response.body;
-    }
-
     async getRoundInfo(roundId) {
         const response = await this.#request
             .get(`${baseUrl}/data`)
@@ -166,14 +158,6 @@ module.exports = class LovedWeb {
             .post(`${baseUrl}/polls`)
             .send(polls)
             .catch(handleLovedWebError);
-    }
-
-    async getIncompletePolls() {
-        const response = await this.#request
-            .get(`${baseUrl}/polls/incomplete`)
-            .catch(handleLovedWebError);
-
-        return response.body;
     }
 
     async updatePollsWithResults(pollResults) {
