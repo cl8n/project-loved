@@ -1,122 +1,153 @@
-// TODO complete polls on loved.sh
-console.error('ask clayton to fix this before using it');
-process.exit(1);
-
-const { yellow } = require('chalk');
+const { red } = require('chalk');
 const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
-const Gamemode = require('../src/gamemode');
-const { loadTextResource, textFromTemplate } = require('../src/helpers');
+const GameMode = require('../src/gamemode');
+const { escapeMarkdown, joinList, loadTextResource, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 const keepWatches = process.argv.includes('--keep-watches', 2);
 const resultsPostTemplate = loadTextResource('results-post-template.bbcode');
 
-function mapResultsToText(beatmapset, passed) {
-    const color = passed ? '#22DD22' : '#DD2222';
+function mapResultsToText(nomination) {
+  const artistAndTitle = `${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`;
+  const color = nomination.passed ? '#22DD22' : '#DD2222';
+  const creators = joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? c.name : `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
 
-    return `[b][color=${color}]${beatmapset.result.percent}%[/color][/b] (${beatmapset.result.yes}:${beatmapset.result.no}) - ${beatmapset.title}`;
+  return `[b][color=${color}]${nomination.pollResult.percent}%[/color][/b] (${nomination.pollResult.yes}:${nomination.pollResult.no})`
+    + ` - [b][url=https://osu.ppy.sh/beatmapsets/${nomination.beatmapset.id}#${nomination.game_mode.linkName}]${artistAndTitle}[/url][/b]`
+    + ` by ${creators}`;
 }
 
-function mapResultsToEmbed(beatmapset, passed) {
-    return {
-        color: passed ? 2284834 : 14492194,
-        description: `${beatmapset.result.percent}% - ${beatmapset.result.yes}:${beatmapset.result.no}`,
-        title: beatmapset.title
-            .replace(/\[\/?url(?:=.+?)?\]/g, '')
-            .replace(/\\/g, '\\\\')
-            .replace(/\*/g, '\\*')
-            .replace(/_/g, '\\_')
-            .replace(/\[b\](.+?)\[\/b\]/g, '**$1**'),
-        url: beatmapset.title.match(/\[url=(https:\/\/osu\.ppy\.sh\/beatmapsets\/[a-z0-9#]+)\]/)[1],
-    }
+function mapResultsToEmbed(nomination) {
+  const artistAndTitle = escapeMarkdown(`${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`);
+  const creators = joinList(nomination.beatmapset_creators.map((c) => escapeMarkdown(c.name)));
+
+  return {
+    color: nomination.passed ? 2284834 : 14492194,
+    description: `${nomination.pollResult.percent}% - ${nomination.pollResult.yes}:${nomination.pollResult.no}`,
+    title: `**${artistAndTitle}** by ${creators}`,
+    url: `https://osu.ppy.sh/beatmapsets/${nomination.beatmapset.id}#${nomination.game_mode.linkName}`,
+  };
 }
 
 (async function () {
-    console.log('Posting results');
+  console.log('Preparing to post results');
 
-    const lovedWeb = new LovedWeb(config.lovedApiKey);
-    const { discordWebhooks, extraGameModeInfo } = await lovedWeb.getRoundInfo(config.lovedRoundId);
-    const mainTopics = await Forum.getModeTopics(120);
-    const mainTopicsReplies = {};
+  const lovedWeb = new LovedWeb(config.lovedApiKey);
+  const { allNominations, discordWebhooks, extraGameModeInfo } = await lovedWeb.getRoundInfo(config.lovedRoundId);
+  const mainTopics = await Forum.getModeTopics(120);
+  const gameModes = GameMode.modes().filter((gameMode) => mainTopics[gameMode.integer] != null).reverse();
+  let error = false;
 
-    for (const mode of Gamemode.modes().reverse()) {
-        if (mainTopics[mode.integer] == null) {
-            console.error(yellow(`Skipping ${mode.longName}, no main topic found`));
-            continue;
-        }
+  for (const gameMode of GameMode.modes()) {
+    if (
+      (mainTopics[gameMode.integer] == null) !==
+      (allNominations.filter((n) => n.game_mode.integer === gameMode.integer).length === 0)
+    ) {
+      console.error(red(`Nominations and main topics do not agree about ${gameMode.longName}'s presence`));
+      error = true;
+    }
+  }
 
-        const extraInfo = extraGameModeInfo[mode.integer];
-        let mainPost = (await lovedWeb.getForumTopic(mainTopics[mode.integer])).first_post_body;
+  for (const nomination of allNominations) {
+    if (nomination.poll == null) {
+      console.error(red(`Nomination #${nomination.id} does not have a poll`));
+      error = true;
+    }
+  }
 
-        const beatmapsets = [];
+  if (error) {
+    process.exit(1);
+  }
 
-        while (true) {
-            const topicMatch = mainPost.match(/\[url=https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\]Vote for this map here!/);
+  console.log(`Locking topics${keepWatches ? '' : ' and removing watches'}`);
 
-            if (topicMatch == null)
-                break;
+  const lockPromises = gameModes.map((gameMode) => Forum.lockTopic(mainTopics[gameMode.integer]));
 
-            const post = (await lovedWeb.getForumTopic(topicMatch[1])).first_post_body;
-            const pollResult = await Forum.getPollResult(topicMatch[1]);
-            const postLineEnding = post.includes('\r\n') ? '\r\n' : '\n';
+  for (const nomination of allNominations) {
+    lockPromises.push(Forum.lockTopic(nomination.poll.topic_id));
+  }
 
-            beatmapsets.push({
-                passed: parseFloat(pollResult.percent) >= extraInfo.threshold * 100,
-                result: pollResult,
-                title: post.split(postLineEnding)[2],
-                topicId: topicMatch[1]
-            });
-
-            Forum.lockTopic(topicMatch[1]);
-
-            if (!keepWatches)
-                Forum.watchTopic(topicMatch[1], false);
-
-            mainPost = mainPost.substring(topicMatch.index + topicMatch[0].length);
-        }
-
-        for (const beatmapset of beatmapsets.slice().reverse()) {
-            const replyContent = beatmapset.passed ? config.messages.resultsPassed : config.messages.resultsFailed;
-            await Forum.reply(beatmapset.topicId, replyContent);
-        }
-
-        const passedBeatmapsets = beatmapsets.filter(b => b.passed);
-        const failedBeatmapsets = beatmapsets.filter(b => !b.passed);
-
-        mainTopicsReplies[mode.integer] = textFromTemplate(resultsPostTemplate, {
-            PASSED_BEATMAPSETS: passedBeatmapsets.map(b => mapResultsToText(b, true)).join('\n'),
-            FAILED_BEATMAPSETS: failedBeatmapsets.map(b => mapResultsToText(b, false)).join('\n'),
-            THRESHOLD: extraInfo.thresholdFormatted,
-        });
-
-        Forum.lockTopic(mainTopics[mode.integer]);
-
-        if (!keepWatches)
-            Forum.watchTopic(mainTopics[mode.integer], false);
-
-        if (discordWebhooks[mode.integer] != null)
-            new Discord(discordWebhooks[mode.integer]).post(
-                `Project Loved: ${mode.longName}`,
-                config.messages.discordResults,
-                passedBeatmapsets.map(b => mapResultsToEmbed(b, true))
-                    .concat(failedBeatmapsets.map(b => mapResultsToEmbed(b, false)))
-            );
+  if (!keepWatches) {
+    for (const gameMode of gameModes) {
+      lockPromises.push(Forum.watchTopic(mainTopics[gameMode.integer], false));
     }
 
-    const replyIdsByGamemode = {};
+    for (const nomination of allNominations) {
+      lockPromises.push(Forum.watchTopic(nomination.poll.topic_id, false));
+    }
+  }
 
-    for (const mode of Gamemode.modes().reverse()) {
-        if (mainTopics[mode.integer] == null)
-            continue;
+  await Promise.all(lockPromises);
 
-        Forum.pinTopic(mainTopics[mode.integer], false);
+  console.log('Unpinning main topics');
 
-        replyIdsByGamemode[mode.integer] = await Forum.reply(mainTopics[mode.integer], mainTopicsReplies[mode.integer]);
+  await Promise.all(gameModes.map((gameMode) => Forum.pinTopic(mainTopics[gameMode.integer], false)));
+
+  console.log('Replying to topics');
+
+  const discordPostArguments = {};
+  const mainTopicReplies = {};
+  const mainTopicReplyIds = {};
+
+  for (const gameMode of gameModes) {
+    const extraInfo = extraGameModeInfo[mode.integer];
+    const nominations = allNominations.filter((n) => n.game_mode.integer === gameMode.integer);
+
+    for (const nomination of nominations.slice().reverse()) {
+      const pollResult = await Forum.getPollResult(nomination.poll.topic_id);
+
+      nomination.passed = parseFloat(pollResult.percent) >= extraInfo.threshold * 100;
+      nomination.pollResult = pollResult;
+
+      await Forum.reply(
+        nomination.poll.topic_id,
+        nomination.passed ? config.messages.resultsPassed : config.messages.resultsFailed,
+      );
     }
 
-    console.log('Submitting results posts to loved.sh');
+    const failedNominations = nominations.filter((n) => !n.passed);
+    const passedNominations = nominations.filter((n) => n.passed);
 
-    await lovedWeb.updateResultsPosts(config.lovedRoundId, replyIdsByGamemode);
+    discordPostArguments[gameMode.integer] = [
+      `Project Loved: ${gameMode.longName}`,
+      config.messages.discordResults,
+      [
+        ...passedNominations.map(mapResultsToEmbed),
+        ...failedNominations.map(mapResultsToEmbed),
+      ],
+    ];
+    mainTopicReplies[gameMode.integer] = textFromTemplate(resultsPostTemplate, {
+      FAILED_BEATMAPSETS: failedNominations.map(mapResultsToText).join('\n'),
+      PASSED_BEATMAPSETS: passedNominations.map(mapResultsToText).join('\n'),
+      THRESHOLD: extraInfo.thresholdFormatted,
+    });
+  }
+
+  for (const gameMode of gameModes) {
+    mainTopicReplyIds[gameMode.integer] = await Forum.reply(mainTopics[gameMode.integer], mainTopicReplies[gameMode.integer]);
+  }
+
+  console.log('Posting announcements to Discord');
+
+  for (const gameMode of gameModes) {
+    if (discordWebhooks[gameMode.integer] != null) {
+      await new Discord(discordWebhooks[gameMode.integer]).post(...discordPostArguments[gameMode.integer]);
+    }
+  }
+
+  console.log('Submitting poll results to loved.sh');
+
+  await lovedWeb.updatePollsWithResults(
+    allNominations.map((nomination) => ({
+      id: nomination.poll.id,
+      no: nomination.pollResult.no,
+      yes: nomination.pollResult.yes,
+    })),
+  );
+
+  console.log('Submitting results posts to loved.sh');
+
+  await lovedWeb.updateResultsPosts(config.lovedRoundId, mainTopicReplyIds);
 })();
