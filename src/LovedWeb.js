@@ -23,7 +23,7 @@ module.exports = class LovedWeb {
         this.#request = superagent
             .agent()
             .set('X-Loved-InteropKey', key)
-            .set('X-Loved-InteropVersion', '2');
+            .set('X-Loved-InteropVersion', '3');
     }
 
     async getForumTopic(topicId) {
