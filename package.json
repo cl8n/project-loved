@@ -9,8 +9,7 @@
     "news": "FORCE_COLOR=1 node bin/generate.js",
     "news:forum": "FORCE_COLOR=1 node bin/generate.js --threads --slow-requests",
     "results": "FORCE_COLOR=1 node bin/results.js --slow-requests",
-    "setup": "npm install & sh bin/setup.sh",
-    "stats": "FORCE_COLOR=1 node bin/collect-stats.js --slow-requests"
+    "setup": "npm install & sh bin/setup.sh"
   },
   "engines": {
     "node": ">=12"
