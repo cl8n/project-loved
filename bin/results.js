@@ -93,7 +93,7 @@ function mapResultsToEmbed(nomination) {
   const mainTopicReplyIds = {};
 
   for (const gameMode of gameModes) {
-    const extraInfo = extraGameModeInfo[mode.integer];
+    const extraInfo = extraGameModeInfo[gameMode.integer];
     const nominations = allNominations.filter((n) => n.game_mode.integer === gameMode.integer);
 
     for (const nomination of nominations.slice().reverse()) {
