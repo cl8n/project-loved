@@ -1,3 +1,4 @@
+require('../src/force-color');
 const config = require('../src/config');
 const Forum = require('../src/forum');
 const { joinList, loadTextResource, textFromTemplate, pushUnique } = require('../src/helpers');

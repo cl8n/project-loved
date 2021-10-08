@@ -1,3 +1,4 @@
+require('../src/force-color');
 const open = require('open');
 const config = require('../src/config');
 const LovedWeb = require('../src/LovedWeb');

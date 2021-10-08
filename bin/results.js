@@ -1,3 +1,4 @@
+require('../src/force-color');
 const { red } = require('chalk');
 const config = require('../src/config');
 const Discord = require('../src/discord');

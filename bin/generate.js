@@ -1,3 +1,4 @@
+require('../src/force-color');
 const { dim, green, red, yellow } = require('chalk');
 const { existsSync } = require('fs');
 const { readdir, writeFile } = require('fs').promises;
