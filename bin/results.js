@@ -8,6 +8,7 @@ const { escapeMarkdown, joinList, loadTextResource, textFromTemplate } = require
 const LovedWeb = require('../src/LovedWeb');
 
 const keepWatches = process.argv.includes('--keep-watches', 2);
+const skipForumState = process.argv.includes('--skip-forum-state', 2);
 const resultsPostTemplate = loadTextResource('results-post-template.bbcode');
 
 function mapResultsToText(nomination) {
@@ -62,29 +63,31 @@ function mapResultsToEmbed(nomination) {
     process.exit(1);
   }
 
-  console.log(`Locking topics${keepWatches ? '' : ' and removing watches'}`);
+  if (!skipForumState) {
+    console.log(`Locking topics${keepWatches ? '' : ' and removing watches'}`);
 
-  const lockPromises = gameModes.map((gameMode) => Forum.lockTopic(mainTopics[gameMode.integer]));
-
-  for (const nomination of allNominations) {
-    lockPromises.push(Forum.lockTopic(nomination.poll.topic_id));
-  }
-
-  if (!keepWatches) {
-    for (const gameMode of gameModes) {
-      lockPromises.push(Forum.watchTopic(mainTopics[gameMode.integer], false));
-    }
+    const lockPromises = gameModes.map((gameMode) => Forum.lockTopic(mainTopics[gameMode.integer]));
 
     for (const nomination of allNominations) {
-      lockPromises.push(Forum.watchTopic(nomination.poll.topic_id, false));
+      lockPromises.push(Forum.lockTopic(nomination.poll.topic_id));
     }
+
+    if (!keepWatches) {
+      for (const gameMode of gameModes) {
+        lockPromises.push(Forum.watchTopic(mainTopics[gameMode.integer], false));
+      }
+
+      for (const nomination of allNominations) {
+        lockPromises.push(Forum.watchTopic(nomination.poll.topic_id, false));
+      }
+    }
+
+    await Promise.all(lockPromises);
+
+    console.log('Unpinning main topics');
+
+    await Promise.all(gameModes.map((gameMode) => Forum.pinTopic(mainTopics[gameMode.integer], false)));
   }
-
-  await Promise.all(lockPromises);
-
-  console.log('Unpinning main topics');
-
-  await Promise.all(gameModes.map((gameMode) => Forum.pinTopic(mainTopics[gameMode.integer], false)));
 
   console.log('Replying to topics');
 
