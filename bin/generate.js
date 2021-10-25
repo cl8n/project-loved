@@ -184,16 +184,26 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
       Forum.updatePost(postInfo.id, postInfo.content.replace('MAIN_TOPIC_ID', mainTopicId));
     }
 
+    discordBeatmapsetStrings.reverse();
     const discordWebhook = discordWebhooks[gameMode.integer];
 
     if (discordWebhook != null) {
-      new Discord(discordWebhook).post(
-        `Project Loved: ${gameMode.longName}`,
-        // TODO: Why is this not a normal template
-        textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length })
-          + '\n\n'
-          + discordBeatmapsetStrings.reverse().join('\n\n'),
-      );
+      let discordMessage = textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length }) + '\n\n';
+      const sendMessage = () => new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, discordMessage.trim());
+
+      for (const beatmapsetString of discordBeatmapsetStrings) {
+        const newMessage = discordMessage + beatmapsetString + '\n\n';
+
+        if (newMessage.length > Discord.maxLength) {
+          await sendMessage();
+          discordMessage = beatmapsetString + '\n\n';
+          continue;
+        }
+
+        discordMessage = newMessage;
+      }
+
+      await sendMessage();
     }
   }
 
