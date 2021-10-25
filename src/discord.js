@@ -1,6 +1,9 @@
 const superagent = require('superagent');
 
 module.exports = class Discord {
+    static maxEmbeds = 10;
+    static maxLength = 2000;
+
     #webhook;
 
     constructor(webhook) {
@@ -8,24 +11,24 @@ module.exports = class Discord {
     }
 
     async post(username, content, embeds = null) {
-        if (content != null && content.length > 2000 && embeds != null && embeds.length > 10)
+        if (content != null && content.length > Discord.maxLength && embeds != null && embeds.length > Discord.maxEmbeds)
             throw new Error(`Discord message content and embeds are too long`);
 
-        if (content != null && content.length > 2000) {
-            await this.post(username, content.slice(0, 2000), embeds);
+        if (content != null && content.length > Discord.maxLength) {
+            await this.post(username, content.slice(0, Discord.maxLength), embeds);
 
-            for (let i = 2000; i < content.length; i += 2000) {
-                await this.post(username, content.slice(i, i + 2000));
+            for (let i = Discord.maxLength; i < content.length; i += Discord.maxLength) {
+                await this.post(username, content.slice(i, i + Discord.maxLength));
             }
 
             return;
         }
 
-        if (embeds != null && embeds.length > 10) {
-            await this.post(username, content, embeds.slice(0, 10));
+        if (embeds != null && embeds.length > Discord.maxEmbeds) {
+            await this.post(username, content, embeds.slice(0, Discord.maxEmbeds));
 
-            for (let i = 10; i < embeds.length; i += 10) {
-                await this.post(username, null, embeds.slice(i, i + 10));
+            for (let i = Discord.maxEmbeds; i < embeds.length; i += Discord.maxEmbeds) {
+                await this.post(username, null, embeds.slice(i, i + Discord.maxEmbeds));
             }
 
             return;
