@@ -42,6 +42,11 @@ function escapeMarkdown(text) {
         .replace(/(?<!\\)\[(.*?[^\\])\](?!\()/g, '\\[$1\\]');
 }
 
+function expandBbcodeRootLinks(text) {
+    return text.toString()
+        .replace(/\[url=\/([^\]]+)\]/g, '[url=https://osu.ppy.sh/$1]');
+}
+
 function getExcludedDiffNames(beatmapset, nomination) {
     const excludedDiffNames = [];
 
@@ -119,6 +124,7 @@ module.exports = {
     convertToMarkdown,
     escapeHtml,
     escapeMarkdown,
+    expandBbcodeRootLinks,
     getExcludedDiffNames,
     joinList,
     loadTextResource,

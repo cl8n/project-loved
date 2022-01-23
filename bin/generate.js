@@ -8,7 +8,7 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { convertToMarkdown, escapeMarkdown, joinList, loadTextResource, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 // TODO: Move to file dedicated to topic storage (also see topics-cache)
@@ -103,7 +103,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
         CAPTAIN: nomination.description_author.name,
         CAPTAIN_ID: nomination.description_author.id,
         CREATORS: creatorsBbcode,
-        DESCRIPTION: nomination.description,
+        DESCRIPTION: expandBbcodeRootLinks(nomination.description),
         LINK_MODE: gameMode.linkName,
         MAIN_TOPIC_TITLE: mainTopicTitle,
       });

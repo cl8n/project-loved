@@ -23,7 +23,7 @@ module.exports = class LovedWeb {
         this.#request = superagent
             .agent()
             .set('X-Loved-InteropKey', key)
-            .set('X-Loved-InteropVersion', '3');
+            .set('X-Loved-InteropVersion', '4');
     }
 
     async getForumTopic(topicId) {
@@ -80,33 +80,6 @@ module.exports = class LovedWeb {
                 }
             }
 
-            // TODO: Should be done on website
-            nomination.beatmapset_creators.sort((a, b) => {
-                if (a.id === nomination.beatmapset.creator_id)
-                    return -1;
-
-                if (b.id === nomination.beatmapset.creator_id)
-                    return 1;
-
-                return a.name.localeCompare(b.name);
-            });
-            // TODO: Should be done on website
-            nomination.description = nomination.description == null ? null :
-                nomination.description
-                    .trim()
-                    .replace(/\r\n?/g, '\n')
-                    .replace(/^ +| +$/gm, '')
-                    .replace(/[‘’]/g, "'")
-                    .replace(/[“”]/g, '"')
-                    .replace(/…/g, '...')
-                    .replace(/½/g, '1/2')
-                    .replace(/⅓/g, '1/3')
-                    .replace(/¼/g, '1/4')
-                    .replace(/⅙/g, '1/6')
-                    .replace(/⅛/g, '1/8')
-                    .replace(/\b(\d+) ?k\b/gi, '$1K')
-                    .replace(/\b(\d+) ?bpm\b/gi, '$1 BPM')
-                    .replace(/o2jam/gi, 'O2Jam');
             nomination.game_mode = new GameMode(nomination.game_mode);
 
             const extras = extraGameModeInfo[nomination.game_mode.integer];
