@@ -71,6 +71,8 @@ const requestWrapped = async function requestWrapped(options) {
             throw 'Authorization failed';
         case 404:
             throw 'Not found';
+        case 413:
+            throw 'File too large';
         case 500:
             throw 'Server error';
     }
