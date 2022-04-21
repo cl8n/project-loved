@@ -74,6 +74,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
   if (error)
     throw new Error();
 
+  const discordBeatmapsetStringsByGameMode = {};
   const discordBeatmapsetTemplate = loadTextResource('discord-template-beatmap.md');
   const mainPostTemplate = loadTextResource('main-thread-template.bbcode');
   const mainPostBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
@@ -185,10 +186,16 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
       Forum.updatePost(postInfo.id, postInfo.content.replace('MAIN_TOPIC_ID', mainTopicId));
     }
 
-    discordBeatmapsetStrings.reverse();
+    discordBeatmapsetStringsByGameMode[gameMode.integer] = discordBeatmapsetStrings.reverse();
+  }
+
+  console.log('Posting announcements to Discord');
+
+  for (const gameMode of GameMode.modes()) {
+    const discordBeatmapsetStrings = discordBeatmapsetStringsByGameMode[gameMode.integer];
     const discordWebhook = discordWebhooks[gameMode.integer];
 
-    if (discordWebhook != null) {
+    if (discordBeatmapsetStrings != null && discordBeatmapsetStrings.length > 0 && discordWebhook != null) {
       let discordMessage = textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length }) + '\n\n';
       const sendMessage = () => new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, discordMessage.trim());
 
