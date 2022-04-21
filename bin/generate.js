@@ -197,13 +197,13 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
     if (discordBeatmapsetStrings != null && discordBeatmapsetStrings.length > 0 && discordWebhook != null) {
       let discordMessage = textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length }) + '\n\n';
-      const sendMessage = () => new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, discordMessage.trim());
+      const sendMessage = (message) => new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, message.trim());
 
       for (const beatmapsetString of discordBeatmapsetStrings) {
         const newMessage = discordMessage + beatmapsetString + '\n\n';
 
         if (newMessage.length > Discord.maxLength) {
-          await sendMessage();
+          await sendMessage(discordMessage);
           discordMessage = beatmapsetString + '\n\n';
           continue;
         }
@@ -211,7 +211,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
         discordMessage = newMessage;
       }
 
-      await sendMessage();
+      await sendMessage(discordMessage);
     }
   }
 
