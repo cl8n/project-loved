@@ -8,7 +8,7 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 // TODO: Move to file dedicated to topic storage (also see topics-cache)
@@ -35,6 +35,7 @@ async function generateBanners(bannersPath, beatmapsets) {
       })
       .catch((reason) => {
         console.error(dim(red(`Failed to create banner for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`)));
+        throw new Error();
       });
 
     bannerPromises.push(bannerPromise);
@@ -71,7 +72,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
   }
 
   if (error)
-    process.exit(1);
+    throw new Error();
 
   const discordBeatmapsetTemplate = loadTextResource('discord-template-beatmap.md');
   const mainPostTemplate = loadTextResource('main-thread-template.bbcode');
@@ -298,7 +299,7 @@ function getExtraBeatmapsetInfo(nomination) {
       const versionMatch = beatmap.version.match(/(?:\[\d+K\] )?(.+)/i);
 
       if (versionMatch == null)
-        throw new Error('Excluded beatmap version match failed');
+        throw `Excluded beatmap version match failed for nomination #${nomination.id}`;
 
       excludedDiffNames.push(`[${versionMatch[1]}]`);
     }
@@ -308,7 +309,7 @@ function getExtraBeatmapsetInfo(nomination) {
   }
 
   if (beatmaps.length === 0)
-    throw new Error('No beatmaps for this nomination');
+    throw `No beatmaps for nomination #${nomination.id}`;
 
   // TODO: should be done on website
   beatmaps
@@ -387,6 +388,9 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
     }
   }
 
+  if (error)
+    throw new Error();
+
   return paths;
 }
 
@@ -395,7 +399,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   const shouldGenerateTopics = process.argv.includes('--threads', 2);
   const lovedWeb = new LovedWeb(config.lovedApiKey);
 
-  const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
+  const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
   const postTimeIsoString = roundInfo.postTime.toISOString();
 
   roundInfo.postDateString = postTimeIsoString.slice(0, 10);
@@ -403,7 +407,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
 
   const beatmapsets = roundInfo.nominations.map((n) => n.beatmapset);
-  const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsets);
+  const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsets).catch(logAndExit);
 
   for (const nomination of roundInfo.allNominations) {
     nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
@@ -412,7 +416,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   await generateBanners(
     join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
     beatmapsets,
-  );
+  ).catch(logAndExit);
 
   if (shouldGenerateTopics) {
     // TODO: probably just pass roundInfo...
@@ -423,7 +427,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
       roundInfo.extraGameModeInfo,
       roundInfo.resultsPostIds,
       roundInfo.discordWebhooks,
-    );
+    ).catch(logAndExit);
   }
 
   // TODO: Rewrite with async functions?
@@ -432,5 +436,5 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   await generateNews(
     join(outPath, `news/${roundInfo.newsDirname}.md`),
     roundInfo,
-  );
+  ).catch(logAndExit);
 })();

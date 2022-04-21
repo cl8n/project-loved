@@ -1,7 +1,7 @@
 require('../src/force-color');
 const config = require('../src/config');
 const Forum = require('../src/forum');
-const { joinList, loadTextResource, textFromTemplate, pushUnique } = require('../src/helpers');
+const { joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 const guestTemplate = loadTextResource('pm-guest-template.bbcode');
@@ -12,8 +12,7 @@ const metadataPm = process.argv.includes('--metadata', 2);
 
 if (metadataPm) {
     // TODO: doesn't work because metadata assignees are a one-to-many relationship now
-    console.error('ask clayton to fix this before using it');
-    process.exit(1);
+    logAndExit('Ask Clayton to fix this command before using it');
 }
 
 // TODO: Use new chat
@@ -104,7 +103,7 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
 }
 
 (async () => {
-    const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId);
+    const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId).catch(logAndExit);
 
     for (const nomination of roundInfo.nominations)
         if (metadataPm)

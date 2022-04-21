@@ -1,5 +1,7 @@
+const { red } = require('chalk');
 const { existsSync, mkdirSync, readFileSync } = require('fs');
 const { dirname, join } = require('path');
+const { inspect } = require('util');
 
 function convertToMarkdown(bbcode) {
     return bbcode.toString()
@@ -76,6 +78,22 @@ function loadTextResource(basename) {
     return readFileSync(join(__dirname, '../resources', basename), 'utf8');
 }
 
+function logAndExit(error) {
+    let errorMessage = 'Error occurred';
+
+    if (typeof error === 'string') {
+        errorMessage = error;
+    } else if (error instanceof Error) {
+        errorMessage = error.message ? inspect(error) : null;
+    }
+
+    if (errorMessage != null) {
+        console.error(red(errorMessage));
+    }
+
+    process.exit(1);
+}
+
 function maxOf(array, key) {
     const reducer = (prev, curr) => prev[key] > curr[key] ? prev : curr;
 
@@ -128,6 +146,7 @@ module.exports = {
     getExcludedDiffNames,
     joinList,
     loadTextResource,
+    logAndExit,
     maxOf,
     minOf,
     mkdirTreeSync,

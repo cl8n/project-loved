@@ -4,7 +4,7 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { escapeMarkdown, joinList, loadTextResource, textFromTemplate } = require('../src/helpers');
+const { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 const keepWatches = process.argv.includes('--keep-watches', 2);
@@ -37,7 +37,7 @@ function mapResultsToEmbed(nomination) {
   console.log('Preparing to post results');
 
   const lovedWeb = new LovedWeb(config.lovedApiKey);
-  const { allNominations, discordWebhooks, extraGameModeInfo } = await lovedWeb.getRoundInfo(config.lovedRoundId);
+  const { allNominations, discordWebhooks, extraGameModeInfo } = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
   const mainTopics = await Forum.getModeTopics(120);
   const gameModes = GameMode.modes().filter((gameMode) => mainTopics[gameMode.integer] != null).reverse();
   let error = false;
