@@ -40,4 +40,4 @@ A typical round of Project Loved involves:
 | `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
 | `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
 
-In addition to `config.json`, you need to provide beatmap backgrounds for each of the mapsets included in the current round. Their filenames (not including the extension) must match the beatmapset ID. To speed up the process of collecting backgrounds, you can put all of the OSZ files in the `config` folder and run `npm run maps:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
+In addition to `config.json`, you need to provide beatmap backgrounds for each of the mapsets included in the current round. Their filenames (not including the extension) must match the beatmapset ID. Run `npm run maps:download` to download most of them automatically. For the remaining, you can put all of the OSZ files in the `config` folder and run `npm run maps:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
