@@ -2,6 +2,7 @@
   "name": "project-loved",
   "private": true,
   "scripts": {
+    "maps:download": "node bin/get-backgrounds.js",
     "maps:open": "node bin/open-maps.js",
     "maps:unpack": "sh bin/get-images.sh",
     "messages": "node bin/pm-mappers.js --messages",
