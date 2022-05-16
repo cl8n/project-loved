@@ -5,11 +5,11 @@
     "maps:download": "node bin/get-backgrounds.js",
     "maps:open": "node bin/open-maps.js",
     "maps:unpack": "sh bin/get-images.sh",
-    "messages": "node bin/pm-mappers.js --messages",
-    "messages:metadata": "node bin/pm-mappers.js --messages --metadata",
+    "messages": "node bin/pm-mappers.js",
+    "messages:metadata": "node bin/pm-mappers.js --metadata",
     "news": "node bin/generate.js",
-    "news:forum": "node bin/generate.js --threads --slow-requests",
-    "results": "node bin/results.js --slow-requests",
+    "news:forum": "node bin/generate.js --threads",
+    "results": "node bin/results.js",
     "setup": "npm install & sh bin/setup.sh"
   },
   "engines": {

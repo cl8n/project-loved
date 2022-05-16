@@ -26,11 +26,7 @@ requestUnwrapped = requestUnwrapped.defaults({
 
 const limiter = new bottleneck({
     maxConcurrent: 1,
-    minTime: process.argv.includes('--messages', 2)
-        ? 20000
-        : process.argv.includes('--slow-requests', 2)
-            ? 2500
-            : 1000
+    minTime: 2500,
 });
 
 function handleVerification() {
