@@ -1,8 +1,9 @@
 const { dim, green, red, yellow } = require('chalk');
 const superagent = require('superagent');
+const config = require('./config');
 const GameMode = require('./gamemode');
 
-const baseUrl = 'https://loved.sh/api/local-interop';
+const baseUrl = config.lovedBaseUrl + '/api/local-interop';
 
 function handleLovedWebError(error) {
     if (typeof error === 'object' && error.response != null && error.response.body != null && error.response.body.error != null) {

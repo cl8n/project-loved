@@ -6,14 +6,13 @@ const WebSocket = require('ws');
 const config = require('./config');
 const Gamemode = require('./gamemode');
 
-const OSU_SERVER = 'https://osu.ppy.sh/';
 const jar = requestUnwrapped.jar();
-jar.setCookie(`__cfduid=${config.cloudflare.id}`, OSU_SERVER);
-jar.setCookie(`cf_clearance=${config.cloudflare.clearance}`, OSU_SERVER);
-jar.setCookie(`osu_session=${config.session}`, OSU_SERVER);
-jar.setCookie(`XSRF-TOKEN=${config.csrf}`, OSU_SERVER);
+jar.setCookie(`__cfduid=${config.cloudflare.id}`, config.osuBaseUrl);
+jar.setCookie(`cf_clearance=${config.cloudflare.clearance}`, config.osuBaseUrl);
+jar.setCookie(`osu_session=${config.session}`, config.osuBaseUrl);
+jar.setCookie(`XSRF-TOKEN=${config.csrf}`, config.osuBaseUrl);
 requestUnwrapped = requestUnwrapped.defaults({
-    baseUrl: OSU_SERVER,
+    baseUrl: config.osuBaseUrl,
     method: 'POST',
     followRedirect: false,
     headers: {

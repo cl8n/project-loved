@@ -7,7 +7,9 @@ const expected = [
   'csrf',
   'csrfOld',
   'lovedApiKey',
+  'lovedBaseUrl',
   'lovedRoundId',
+  'osuBaseUrl',
   'pollStartGuess',
   'session',
   'sessionOld',
@@ -51,6 +53,9 @@ if (errors.length > 0) {
   process.stderr.write('Errors in config:\n' + errors);
   process.exit(1);
 }
+
+config.lovedBaseUrl = config.lovedBaseUrl.replace(/\/+$/, '');
+config.osuBaseUrl = config.osuBaseUrl.replace(/\/+$/, '');
 
 module.exports = {
   ...require('../resources/info.json'),
