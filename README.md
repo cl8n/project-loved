@@ -27,17 +27,21 @@ A typical round of Project Loved involves:
 
 | Option | Description |
 | :-- | :-- |
+| `apiClient.id` | API client ID for chat announcements |
+| `apiClient.secret` | API client secret for chat announcements |
 | `cloudflare.id` | https://osu.ppy.sh's `__cfduid` cookie |
 | `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie |
 | `csrf` | https://osu.ppy.sh's `XSRF-TOKEN` cookie |
-| `csrfOld` | https://old.ppy.sh's `localUserCheck` value (found in a script element) |
 | `lovedApiKey` | API key for https://loved.sh |
+| `lovedBaseUrl` | Base URL for https://loved.sh |
 | `lovedRoundId` | ID of the round on https://loved.sh |
+| `osuBaseUrl` | Base URL for https://osu.ppy.sh |
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
-| `sessionOld` | https://old.ppy.sh's `phpbb3_2cjk5_sid` cookie |
 | `userAgent` | `User-Agent` header of the browser used to obtain Cloudflare cookies |
 | `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
 | `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
+
+When creating the API client for chat announcements, set the "Application Callback URL" field to `http://localhost:18888`.
 
 In addition to `config.json`, you need to provide beatmap backgrounds for each of the mapsets included in the current round. Their filenames (not including the extension) must match the beatmapset ID. Run `npm run maps:download` to download most of them automatically. For the remaining, you can put all of the OSZ files in the `config` folder and run `npm run maps:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
