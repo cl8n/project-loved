@@ -1,12 +1,14 @@
 require('../src/force-color');
+const { yellow } = require('chalk');
+const { sendChatAnnouncement, setChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
 const Forum = require('../src/forum');
 const { joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
-const guestTemplate = loadTextResource('pm-guest-template.bbcode');
+const guestTemplate = loadTextResource('chat-nomination-guest-template.md');
 const metadataTemplate = loadTextResource('pm-metadata-template.bbcode');
-const hostTemplate = loadTextResource('pm-template.bbcode');
+const hostTemplate = loadTextResource('chat-nomination-template.md');
 
 const metadataPm = process.argv.includes('--metadata', 2);
 
@@ -35,7 +37,6 @@ function sendMetadataPm(nomination) {
     );
 }
 
-// TODO: Use new chat
 function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     if (nominations.length === 0)
         throw 'No nominations provided';
@@ -59,7 +60,7 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     const gameModeVars = gameModes.length > 1
         ? {
             GAME_MODES: joinList(gameModes.map((m) => m.longName)),
-            THRESHOLDS: `[list]${gameModes.map((m) => `[*]${m.longName}: ${extraGameModeInfo[m.integer].thresholdFormatted}`)}[/list]`,
+            THRESHOLDS: gameModes.map((m) => `- ${m.longName}: **${extraGameModeInfo[m.integer].thresholdFormatted}**`).join('\n'),
         } : {
             GAME_MODE: gameModes[0].longName,
             THRESHOLD: extraGameModeInfo[gameModes[0].integer].thresholdFormatted,
@@ -68,42 +69,52 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
         .filter((creator) => creator.id !== beatmapset.creator_id)
         .sort((a, b) => a.name.localeCompare(b.name));
 
-    Forum.sendPm(
-        config.messages.pmHost,
-        'heart',
+    sendChatAnnouncement(
+        [beatmapset.creator_id],
+        'Project Loved nomination',
+        'Your map has been nominated for the next round of Project Loved!',
         textFromTemplate(hostTemplate, {
-            ARTIST: beatmapset.artist,
+            ARTIST: beatmapset.original_artist,
             BEATMAPSET_ID: beatmapset.id,
             EXCLUDED_DIFFS: excludedVersions.length > 0 ? joinList(excludedVersions) : null,
             GUESTS: guestCreators.length > 0 ? joinList(guestCreators.map((c) => c.name)) : null,
             POLL_START: config.pollStartGuess,
             ROUND_NAME: roundName,
-            TITLE: beatmapset.title,
+            TITLE: beatmapset.original_title,
             ...gameModeVars,
         }),
-        [beatmapset.creator_id],
     );
 
-    for (const guest of guestCreators) {
-        if (guest.banned)
-            continue;
+    const guestCreatorsToMessage = guestCreators.filter((creator) => {
+        if (creator.banned || creator.id >= 4294000000) {
+            console.error(yellow(`Skipping chat announcement to banned user ${creator.name}`));
+            return false;
+        }
 
-        Forum.sendPm(
-            config.messages.pmGuest,
-            'heart',
+        return true;
+    });
+
+    if (guestCreatorsToMessage.length > 0)
+        sendChatAnnouncement(
+            guestCreatorsToMessage.map((user) => user.id),
+            'Project Loved guest nomination',
+            'Your guest map has been nominated for the next round of Project Loved!',
             textFromTemplate(guestTemplate, {
-                ARTIST: beatmapset.artist,
+                ARTIST: beatmapset.original_artist,
                 BEATMAPSET_ID: beatmapset.id,
                 ROUND_NAME: roundName,
-                TITLE: beatmapset.title,
+                TITLE: beatmapset.original_title,
             }),
-            [guest.id],
         );
-    }
 }
 
 (async () => {
     const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId).catch(logAndExit);
+
+    if (roundInfo.nominations.length === 0)
+        return;
+
+    await setChatAccessToken();
 
     for (const nomination of roundInfo.nominations)
         if (metadataPm)

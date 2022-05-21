@@ -3,27 +3,28 @@ const config = require('../config/config.json');
 
 let errors = '';
 const expected = [
+  'apiClient',
   'cloudflare',
   'csrf',
-  'csrfOld',
   'lovedApiKey',
   'lovedBaseUrl',
   'lovedRoundId',
   'osuBaseUrl',
   'pollStartGuess',
   'session',
-  'sessionOld',
   'userAgent',
   'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
 const unused = [
   'captains',
+  'csrfOld',
   'date',
   'discord',
   'month',
   'osuApiKey',
   'resultsPost',
+  'sessionOld',
   'time',
   'title',
   'username',

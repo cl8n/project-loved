@@ -1,17 +1,19 @@
 {
+    "apiClient": {
+        "id": "",
+        "secret": ""
+    },
     "cloudflare": {
         "id": "",
         "clearance": ""
     },
     "csrf": "",
-    "csrfOld": "",
     "lovedApiKey": "",
     "lovedBaseUrl": "https://loved.sh",
     "lovedRoundId": 0,
     "osuBaseUrl": "https://osu.ppy.sh",
     "pollStartGuess": "next weekend",
     "session": "",
-    "sessionOld": "",
     "userAgent": "",
     "videos": {
         "intro": "",
