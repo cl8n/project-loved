@@ -223,6 +223,7 @@ async function generateNews(newsPath, roundInfo) {
   console.log('Generating news post');
 
   const gameModeSectionStrings = [];
+  const gameModesPresent = [];
   const newsGameModeTemplate = loadTextResource('news-post-template-mode.md');
   const newsNominationTemplate = loadTextResource('news-post-template-beatmap.md');
   const newsTemplate = loadTextResource('news-post-template.md');
@@ -234,9 +235,11 @@ async function generateNews(newsPath, roundInfo) {
       .filter((n) => n.game_mode.integer === gameMode.integer);
 
     if (nominationsForMode.length === 0) {
-      console.error(yellow(`Skipping ${gameMode.longName}, there are no nominations`));
+      console.log(yellow(`Skipping ${gameMode.longName}, there are no nominations`));
       continue;
     }
+
+    gameModesPresent.push(gameMode);
 
     for (const nomination of nominationsForMode) {
       const errors = [];
@@ -284,6 +287,7 @@ async function generateNews(newsPath, roundInfo) {
   await writeFile(newsPath, textFromTemplate(newsTemplate, {
     AUTHOR: roundInfo.newsAuthorName,
     DATE: roundInfo.postDateString,
+    GAME_MODES: gameModesPresent,
     HEADER: roundInfo.introPreview,
     INTRO: roundInfo.intro,
     NOMINATIONS: gameModeSectionStrings.join('\n\n'),

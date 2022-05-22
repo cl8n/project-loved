@@ -20,10 +20,7 @@ if (vars.VIDEO) {
 
 ### Navigation
 
-- [osu!](#osu!)
-- [osu!taiko](#osu!taiko)
-- [osu!catch](#osu!catch)
-- [osu!mania](#osu!mania)
+<? vars.GAME_MODES.map((m) => `- [${m.longName}](#${m.longName})`).join('\n') ?>
 
 {{NOMINATIONS}}
 
