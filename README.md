@@ -12,7 +12,6 @@ This project contains the tools required to generate announcements, forum thread
 A typical round of Project Loved involves:
 
 - Messaging mappers of nominated mapsets: `npm run messages`
-- Messaging mappers for any update requests: `npm run messages:metadata`
 - Creating a news post: `npm run news -- <osu-wiki folder>`
 - Opening forum polls and updating the news post: `npm run news:forum -- <osu-wiki folder>`
 - Posting results when forum polls have concluded: `npm run results`

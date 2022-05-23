@@ -2,40 +2,11 @@ require('../src/force-color');
 const { yellow } = require('chalk');
 const { sendChatAnnouncement, setChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
-const Forum = require('../src/forum');
 const { joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 const guestTemplate = loadTextResource('chat-nomination-guest-template.md');
-const metadataTemplate = loadTextResource('pm-metadata-template.bbcode');
 const hostTemplate = loadTextResource('chat-nomination-template.md');
-
-const metadataPm = process.argv.includes('--metadata', 2);
-
-if (metadataPm) {
-    // TODO: doesn't work because metadata assignees are a one-to-many relationship now
-    logAndExit('Ask Clayton to fix this command before using it');
-}
-
-// TODO: Use new chat
-function sendMetadataPm(nomination) {
-    // TODO: Track maps which have already had this message sent
-    if (nomination.metadata_state !== 1)
-        return;
-
-    Forum.sendPm(
-        config.messages.pmMetadata,
-        'alert',
-        textFromTemplate(metadataTemplate, {
-            ARTIST: nomination.beatmapset.original_artist,
-            AUTHOR: nomination.metadata_assignee.name,
-            AUTHOR_ID: nomination.metadata_assignee.id,
-            BEATMAPSET_ID: nomination.beatmapset.id,
-            TITLE: nomination.beatmapset.original_title,
-        }),
-        [nomination.beatmapset.creator_id],
-    );
-}
 
 function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     if (nominations.length === 0)
@@ -117,13 +88,9 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     await setChatAccessToken();
 
     for (const nomination of roundInfo.nominations)
-        if (metadataPm)
-            sendMetadataPm(nomination);
-        else
-            sendNotifyPm(
-                roundInfo.allNominations
-                    .filter((n) => n.beatmapset_id === nomination.beatmapset_id),
-                roundInfo.extraGameModeInfo,
-                roundInfo.name,
-            );
+        sendNotifyPm(
+            roundInfo.allNominations.filter((n) => n.beatmapset_id === nomination.beatmapset_id),
+            roundInfo.extraGameModeInfo,
+            roundInfo.name,
+        );
 })();
