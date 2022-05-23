@@ -27,23 +27,6 @@ module.exports = class LovedWeb {
             .set('X-Loved-InteropVersion', '5');
     }
 
-    async getForumTopic(topicId) {
-        console.log(dim(`[loved.sh] Getting forum topic #${topicId}`));
-
-        try {
-            const response = await this.#request
-                .get(`${baseUrl}/forum-topic`)
-                .query({ topicId })
-                .catch(handleLovedWebError);
-
-            console.log(dim(green(`[loved.sh] Got forum topic #${topicId}`)));
-            return response.body;
-        } catch (error) {
-            console.error(dim(red(`[loved.sh] Failed to get forum topic #${topicId}`)));
-            throw error;
-        }
-    }
-
     async getRoundInfo(roundId) {
         const response = await this.#request
             .get(`${baseUrl}/data`)
@@ -119,19 +102,20 @@ module.exports = class LovedWeb {
         };
     }
 
+    getRoundTopicIds(roundId) {
+        return this.#request
+            .get(`${baseUrl}/topic-ids`)
+            .query({ roundId })
+            .then((response) => response.body)
+            .catch(handleLovedWebError);
+    }
+
     async getRoundsAvailable() {
         const response = await this.#request
             .get(`${baseUrl}/rounds-available`)
             .catch(handleLovedWebError);
 
         return response.body;
-    }
-
-    async addPolls(polls) {
-        await this.#request
-            .post(`${baseUrl}/polls`)
-            .send(polls)
-            .catch(handleLovedWebError);
     }
 
     async updatePollsWithResults(pollResults) {
@@ -145,6 +129,16 @@ module.exports = class LovedWeb {
         await this.#request
             .post(`${baseUrl}/results-post-ids`)
             .send({ roundId, replies: replyIdsByGamemode })
+            .catch(handleLovedWebError);
+    }
+
+    createPolls(roundId, mainTopicBodies, nominationTopicBodies) {
+        console.log(dim('[loved.sh] Creating forum polls\n[loved.sh] This may take a few minutes...'));
+
+        return this.#request
+            .post(`${baseUrl}/news`)
+            .send({ mainTopicBodies, nominationTopicBodies, roundId })
+            .then((response) => response.body)
             .catch(handleLovedWebError);
     }
 };

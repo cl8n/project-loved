@@ -1,6 +1,5 @@
 require('../src/force-color');
 const { dim, green, red, yellow } = require('chalk');
-const { existsSync } = require('fs');
 const { readdir, writeFile } = require('fs').promises;
 const { join } = require('path');
 const BeatmapsetBanner = require('../src/BeatmapsetBanner');
@@ -10,14 +9,6 @@ const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
 const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
-
-// TODO: Move to file dedicated to topic storage (also see topics-cache)
-const topicIds = existsSync(join(__dirname, '../storage/topic-ids.json'))
-  ? require('../storage/topic-ids.json')
-  : {};
-const topicTimes = existsSync(join(__dirname, '../storage/topic-times.json'))
-  ? require('../storage/topic-times.json')
-  : {};
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.log('Generating beatmapset banners');
@@ -49,15 +40,6 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
   let error = false;
 
-  for (const gameMode of GameMode.modes()) {
-    const nominationsForMode = nominations.filter((n) => n.game_mode.integer === gameMode.integer);
-
-    if (nominationsForMode.length === 0) {
-      console.error(red(`No nominations for ${gameMode.longName}`));
-      error = true;
-    }
-  }
-
   // TODO: Check states instead
   for (const nomination of nominations) {
     if (nomination.description == null) {
@@ -74,31 +56,45 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
   if (error)
     throw new Error();
 
-  const discordBeatmapsetStringsByGameMode = {};
   const discordBeatmapsetTemplate = loadTextResource('discord-template-beatmap.md');
-  const mainPostTemplate = loadTextResource('main-thread-template.bbcode');
-  const mainPostBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
+  const mainTopicTemplate = loadTextResource('main-thread-template.bbcode');
+  const mainTopicBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
   const votingPostTemplate = loadTextResource('voting-thread-template.bbcode');
-  const polls = [];
+  const discordBeatmapsets = {};
+  const mainTopicBodies = {};
+  const nominationTopicBodies = {};
 
-  // Post in reverse so that it looks in-order on the topic listing
-  for (const gameMode of GameMode.modes().reverse()) {
-    console.log(`Posting ${gameMode.longName} forum topics`);
-
-    const discordBeatmapsetStrings = [];
+  for (const gameMode of GameMode.modes()) {
     const extraInfo = extraGameModeInfo[gameMode.integer];
-    const mainPostBeatmapsetStrings = [];
+    const mainTopicBeatmapsets = [];
     const mainTopicTitle = `[${gameMode.longName}] ${roundTitle}`;
-    const nominationsForMode = nominations
-      .filter((n) => n.game_mode.integer === gameMode.integer)
-      .reverse();
-    const postsByNominationId = {};
+    const nominationsForMode = nominations.filter((n) => n.game_mode.integer === gameMode.integer);
+
+    if (nominationsForMode.length === 0) {
+      continue;
+    }
 
     for (const nomination of nominationsForMode) {
       const beatmapset = nomination.beatmapset;
       const artistAndTitle = `${beatmapset.artist} - ${beatmapset.title}`;
       const creatorsBbcode = joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? c.name : `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
-      const postContent = textFromTemplate(votingPostTemplate, {
+
+      discordBeatmapsets[nomination.id] = textFromTemplate(discordBeatmapsetTemplate, {
+        BEATMAPSET_ID: beatmapset.id,
+        BEATMAPSET: escapeMarkdown(artistAndTitle),
+        CREATORS: joinList(nomination.beatmapset_creators.map(
+          (c) => c.id >= 4294000000 ? escapeMarkdown(c.name) : `[${escapeMarkdown(c.name)}](<https://osu.ppy.sh/users/${c.id}>)`,
+        )),
+        LINK_MODE: gameMode.linkName,
+      });
+      mainTopicBeatmapsets.push(textFromTemplate(mainTopicBeatmapsetTemplate, {
+        BEATMAPSET: artistAndTitle,
+        BEATMAPSET_ID: beatmapset.id,
+        CREATORS: creatorsBbcode,
+        LINK_MODE: gameMode.linkName,
+        TOPIC_ID: `{{${nomination.id}_TOPIC_ID}}`,
+      }));
+      nominationTopicBodies[nomination.id] = textFromTemplate(votingPostTemplate, {
         BEATMAPSET: artistAndTitle,
         BEATMAPSET_EXTRAS: getExtraBeatmapsetInfo(nomination),
         BEATMAPSET_ID: beatmapset.id,
@@ -109,93 +105,45 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
         LINK_MODE: gameMode.linkName,
         MAIN_TOPIC_TITLE: mainTopicTitle,
       });
-      let topicId = topicIds[nomination.id];
-      let topicFromLovedWeb;
-
-      if (topicId == null) {
-        const coverId = await Forum.storeTopicCover(beatmapset.bgPath);
-        const pollTitle = `Should ${artistAndTitle} be Loved?`;
-        let postTitle = `[${gameMode.longName}] ${artistAndTitle} by ${beatmapset.creator_name}`;
-
-        if (postTitle.length > 100) {
-          const longerMeta = beatmapset.title.length > beatmapset.artist.length ? beatmapset.title : beatmapset.artist;
-
-          // TODO: Could break if `longerMeta` appears more than once in the post title
-          //       Also could break if both artist and title are very long
-          postTitle = postTitle.replace(
-            longerMeta,
-            longerMeta.slice(0, longerMeta.length - postTitle.length + 97) + '...',
-          );
-        }
-
-        topicId = await Forum.storeTopicWithPoll(postTitle, postContent, coverId, pollTitle);
-        topicIds[nomination.id] = topicId;
-        topicFromLovedWeb = await lovedWeb.getForumTopic(topicId);
-        topicTimes[nomination.id] = topicFromLovedWeb.first_post_created_at;
-
-        await writeFile(join(__dirname, '../storage/topic-ids.json'), JSON.stringify(topicIds));
-        await writeFile(join(__dirname, '../storage/topic-times.json'), JSON.stringify(topicTimes));
-      } else {
-        topicFromLovedWeb = await lovedWeb.getForumTopic(topicId);
-      }
-
-      postsByNominationId[nomination.id] = {
-        id: topicFromLovedWeb.first_post_id,
-        content: postContent,
-      };
-
-      mainPostBeatmapsetStrings.push(textFromTemplate(mainPostBeatmapsetTemplate, {
-        BEATMAPSET: artistAndTitle,
-        BEATMAPSET_ID: beatmapset.id,
-        CREATORS: creatorsBbcode,
-        LINK_MODE: gameMode.linkName,
-        TOPIC_ID: topicId,
-      }));
-
-      discordBeatmapsetStrings.push(textFromTemplate(discordBeatmapsetTemplate, {
-        BEATMAPSET_ID: beatmapset.id,
-        BEATMAPSET: escapeMarkdown(artistAndTitle),
-        CREATORS: joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? escapeMarkdown(c.name) : `[${escapeMarkdown(c.name)}](<https://osu.ppy.sh/users/${c.id}>)`)),
-        LINK_MODE: gameMode.linkName,
-        TOPIC_ID: topicId,
-      }));
-
-      polls.push({
-        beatmapsetId: beatmapset.id,
-        endedAt: new Date(new Date(topicTimes[nomination.id]).getTime() + 864000000/* 10 days, TODO dont hardcode */), // TODO: not technically the poll time but should be the same
-        gameMode: gameMode.integer,
-        roundId: config.lovedRoundId,
-        startedAt: new Date(topicTimes[nomination.id]), // TODO: not technically the poll time but should be the same
-        topicId,
-      });
     }
 
-    const mainTopicId = await Forum.storeTopic(mainTopicTitle, textFromTemplate(mainPostTemplate, {
-      BEATMAPS: mainPostBeatmapsetStrings.reverse().join('\n\n'),
+    mainTopicBodies[gameMode.integer] = textFromTemplate(mainTopicTemplate, {
+      BEATMAPS: mainTopicBeatmapsets.join('\n\n'),
       CAPTAINS: joinList(extraInfo.nominators.map((n) => `[url=https://osu.ppy.sh/users/${n.id}]${n.name}[/url]`)),
       GAME_MODE_LINK_NAME: gameMode.linkName,
       RESULTS_POST: `https://osu.ppy.sh/community/forums/posts/${resultsPostIds[gameMode.integer]}`,
       THRESHOLD: extraInfo.thresholdFormatted,
-    }));
-
-    Forum.pinTopic(mainTopicId, 'announce');
-
-    for (const nomination of nominationsForMode) {
-      const postInfo = postsByNominationId[nomination.id];
-
-      Forum.updatePost(postInfo.id, postInfo.content.replace('MAIN_TOPIC_ID', mainTopicId));
-    }
-
-    discordBeatmapsetStringsByGameMode[gameMode.integer] = discordBeatmapsetStrings.reverse();
+    });
   }
+
+  const { mainTopicIds, nominationTopicIds } = await lovedWeb.createPolls(
+    config.lovedRoundId,
+    mainTopicBodies,
+    nominationTopicBodies,
+  );
+
+  console.log('Uploading topic covers');
+
+  await Promise.all(nominations.map((nomination) =>
+    Forum.storeTopicCover(nomination.beatmapset.bgPath, nominationTopicIds[nomination.id])
+  ));
+
+  console.log('Pinning main topics');
+
+  await Promise.all(mainTopicIds.map((topicId) => Forum.pinTopic(topicId, 'announce')));
 
   console.log('Posting announcements to Discord');
 
-  for (const gameMode of GameMode.modes()) {
-    const discordBeatmapsetStrings = discordBeatmapsetStringsByGameMode[gameMode.integer];
+  await Promise.all(GameMode.modes().map(async (gameMode) => {
+    const discordBeatmapsetStrings = nominations
+      .filter((nomination) => nomination.game_mode.integer === gameMode.integer)
+      .map((nomination) => discordBeatmapsets[nomination.id].replace(
+        '{{TOPIC_ID}}',
+        nominationTopicIds[nomination.id],
+      ));
     const discordWebhook = discordWebhooks[gameMode.integer];
 
-    if (discordBeatmapsetStrings != null && discordBeatmapsetStrings.length > 0 && discordWebhook != null) {
+    if (discordBeatmapsetStrings.length > 0 && discordWebhook != null) {
       let discordMessage = textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length }) + '\n\n';
       const sendMessage = (message) => new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, message.trim());
 
@@ -213,13 +161,10 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
       await sendMessage(discordMessage);
     }
-  }
-
-  console.log('Submitting polls to loved.sh')
-  lovedWeb.addPolls(polls);
+  }));
 }
 
-async function generateNews(newsPath, roundInfo) {
+async function generateNews(newsPath, roundInfo, topicIds) {
   console.log('Generating news post');
 
   const gameModeSectionStrings = [];
@@ -447,5 +392,6 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   await generateNews(
     join(outPath, `news/${roundInfo.newsDirname}.md`),
     roundInfo,
+    await lovedWeb.getRoundTopicIds(config.lovedRoundId).catch(logAndExit),
   ).catch(logAndExit);
 })();

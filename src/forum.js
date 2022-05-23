@@ -109,11 +109,12 @@ function firstPostIdFromTopicView(body) {
     return parseInt(match[1], 10);
 }
 
-module.exports.storeTopicCover = async function (filename) {
+module.exports.storeTopicCover = async function (filename, topicId) {
     const body = await request({
         uri: '/community/forums/topic-covers',
         formData: {
-            cover_file: fs.createReadStream(filename)
+            cover_file: fs.createReadStream(filename),
+            topic_id: topicId,
         }
     });
 
