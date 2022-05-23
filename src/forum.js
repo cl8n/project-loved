@@ -91,24 +91,6 @@ const request = async function (...args) {
     }
 }
 
-function idFromUrl(url) {
-    const match = url.match(/\/(\d+)\s*$/);
-
-    if (match == null)
-        return null;
-
-    return parseInt(match[1], 10);
-}
-
-function firstPostIdFromTopicView(body) {
-    const match = body.match(/data-post-id="(\d+)"/);
-
-    if (match == null)
-        return null;
-
-    return parseInt(match[1], 10);
-}
-
 module.exports.storeTopicCover = async function (filename, topicId) {
     const body = await request({
         uri: '/community/forums/topic-covers',
@@ -119,58 +101,6 @@ module.exports.storeTopicCover = async function (filename, topicId) {
     });
 
     return JSON.parse(body).id;
-}
-
-module.exports.storeTopic = async function (title, content) {
-    const response = await request({
-        uri: '/community/forums/topics',
-        form: {
-            forum_id: 120,
-            title: title,
-            body: content
-        },
-        resolveWithFullResponse: true
-    });
-
-    if (response.statusCode !== 302)
-        throw new Error(`Missing redirect to new topic: status code ${response.statusCode}`);
-
-    return idFromUrl(response.headers.location);
-}
-
-module.exports.storeTopicWithPoll = async function (title, content, coverId, pollTitle) {
-    const response = await request({
-        uri: '/community/forums/topics',
-        form: {
-            forum_id: 120,
-            title: title,
-            body: content,
-            with_poll: 1,
-            cover_id: coverId,
-            'forum_topic_poll[hide_results]': 1,
-            'forum_topic_poll[length_days]': 10, // TODO not hardcoded
-            'forum_topic_poll[max_options]': 1,
-            'forum_topic_poll[options]': 'Yes\r\nNo',
-            'forum_topic_poll[title]': pollTitle,
-            'forum_topic_poll[vote_change]': 1
-        },
-        resolveWithFullResponse: true
-    });
-
-    if (response.statusCode !== 302)
-        throw new Error(`Missing redirect to new topic: status code ${response.statusCode}`);
-
-    return idFromUrl(response.headers.location);
-}
-
-module.exports.updatePost = function (postId, content) {
-    return request({
-        uri: `/community/forums/posts/${postId}`,
-        method: 'PUT',
-        form: {
-            body: content
-        }
-    });
 }
 
 module.exports.pinTopic = function (topicId, type = 'pin') {
@@ -226,8 +156,12 @@ module.exports.reply = async function (topicId, content) {
             body: content
         }
     });
+    const firstPostIdMatch = body.match(/data-post-id="(\d+)"/);
 
-    return firstPostIdFromTopicView(body);
+    if (firstPostIdMatch == null)
+        return null;
+
+    return parseInt(firstPostIdMatch[1], 10);
 }
 
 module.exports.getModeTopics = async function (forumId) {
@@ -250,39 +184,6 @@ module.exports.getModeTopics = async function (forumId) {
         body = body.substring(match.index + match[0].length);
 
         topics[mode.integer] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
-    }
-
-    return topics;
-}
-
-// Note: This excludes pinned topics
-module.exports.getTopics = async function (forumId, untilTopicId) {
-    const topics = [];
-    let idx;
-
-    for (let page = 1; ; page++) {
-        let listing = await request({
-            uri: `/community/forums/${forumId}`,
-            method: 'GET',
-            qs: {
-                page: page
-            }
-        });
-
-        listing = listing.substring(listing.indexOf('id="topics"'));
-
-        if ((idx = listing.indexOf('js-forum-topic-entry')) === -1)
-            break;
-
-        do {
-            listing = listing.substring(idx + 20);
-            const topicId = parseInt(listing.match(/data-topic-id="(\d+)"/)[1]);
-
-            if (topicId === untilTopicId)
-                return topics;
-
-            topics.push(topicId);
-        } while ((idx = listing.indexOf('js-forum-topic-entry')) !== -1);
     }
 
     return topics;
