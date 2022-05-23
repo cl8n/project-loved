@@ -98,7 +98,7 @@ async function setChatAccessToken() {
 
 const limiter = new bottleneck({
   maxConcurrent: 1,
-  minTime: 1000,
+  minTime: 1250,
 });
 
 module.exports = {
