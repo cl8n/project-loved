@@ -5,6 +5,7 @@ const { createServer } = require('http');
 const open = require('open');
 const superagent = require('superagent');
 const { URLSearchParams, URL } = require('url');
+const { inspect } = require('util');
 const config = require('./config');
 
 let chatAccessToken;
@@ -26,15 +27,15 @@ function sendChatAnnouncement(userIds, name, description, message) {
     })
     .then(() => console.log(green(`Sent chat announcement to ${userIds.join(', ')}`)))
     .catch((error) => {
-      let message = `Failed to send chat announcement to ${userIds.join(', ')}:\n  `;
+      const message = `Failed to send chat announcement to ${userIds.join(', ')}:`;
 
       if (error.status === 404 || error.status === 422) {
-        message += 'One or more recipients not found';
+        console.error(red(message + '\n  One or more recipients not found'));
       } else {
-        message += error.toString();
+        console.error(red(message));
+        console.error(inspect(error, false, 1, true));
+        process.exit(1);
       }
-
-      console.error(red(message));
     });
 }
 
