@@ -7,6 +7,9 @@ const GameMode = require('../src/gamemode');
 const { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
+console.error(red('Not yet implemented'));
+process.exit(1);
+
 const keepWatches = process.argv.includes('--keep-watches', 2);
 const skipForumState = process.argv.includes('--skip-forum-state', 2);
 const resultsPostTemplate = loadTextResource('results-post-template.bbcode');
