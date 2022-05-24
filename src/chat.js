@@ -11,6 +11,21 @@ const config = require('./config');
 let chatAccessToken;
 const port = 18888;
 
+function revokeChatAccessToken() {
+  if (chatAccessToken == null) {
+    throw 'Chat access token not set';
+  }
+
+  return superagent
+    .delete(`${config.osuBaseUrl}/api/v2/oauth/tokens/current`)
+    .auth(chatAccessToken, { type: 'bearer' })
+    .then(() => {
+      console.log(green('Revoked chat access token'));
+      chatAccessToken = undefined;
+    })
+    .catch(() => console.error(red('Failed to revoke chat access token')));
+}
+
 function sendChatAnnouncement(userIds, name, description, message) {
   if (chatAccessToken == null) {
     throw 'Chat access token not set';
@@ -102,6 +117,7 @@ const limiter = new bottleneck({
 });
 
 module.exports = {
+  revokeChatAccessToken,
   sendChatAnnouncement: limiter.wrap(sendChatAnnouncement),
   setChatAccessToken,
 };

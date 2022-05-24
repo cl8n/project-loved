@@ -1,6 +1,6 @@
 require('../src/force-color');
 const { yellow } = require('chalk');
-const { sendChatAnnouncement, setChatAccessToken } = require('../src/chat');
+const { sendChatAnnouncement, setChatAccessToken, revokeChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
 const { joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
@@ -8,7 +8,7 @@ const LovedWeb = require('../src/LovedWeb');
 const guestTemplate = loadTextResource('chat-nomination-guest-template.md');
 const hostTemplate = loadTextResource('chat-nomination-template.md');
 
-function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
+async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     if (nominations.length === 0)
         throw 'No nominations provided';
 
@@ -40,7 +40,7 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
         .filter((creator) => creator.id !== beatmapset.creator_id)
         .sort((a, b) => a.name.localeCompare(b.name));
 
-    sendChatAnnouncement(
+    await sendChatAnnouncement(
         [beatmapset.creator_id],
         'Project Loved nomination',
         'Your map has been nominated for the next round of Project Loved!',
@@ -66,7 +66,7 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     });
 
     if (guestCreatorsToMessage.length > 0)
-        sendChatAnnouncement(
+        await sendChatAnnouncement(
             guestCreatorsToMessage.map((user) => user.id),
             'Project Loved guest nomination',
             'Your guest map has been nominated for the next round of Project Loved!',
@@ -88,9 +88,11 @@ function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     await setChatAccessToken();
 
     for (const nomination of roundInfo.nominations)
-        sendNotifyPm(
+        await sendNotifyPm(
             roundInfo.allNominations.filter((n) => n.beatmapset_id === nomination.beatmapset_id),
             roundInfo.extraGameModeInfo,
             roundInfo.name,
         );
+
+    await revokeChatAccessToken();
 })();
