@@ -8,7 +8,7 @@
     "news": "node bin/generate.js",
     "news:forum": "node bin/generate.js --threads",
     "results": "node bin/results.js",
-    "setup": "npm install & sh bin/setup.sh"
+    "setup": "npm install && node bin/setup.js"
   },
   "engines": {
     "node": ">=12"
