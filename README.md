@@ -5,7 +5,6 @@ This project contains the tools required to generate announcements, forum thread
 - [Node.js](https://nodejs.org/en/download/) 12+
 - [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive/releases)
   - Download the jpeg-archive binaries and place jpeg-recompress(.exe) in `bin`.
-- `unzip` and `zipinfo`
 
 ## Usage
 
@@ -43,4 +42,4 @@ A typical round of Project Loved involves:
 
 When creating the API client for chat announcements, set the "Application Callback URL" field to `http://localhost:18888`.
 
-In addition to `config.json`, you need to provide beatmap backgrounds for each of the mapsets included in the current round. Their filenames (not including the extension) must match the beatmapset ID. Run `npm run maps:download` to download most of them automatically. For the remaining, you can put all of the OSZ files in the `config` folder and run `npm run maps:unpack`. This will extract backgrounds from beatmapsets where there is only one image.
+In addition to `config.json`, you need to provide beatmap backgrounds for each of the mapsets included in the current round. Their filenames (not including the extension) must match the beatmapset ID. Run `npm run maps:download` to download most of them automatically.

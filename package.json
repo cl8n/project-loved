@@ -4,7 +4,6 @@
   "scripts": {
     "maps:download": "node bin/get-backgrounds.js",
     "maps:open": "node bin/open-maps.js",
-    "maps:unpack": "sh bin/get-images.sh",
     "messages": "node bin/pm-mappers.js",
     "news": "node bin/generate.js",
     "news:forum": "node bin/generate.js --threads",
