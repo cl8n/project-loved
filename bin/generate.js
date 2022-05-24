@@ -122,12 +122,6 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
     nominationTopicBodies,
   );
 
-  console.log('Uploading topic covers');
-
-  await Promise.all(nominations.map((nomination) =>
-    Forum.storeTopicCover(nomination.beatmapset.bgPath, nominationTopicIds[nomination.id])
-  ));
-
   console.log('Pinning main topics');
 
   await Promise.all(mainTopicIds.map((topicId) => Forum.pinTopic(topicId, 'announce')));
@@ -162,6 +156,12 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
       await sendMessage(discordMessage);
     }
   }));
+
+  console.log('Uploading topic covers');
+
+  await Promise.all(nominations.map((nomination) =>
+    Forum.storeTopicCover(nomination.beatmapset.bgPath, nominationTopicIds[nomination.id])
+  ));
 }
 
 async function generateNews(newsPath, roundInfo, topicIds) {
