@@ -322,6 +322,7 @@ function getExtraBeatmapsetInfo(nomination) {
 }
 
 async function loadBeatmapsetBgPaths(beatmapsets) {
+  const defaultBgPath = join(__dirname, '../resources/banner-default.png');
   const dirents = await readdir(join(__dirname, '../config'), { withFileTypes: true });
   const paths = {};
 
@@ -335,17 +336,12 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
       paths[parseInt(filenameMatch[1])] = join(__dirname, '../config', filenameMatch[0]);
   }
 
-  let error = false;
-
   for (const beatmapset of beatmapsets) {
     if (paths[beatmapset.id] == null) {
-      console.error(red(`Missing background image for ${beatmapset.title} [#${beatmapset.id}]`));
-      error = true;
+      console.error(yellow(`Missing background image for ${beatmapset.title} [#${beatmapset.id}], using default`));
+      paths[beatmapset.id] = defaultBgPath;
     }
   }
-
-  if (error)
-    throw new Error();
 
   return paths;
 }
