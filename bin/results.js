@@ -1,5 +1,6 @@
 require('../src/force-color');
 const { red } = require('chalk');
+const { revokeChatAccessToken, sendChatAnnouncement, setChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
@@ -66,15 +67,10 @@ const LovedWeb = require('../src/LovedWeb');
 
   console.log('Posting announcements to Discord');
 
+  const passedVotingCreatorIds = new Set();
   roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
 
   for (const gameMode of gameModesPresent) {
-    const discordWebhook = roundInfo.discordWebhooks[gameMode.integer];
-
-    if (discordWebhook == null) {
-      continue;
-    }
-
     const nominations = roundInfo.allNominations
       .filter((nomination) => nomination.game_mode.integer === gameMode.integer);
     const threshold = roundInfo.extraGameModeInfo[gameMode].threshold;
@@ -83,6 +79,18 @@ const LovedWeb = require('../src/LovedWeb');
       nomination.poll.yesRatio = nomination.poll.result_yes
         / (nomination.poll.result_no + nomination.poll.result_yes);
       nomination.poll.passed = nomination.poll.yesRatio >= threshold;
+
+      if (nomination.poll.passed) {
+        for (const creator of nomination.beatmapset_creators) {
+          passedVotingCreatorIds.add(creator.id);
+        }
+      }
+    }
+
+    const discordWebhook = roundInfo.discordWebhooks[gameMode.integer];
+
+    if (discordWebhook == null) {
+      continue;
     }
 
     await new Discord(discordWebhook).post(
@@ -107,6 +115,17 @@ const LovedWeb = require('../src/LovedWeb');
         }),
     );
   }
+
+  console.log('Sending chat announcement to mappers of passed votings');
+
+  await setChatAccessToken();
+  await sendChatAnnouncement(
+    [...passedVotingCreatorIds],
+    'Project Loved result',
+    'Your map passed Loved voting!',
+    'Congratulations, your map passed voting in the last round of Project Loved! It will be moved to the Loved category soon.',
+  );
+  await revokeChatAccessToken();
 
   console.log('Removing watches from topics');
 
