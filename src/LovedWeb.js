@@ -118,20 +118,6 @@ module.exports = class LovedWeb {
         return response.body;
     }
 
-    async updatePollsWithResults(pollResults) {
-        await this.#request
-            .post(`${baseUrl}/polls/complete`)
-            .send(pollResults)
-            .catch(handleLovedWebError);
-    }
-
-    async updateResultsPosts(roundId, replyIdsByGamemode) {
-        await this.#request
-            .post(`${baseUrl}/results-post-ids`)
-            .send({ roundId, replies: replyIdsByGamemode })
-            .catch(handleLovedWebError);
-    }
-
     createPolls(roundId, mainTopicBodies, nominationTopicBodies) {
         console.log(dim('[loved.sh] Creating forum polls\n[loved.sh] This may take a few minutes...'));
 

@@ -24,15 +24,6 @@ function convertToMarkdown(bbcode) {
         .replace(/(?<!\\)\[(.*?[^\\])\](?!\()/g, '\\[$1\\]');
 }
 
-function escapeHtml(text) {
-    return text.toString()
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
 function escapeMarkdown(text) {
     return text.toString()
         .replace(/\\/g, '\\\\')
@@ -51,17 +42,6 @@ function expandBbcodeRootLinks(text) {
 
 function formatPercent(number) {
     return (number * 100).toFixed(2) + '%';
-}
-
-function getExcludedDiffNames(beatmapset, nomination) {
-    const excludedDiffNames = [];
-
-    beatmapset.forEach((beatmap) => {
-        if (nomination.excludedBeatmaps.includes(parseInt(beatmap.beatmap_id)))
-            excludedDiffNames.push(`[${beatmap.version}]`);
-    });
-
-    return excludedDiffNames;
 }
 
 function joinList(array) {
@@ -144,11 +124,9 @@ function textFromTemplate(template, vars) {
 
 module.exports = {
     convertToMarkdown,
-    escapeHtml,
     escapeMarkdown,
     expandBbcodeRootLinks,
     formatPercent,
-    getExcludedDiffNames,
     joinList,
     loadTextResource,
     logAndExit,

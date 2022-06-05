@@ -124,46 +124,6 @@ module.exports.lockTopic = function (topicId) {
     });
 }
 
-module.exports.getPollResult = async function (topicId) {
-    let topic = await request({
-        uri: `/community/forums/topics/${topicId}`,
-        method: 'GET'
-    });
-
-    const voteCounts = [];
-
-    for (let i = 0; i < 2; i++) {
-        const match = topic.match(/<div class="forum-poll-row__result forum-poll-row__result--total">\s*(\d+)\s*<\/div>/);
-
-        if (match == null)
-            throw new Error('Forum topic page does not match the expected format');
-
-        voteCounts.push(parseInt(match[1]));
-        topic = topic.substring(match.index + match[0].length);
-    }
-
-    return {
-        yes: voteCounts[0],
-        no: voteCounts[1],
-        percent: (100 * voteCounts[0] / (voteCounts[0] + voteCounts[1])).toFixed(2)
-    };
-}
-
-module.exports.reply = async function (topicId, content) {
-    const body = await request({
-        uri: `/community/forums/topics/${topicId}/reply`,
-        form: {
-            body: content
-        }
-    });
-    const firstPostIdMatch = body.match(/data-post-id="(\d+)"/);
-
-    if (firstPostIdMatch == null)
-        return null;
-
-    return parseInt(firstPostIdMatch[1], 10);
-}
-
 module.exports.getModeTopics = async function (forumId) {
     let body = await request({
         uri: `/community/forums/${forumId}`,
