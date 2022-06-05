@@ -55,8 +55,8 @@ const LovedWeb = require('../src/LovedWeb');
   }
 
   for (const gameMode of gameModesPresent) {
-    lockAndUnpinPromises.push(Forum.lockTopic(mainTopicIds[gameMode]));
-    lockAndUnpinPromises.push(Forum.pinTopic(mainTopicIds[gameMode], false));
+    lockAndUnpinPromises.push(Forum.lockTopic(mainTopicIds[gameMode.integer]));
+    lockAndUnpinPromises.push(Forum.pinTopic(mainTopicIds[gameMode.integer], false));
   }
 
   await Promise.all(lockAndUnpinPromises);
@@ -73,7 +73,7 @@ const LovedWeb = require('../src/LovedWeb');
   for (const gameMode of gameModesPresent) {
     const nominations = roundInfo.allNominations
       .filter((nomination) => nomination.game_mode.integer === gameMode.integer);
-    const threshold = roundInfo.extraGameModeInfo[gameMode].threshold;
+    const threshold = roundInfo.extraGameModeInfo[gameMode.integer].threshold;
 
     for (const nomination of nominations) {
       nomination.poll.yesRatio = nomination.poll.result_yes
@@ -136,7 +136,7 @@ const LovedWeb = require('../src/LovedWeb');
   }
 
   for (const gameMode of gameModesPresent) {
-    watchPromises.push(Forum.watchTopic(mainTopicIds[gameMode], false));
+    watchPromises.push(Forum.watchTopic(mainTopicIds[gameMode.integer], false));
   }
 
   await Promise.all(watchPromises);
