@@ -130,6 +130,7 @@ module.exports.getModeTopics = async function (forumId) {
         method: 'GET'
     });
 
+    const topicIdRegex = new RegExp(`href="${config.osuBaseUrl.replace(/\./g, '\\.')}/community/forums/topics/(\\d+)\\?start=unread"`);
     const topics = {};
     body = body.substring(body.indexOf('Pinned Topics'), body.indexOf('id="topics"'));
 
@@ -143,7 +144,7 @@ module.exports.getModeTopics = async function (forumId) {
 
         body = body.substring(match.index + match[0].length);
 
-        topics[mode.integer] = body.match(/href="https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/(\d+)\?start=unread"/)[1];
+        topics[mode.integer] = parseInt(body.match(topicIdRegex)[1], 10);
     }
 
     return topics;
