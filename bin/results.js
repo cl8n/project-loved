@@ -82,7 +82,9 @@ const LovedWeb = require('../src/LovedWeb');
 
       if (nomination.poll.passed) {
         for (const creator of nomination.beatmapset_creators) {
-          passedVotingCreatorIds.add(creator.id);
+          if (!creator.banned) {
+            passedVotingCreatorIds.add(creator.id);
+          }
         }
       }
     }
