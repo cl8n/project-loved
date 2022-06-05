@@ -141,4 +141,14 @@ module.exports = class LovedWeb {
             .then((response) => response.body)
             .catch(handleLovedWebError);
     }
+
+    postResults(roundId, mainTopicIds) {
+        console.log(dim('[loved.sh] Posting replies to forum\n[loved.sh] This may take a few minutes...'));
+
+        return this.#request
+            .post(`${baseUrl}/results`)
+            .send({ mainTopicIds, roundId })
+            .then()
+            .catch(handleLovedWebError);
+    }
 };

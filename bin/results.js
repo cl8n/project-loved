@@ -4,61 +4,40 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate } = require('../src/helpers');
+const { escapeMarkdown, formatPercent, joinList, logAndExit } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
-console.error(red('Not yet implemented'));
-process.exit(1);
-
-const keepWatches = process.argv.includes('--keep-watches', 2);
-const skipForumState = process.argv.includes('--skip-forum-state', 2);
-const resultsPostTemplate = loadTextResource('results-post-template.bbcode');
-
-function mapResultsToText(nomination) {
-  const artistAndTitle = `${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`;
-  const color = nomination.passed ? '#22DD22' : '#DD2222';
-  const creators = joinList(nomination.beatmapset_creators.map((c) => c.id >= 4294000000 ? c.name : `[url=https://osu.ppy.sh/users/${c.id}]${c.name}[/url]`));
-
-  return `[b][color=${color}]${nomination.pollResult.percent}%[/color][/b] (${nomination.pollResult.yes}:${nomination.pollResult.no})`
-    + ` - [b][url=https://osu.ppy.sh/beatmapsets/${nomination.beatmapset.id}#${nomination.game_mode.linkName}]${artistAndTitle}[/url][/b]`
-    + ` by ${creators}`;
-}
-
-function mapResultsToEmbed(nomination) {
-  const artistAndTitle = escapeMarkdown(`${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`);
-  const creators = joinList(nomination.beatmapset_creators.map((c) => escapeMarkdown(c.name)));
-
-  return {
-    color: nomination.passed ? 2284834 : 14492194,
-    description: `${nomination.pollResult.percent}% - ${nomination.pollResult.yes}:${nomination.pollResult.no}`,
-    title: `**${artistAndTitle}** by ${creators}`,
-    url: `https://osu.ppy.sh/beatmapsets/${nomination.beatmapset.id}#${nomination.game_mode.linkName}`,
-  };
-}
-
-(async function () {
-  console.log('Preparing to post results');
-
+(async () => {
   const lovedWeb = new LovedWeb(config.lovedApiKey);
-  const { allNominations, discordWebhooks, extraGameModeInfo } = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
-  const mainTopics = await Forum.getModeTopics(120);
-  const gameModes = GameMode.modes().filter((gameMode) => mainTopics[gameMode.integer] != null).reverse();
-  let error = false;
+  let roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
 
-  for (const gameMode of GameMode.modes()) {
-    if (
-      (mainTopics[gameMode.integer] == null) !==
-      (allNominations.filter((n) => n.game_mode.integer === gameMode.integer).length === 0)
-    ) {
-      console.error(red(`Nominations and main topics do not agree about ${gameMode.longName}'s presence`));
-      error = true;
+  const now = new Date();
+  for (const nomination of roundInfo.allNominations) {
+    if (nomination.poll == null || new Date(nomination.poll.ended_at) > now) {
+      logAndExit('Polls are not yet complete');
+    }
+
+    if (nomination.poll.result_no != null || nomination.poll.result_yes != null) {
+      logAndExit('Poll results have already been stored');
     }
   }
 
-  for (const nomination of allNominations) {
-    if (nomination.poll == null) {
-      console.error(red(`Nomination #${nomination.id} does not have a poll`));
+  let error = false;
+  const gameModesPresent = [];
+  const mainTopicIds = await Forum.getModeTopics(120);
+
+  for (const gameMode of GameMode.modes()) {
+    const gameModeHasNominations = roundInfo.allNominations.some(
+      (nomination) => nomination.game_mode.integer === gameMode.integer,
+    );
+
+    if ((mainTopicIds[gameMode.integer] != null) !== gameModeHasNominations) {
+      console.error(red(`Nominations and main topics do not agree about ${gameMode.longName}'s presence`));
       error = true;
+    }
+
+    if (gameModeHasNominations) {
+      gameModesPresent.push(gameMode);
     }
   }
 
@@ -66,95 +45,80 @@ function mapResultsToEmbed(nomination) {
     process.exit(1);
   }
 
-  if (!skipForumState) {
-    console.log(`Locking topics${keepWatches ? '' : ' and removing watches'}`);
+  console.log('Locking and unpinning topics');
 
-    const lockPromises = gameModes.map((gameMode) => Forum.lockTopic(mainTopics[gameMode.integer]));
+  const lockAndUnpinPromises = [];
 
-    for (const nomination of allNominations) {
-      lockPromises.push(Forum.lockTopic(nomination.poll.topic_id));
-    }
-
-    if (!keepWatches) {
-      for (const gameMode of gameModes) {
-        lockPromises.push(Forum.watchTopic(mainTopics[gameMode.integer], false));
-      }
-
-      for (const nomination of allNominations) {
-        lockPromises.push(Forum.watchTopic(nomination.poll.topic_id, false));
-      }
-    }
-
-    await Promise.all(lockPromises);
-
-    console.log('Unpinning main topics');
-
-    await Promise.all(gameModes.map((gameMode) => Forum.pinTopic(mainTopics[gameMode.integer], false)));
+  for (const nomination of roundInfo.allNominations) {
+    lockAndUnpinPromises.push(Forum.lockTopic(nomination.poll.topic_id));
   }
 
-  console.log('Replying to topics');
-
-  const discordPostArguments = {};
-  const mainTopicReplies = {};
-  const mainTopicReplyIds = {};
-
-  for (const gameMode of gameModes) {
-    const extraInfo = extraGameModeInfo[gameMode.integer];
-    const nominations = allNominations.filter((n) => n.game_mode.integer === gameMode.integer);
-
-    for (const nomination of nominations.slice().reverse()) {
-      const pollResult = await Forum.getPollResult(nomination.poll.topic_id);
-
-      nomination.passed = parseFloat(pollResult.percent) >= extraInfo.threshold * 100;
-      nomination.pollResult = pollResult;
-
-      await Forum.reply(
-        nomination.poll.topic_id,
-        nomination.passed ? config.messages.resultsPassed : config.messages.resultsFailed,
-      );
-    }
-
-    const failedNominations = nominations.filter((n) => !n.passed);
-    const passedNominations = nominations.filter((n) => n.passed);
-
-    discordPostArguments[gameMode.integer] = [
-      `Project Loved: ${gameMode.longName}`,
-      config.messages.discordResults,
-      [
-        ...passedNominations.map(mapResultsToEmbed),
-        ...failedNominations.map(mapResultsToEmbed),
-      ],
-    ];
-    mainTopicReplies[gameMode.integer] = textFromTemplate(resultsPostTemplate, {
-      FAILED_BEATMAPSETS: failedNominations.map(mapResultsToText).join('\n'),
-      PASSED_BEATMAPSETS: passedNominations.map(mapResultsToText).join('\n'),
-      THRESHOLD: extraInfo.thresholdFormatted,
-    });
+  for (const gameMode of gameModesPresent) {
+    lockAndUnpinPromises.push(Forum.lockTopic(mainTopicIds[gameMode]));
+    lockAndUnpinPromises.push(Forum.pinTopic(mainTopicIds[gameMode], false));
   }
 
-  for (const gameMode of gameModes) {
-    mainTopicReplyIds[gameMode.integer] = await Forum.reply(mainTopics[gameMode.integer], mainTopicReplies[gameMode.integer]);
-  }
+  await Promise.all(lockAndUnpinPromises);
+
+  console.log('Saving poll results');
+
+  await lovedWeb.postResults(config.lovedRoundId, mainTopicIds);
 
   console.log('Posting announcements to Discord');
 
-  for (const gameMode of gameModes) {
-    if (discordWebhooks[gameMode.integer] != null) {
-      await new Discord(discordWebhooks[gameMode.integer]).post(...discordPostArguments[gameMode.integer]);
+  roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
+
+  for (const gameMode of gameModesPresent) {
+    const discordWebhook = roundInfo.discordWebhooks[gameMode.integer];
+
+    if (discordWebhook == null) {
+      continue;
     }
+
+    const nominations = roundInfo.allNominations
+      .filter((nomination) => nomination.game_mode.integer === gameMode.integer);
+    const threshold = roundInfo.extraGameModeInfo[gameMode].threshold;
+
+    for (const nomination of nominations) {
+      nomination.poll.yesRatio = nomination.poll.result_yes
+        / (nomination.poll.result_no + nomination.poll.result_yes);
+      nomination.poll.passed = nomination.poll.yesRatio >= threshold;
+    }
+
+    await new Discord(discordWebhook).post(
+      `Project Loved: ${gameMode.longName}`,
+      config.messages.discordResults,
+      nominations
+        .sort((a, b) => +b.poll.passed - +a.poll.passed)
+        .map((nomination) => {
+          const artistAndTitle = escapeMarkdown(
+            `${nomination.beatmapset.artist} - ${nomination.beatmapset.title}`,
+          );
+          const creators = joinList(
+            nomination.beatmapset_creators.map((creator) => escapeMarkdown(creator.name)),
+          );
+
+          return {
+            color: nomination.poll.passed ? 0x22dd22 : 0xdd2222,
+            description: `${formatPercent(nomination.poll.yesRatio)} - ${nomination.poll.result_yes}:${nomination.poll.result_no}`,
+            title: `**${artistAndTitle}** by ${creators}`,
+            url: `https://osu.ppy.sh/beatmapsets/${nomination.beatmapset.id}#${nomination.game_mode.linkName}`,
+          };
+        }),
+    );
   }
 
-  console.log('Submitting poll results to loved.sh');
+  console.log('Removing watches from topics');
 
-  await lovedWeb.updatePollsWithResults(
-    allNominations.map((nomination) => ({
-      id: nomination.poll.id,
-      no: nomination.pollResult.no,
-      yes: nomination.pollResult.yes,
-    })),
-  );
+  const watchPromises = [];
 
-  console.log('Submitting results posts to loved.sh');
+  for (const nomination of roundInfo.allNominations) {
+    watchPromises.push(Forum.watchTopic(nomination.poll.topic_id, false));
+  }
 
-  await lovedWeb.updateResultsPosts(config.lovedRoundId, mainTopicReplyIds);
-})();
+  for (const gameMode of gameModesPresent) {
+    watchPromises.push(Forum.watchTopic(mainTopicIds[gameMode], false));
+  }
+
+  await Promise.all(watchPromises);
+})().catch(logAndExit);

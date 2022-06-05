@@ -49,6 +49,10 @@ function expandBbcodeRootLinks(text) {
         .replace(/\[url=\/([^\]]+)\]/g, '[url=https://osu.ppy.sh/$1]');
 }
 
+function formatPercent(number) {
+    return (number * 100).toFixed(2) + '%';
+}
+
 function getExcludedDiffNames(beatmapset, nomination) {
     const excludedDiffNames = [];
 
@@ -143,6 +147,7 @@ module.exports = {
     escapeHtml,
     escapeMarkdown,
     expandBbcodeRootLinks,
+    formatPercent,
     getExcludedDiffNames,
     joinList,
     loadTextResource,
