@@ -2,37 +2,29 @@ require('../src/force-color');
 const { dim, green, red, yellow } = require('chalk');
 const { readdir, writeFile } = require('fs').promises;
 const { join } = require('path');
-const BeatmapsetBanner = require('../src/BeatmapsetBanner');
 const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
 const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
+const createBanners = require('../src/voting-banner');
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.log('Generating beatmapset banners');
 
   mkdirTreeSync(bannersPath);
 
-  const bannerPromises = [];
-
-  for (const beatmapset of beatmapsets) {
-    const banner = new BeatmapsetBanner(beatmapset);
-    const bannerPath = join(bannersPath, `${beatmapset.id}.jpg`);
-    const bannerPromise = banner.createBanner(bannerPath)
+  await Promise.all(beatmapsets.map((beatmapset) =>
+    createBanners(beatmapset.bgPath, join(bannersPath, beatmapset.id.toString()), beatmapset.title)
       .then(() => {
-        console.log(dim(green(`Created banner for ${beatmapset.title} [#${beatmapset.id}]`)));
+        console.log(dim(green(`Created banners for ${beatmapset.title} [#${beatmapset.id}]`)));
       })
       .catch((reason) => {
-        console.error(dim(red(`Failed to create banner for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`)));
+        console.error(dim(red(`Failed to create banners for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`)));
         throw new Error();
-      });
-
-    bannerPromises.push(bannerPromise);
-  }
-
-  await Promise.all(bannerPromises);
+      }),
+  ));
 }
 
 async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeInfo, resultsPostIds, discordWebhooks) {
