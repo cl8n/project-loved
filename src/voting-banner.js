@@ -2,6 +2,7 @@ const { createCanvas, loadImage, registerFont } = require('canvas');
 const { execFile } = require('child_process');
 const { readdir } = require('fs').promises;
 const { join } = require('path');
+const { formatPercent } = require('./helpers');
 
 registerFont(
   join(__dirname, '../resources/Torus-Regular.otf'),
@@ -98,6 +99,14 @@ module.exports = async function createBanners(backgroundPath, outputPath, title)
     // Draw title text
     context.font = `${21 * scale}px Torus`;
     context.fillText(title, width - 16 * scale, height - 31 * scale);
+
+    // Check for overflowing title text
+    const titleMaxWidth = width - 2 * 16 * scale;
+    const titleOverflow = context.measureText(title).width / titleMaxWidth - 1;
+
+    if (titleOverflow > 0) {
+      throw `Title is ${formatPercent(titleOverflow)} wider than the available space`;
+    }
 
     // Draw link text
     const fontSize = `${12.5 * scale}px `;
