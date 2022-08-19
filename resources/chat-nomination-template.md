@@ -1,4 +1,4 @@
-Hi! Your map of *{{ARTIST}} - {{TITLE}}* is going to be up for voting in the {{ROUND_NAME}} round of Project Loved. <? vars.GAME_MODES != null ? 'Polls' : 'A poll' ?> will be opened {{POLL_START}} to see if the community wants your map Loved.
+Hi! Your map of [{{ARTIST}} - {{TITLE}}](https://osu.ppy.sh/beatmapsets/{{BEATMAPSET_ID}}) is going to be up for voting in the {{ROUND_NAME}} round of Project Loved. <? vars.GAME_MODES != null ? 'Polls' : 'A poll' ?> will be opened {{POLL_START}} to see if the community wants your map Loved.
 
 <?
 
@@ -25,5 +25,4 @@ If you **do not** want your map to be put up for Loved voting, let me know and I
 
 Thanks!
 
-- Map link: <https://osu.ppy.sh/beatmapsets/{{BEATMAPSET_ID}}>
-- About Project Loved: <https://osu.ppy.sh/wiki/Community/Project_Loved>
+About Project Loved: <https://osu.ppy.sh/wiki/Community/Project_Loved>

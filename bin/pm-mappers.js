@@ -2,7 +2,7 @@ require('../src/force-color');
 const { yellow } = require('chalk');
 const { sendChatAnnouncement, setChatAccessToken, revokeChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
-const { joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
+const { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 
 const guestTemplate = loadTextResource('chat-nomination-guest-template.md');
@@ -45,13 +45,21 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
         'Project Loved nomination',
         'Your map has been nominated for the next round of Project Loved!',
         textFromTemplate(hostTemplate, {
-            ARTIST: beatmapset.original_artist,
+            ARTIST: escapeMarkdown(beatmapset.original_artist),
             BEATMAPSET_ID: beatmapset.id,
-            EXCLUDED_DIFFS: excludedVersions.length > 0 ? joinList(excludedVersions) : null,
-            GUESTS: guestCreators.length > 0 ? joinList(guestCreators.map((c) => c.name)) : null,
+            EXCLUDED_DIFFS: excludedVersions.length > 0
+                ? escapeMarkdown(joinList(excludedVersions))
+                : null,
+            GUESTS: guestCreators.length > 0
+                ? joinList(guestCreators.map(
+                    (c) => c.id >= 4294000000
+                        ? escapeMarkdown(c.name)
+                        : `[${escapeMarkdown(c.name)}](https://osu.ppy.sh/users/${c.id})`,
+                ))
+                : null,
             POLL_START: config.pollStartGuess,
             ROUND_NAME: roundName,
-            TITLE: beatmapset.original_title,
+            TITLE: escapeMarkdown(beatmapset.original_title),
             ...gameModeVars,
         }),
     );
@@ -71,10 +79,10 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
             'Project Loved guest nomination',
             'Your guest map has been nominated for the next round of Project Loved!',
             textFromTemplate(guestTemplate, {
-                ARTIST: beatmapset.original_artist,
+                ARTIST: escapeMarkdown(beatmapset.original_artist),
                 BEATMAPSET_ID: beatmapset.id,
                 ROUND_NAME: roundName,
-                TITLE: beatmapset.original_title,
+                TITLE: escapeMarkdown(beatmapset.original_title),
             }),
         );
 }
