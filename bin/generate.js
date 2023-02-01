@@ -1,7 +1,7 @@
 require('../src/force-color');
 const { dim, green, red, yellow } = require('chalk');
 const { readdir, writeFile } = require('fs').promises;
-const { join } = require('path');
+const { dirname, join } = require('path');
 const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
@@ -221,6 +221,8 @@ async function generateNews(newsPath, roundInfo, topicIds) {
     }));
   }
 
+  mkdirTreeSync(dirname(newsPath));
+
   await writeFile(newsPath, textFromTemplate(newsTemplate, {
     AUTHOR: roundInfo.newsAuthorName,
     DATE: roundInfo.postDateString,
@@ -348,6 +350,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 
   roundInfo.postDateString = postTimeIsoString.slice(0, 10);
   roundInfo.postTimeString = postTimeIsoString.slice(11, 19);
+  roundInfo.postYear = postTimeIsoString.slice(0, 4);
   roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
 
   const beatmapsets = roundInfo.nominations.map((n) => n.beatmapset);
@@ -374,11 +377,8 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
     ).catch(logAndExit);
   }
 
-  // TODO: Rewrite with async functions?
-  mkdirTreeSync(join(outPath, 'news'));
-
   await generateNews(
-    join(outPath, `news/${roundInfo.newsDirname}.md`),
+    join(outPath, `news/${roundInfo.postYear}/${roundInfo.newsDirname}.md`),
     roundInfo,
     await lovedWeb.getRoundTopicIds(config.lovedRoundId).catch(logAndExit),
   ).catch(logAndExit);
