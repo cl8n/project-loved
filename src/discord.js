@@ -8,6 +8,7 @@ const limiter = new bottleneck({
 
 module.exports = class Discord {
     static maxEmbeds = 10;
+    static maxEmbedTitleLength = 256;
     static maxLength = 2000;
 
     #webhook;
@@ -39,6 +40,21 @@ module.exports = class Discord {
                 }
 
                 return;
+            }
+
+            if (embeds != null) {
+                for (const embed of embeds) {
+                    if (embed.title && embed.title.length > Discord.maxEmbedTitleLength) {
+                        const description = embed.description;
+
+                        embed.description = '...' + embed.title.slice(Discord.maxEmbedTitleLength - 3);
+                        embed.title = embed.title.slice(0, Discord.maxEmbedTitleLength - 3) + '...';
+
+                        if (description) {
+                            embed.description += '\n\n' + description;
+                        }
+                    }
+                }
             }
 
             await superagent
