@@ -17,46 +17,46 @@ module.exports = class Discord {
         this.#webhook = webhook;
     }
 
-    post(username, content, embeds = null) {
-        return limiter.schedule(async () => {
-            if (content != null && content.length > Discord.maxLength && embeds != null && embeds.length > Discord.maxEmbeds)
-                throw new Error(`Discord message content and embeds are too long`);
+    async post(username, content, embeds = null) {
+        if (content != null && content.length > Discord.maxLength && embeds != null && embeds.length > Discord.maxEmbeds)
+            throw new Error(`Discord message content and embeds are too long`);
 
-            if (content != null && content.length > Discord.maxLength) {
-                await this.post(username, content.slice(0, Discord.maxLength), embeds);
+        if (content != null && content.length > Discord.maxLength) {
+            await this.post(username, content.slice(0, Discord.maxLength), embeds);
 
-                for (let i = Discord.maxLength; i < content.length; i += Discord.maxLength) {
-                    await this.post(username, content.slice(i, i + Discord.maxLength));
-                }
-
-                return;
+            for (let i = Discord.maxLength; i < content.length; i += Discord.maxLength) {
+                await this.post(username, content.slice(i, i + Discord.maxLength));
             }
 
-            if (embeds != null && embeds.length > Discord.maxEmbeds) {
-                await this.post(username, content, embeds.slice(0, Discord.maxEmbeds));
+            return;
+        }
 
-                for (let i = Discord.maxEmbeds; i < embeds.length; i += Discord.maxEmbeds) {
-                    await this.post(username, null, embeds.slice(i, i + Discord.maxEmbeds));
-                }
+        if (embeds != null && embeds.length > Discord.maxEmbeds) {
+            await this.post(username, content, embeds.slice(0, Discord.maxEmbeds));
 
-                return;
+            for (let i = Discord.maxEmbeds; i < embeds.length; i += Discord.maxEmbeds) {
+                await this.post(username, null, embeds.slice(i, i + Discord.maxEmbeds));
             }
 
-            if (embeds != null) {
-                for (const embed of embeds) {
-                    if (embed.title && embed.title.length > Discord.maxEmbedTitleLength) {
-                        const description = embed.description;
+            return;
+        }
 
-                        embed.description = '...' + embed.title.slice(Discord.maxEmbedTitleLength - 3);
-                        embed.title = embed.title.slice(0, Discord.maxEmbedTitleLength - 3) + '...';
+        if (embeds != null) {
+            for (const embed of embeds) {
+                if (embed.title && embed.title.length > Discord.maxEmbedTitleLength) {
+                    const description = embed.description;
 
-                        if (description) {
-                            embed.description += '\n\n' + description;
-                        }
+                    embed.description = '...' + embed.title.slice(Discord.maxEmbedTitleLength - 3);
+                    embed.title = embed.title.slice(0, Discord.maxEmbedTitleLength - 3) + '...';
+
+                    if (description) {
+                        embed.description += '\n\n' + description;
                     }
                 }
             }
+        }
 
+        await limiter.schedule(async () => {
             await superagent
                 .post(this.#webhook)
                 .send({
