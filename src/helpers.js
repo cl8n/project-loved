@@ -45,17 +45,9 @@ function formatPercent(number) {
 }
 
 function joinList(array) {
-    if (array.length === 0)
-        throw new Error('List must not be empty');
-
-    let line = array[0];
-
-    for (let i = 1; i < array.length; i++)
-        line += i === array.length - 1
-          ? ` and ${array[i]}`
-          : `, ${array[i]}`;
-
-    return line;
+    return array.length < 3
+        ? array.join(' and ')
+        : array.slice(0, -1).join(', ') + ', and ' + array.at(-1);
 }
 
 function loadTextResource(basename) {
