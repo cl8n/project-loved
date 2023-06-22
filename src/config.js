@@ -13,7 +13,6 @@ const expected = [
   'pollStartGuess',
   'session',
   'userAgent',
-  'videos',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
 const unused = [
@@ -28,6 +27,7 @@ const unused = [
   'time',
   'title',
   'username',
+  'videos',
 ];
 
 function addError(message) {

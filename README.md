@@ -37,8 +37,6 @@ A typical round of Project Loved involves:
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
 | `userAgent` | `User-Agent` header of the browser used to obtain Cloudflare cookies |
-| `videos.intro` | YouTube video ID for video to be shown after the news post's intro |
-| `videos.<mode>` | YouTube video ID for video to be shown under \<mode\>'s header in the news post |
 
 When creating the API client for chat announcements, set the "Application Callback URL" field to `http://localhost:18888`.
 

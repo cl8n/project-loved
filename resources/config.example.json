@@ -14,12 +14,5 @@
     "osuBaseUrl": "https://osu.ppy.sh",
     "pollStartGuess": "next weekend",
     "session": "",
-    "userAgent": "",
-    "videos": {
-        "intro": "",
-        "osu": "",
-        "taiko": "",
-        "catch": "",
-        "mania": ""
-    }
+    "userAgent": ""
 }
