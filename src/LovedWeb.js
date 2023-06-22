@@ -4,6 +4,7 @@ const config = require('./config');
 const GameMode = require('./gamemode');
 
 const baseUrl = config.lovedBaseUrl + '/api/local-interop';
+const interopVersion = '7';
 
 function handleLovedWebError(error) {
     if (typeof error === 'object' && error.response != null && error.response.body != null && error.response.body.error != null) {
@@ -24,7 +25,7 @@ module.exports = class LovedWeb {
         this.#request = superagent
             .agent()
             .set('X-Loved-InteropKey', key)
-            .set('X-Loved-InteropVersion', '6');
+            .set('X-Loved-InteropVersion', interopVersion);
     }
 
     async getRoundInfo(roundId) {
