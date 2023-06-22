@@ -6,7 +6,7 @@ const config = require('../src/config');
 const Discord = require('../src/discord');
 const Forum = require('../src/forum');
 const GameMode = require('../src/gamemode');
-const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate } = require('../src/helpers');
+const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate, videoHtml } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');
 const createBanners = require('../src/voting-banner');
 
@@ -217,7 +217,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
       CONSISTENT_CAPTAIN_ID: extraInfo.descriptionAuthors.length === 1 ? extraInfo.descriptionAuthors[0].id : null,
       MODE_LONG: gameMode.longName,
       NOMINATIONS: nominationStrings.join('\n\n'),
-      VIDEO: config.videos[gameMode.shortName],
+      VIDEO: videoHtml(extraInfo.video),
     }));
   }
 
@@ -233,7 +233,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
     OUTRO: roundInfo.outro,
     TIME: roundInfo.postTimeString,
     TITLE: roundInfo.title,
-    VIDEO: config.videos.intro,
+    VIDEO: videoHtml(roundInfo.video),
   }) + '\n');
 }
 

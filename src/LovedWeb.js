@@ -51,6 +51,7 @@ module.exports = class LovedWeb {
                 nominators: [],
                 threshold: gameModeInfo.voting_threshold,
                 thresholdFormatted: (gameModeInfo.voting_threshold * 100).toFixed() + '%',
+                video: gameModeInfo.video,
             };
 
             if (resultsPostIds[gameMode.integer] == null)
@@ -99,6 +100,7 @@ module.exports = class LovedWeb {
             postTime: new Date(round.news_posted_at),
             resultsPostIds,
             title: `Project Loved: ${round.name}`,
+            video: round.video,
         };
     }
 

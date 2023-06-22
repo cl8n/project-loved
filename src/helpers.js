@@ -114,6 +114,26 @@ function textFromTemplate(template, vars) {
         .trim();
 }
 
+function videoHtml(videoIdOrLink) {
+    if (typeof videoIdOrLink !== 'string') {
+        return null;
+    }
+
+    // MP4 video link
+    if (videoIdOrLink.startsWith('http')) {
+        return [
+            '<div align="center">',
+            '  <video width="95%" controls>',
+            `    <source src="${videoIdOrLink}" type="video/mp4" preload="none">`,
+            '  </video>',
+            '</div>',
+        ].join('\n');
+    }
+
+    // YouTube video ID
+    return `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoIdOrLink}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+}
+
 module.exports = {
     convertToMarkdown,
     escapeMarkdown,
@@ -127,4 +147,5 @@ module.exports = {
     mkdirTreeSync,
     pushUnique,
     textFromTemplate,
+    videoHtml,
 };
