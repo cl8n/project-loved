@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "bottleneck": "^2.19.5",
-    "canvas": "^2.8.0",
+    "canvas": "^2.11.2",
     "chalk": "^4.1.1",
     "open": "^8.2.1",
     "request": "^2.88.2",
