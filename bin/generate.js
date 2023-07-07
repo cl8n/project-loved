@@ -341,10 +341,14 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 }
 
 (async () => {
-  const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-')) || join(__dirname, '../output');
+  const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-'));
   const shouldGenerateTopics = process.argv.includes('--threads', 2);
-  const lovedWeb = new LovedWeb(config.lovedApiKey);
 
+  if (outPath == null && !shouldGenerateTopics) {
+    logAndExit('No output path provided and not generating topics');
+  }
+
+  const lovedWeb = new LovedWeb(config.lovedApiKey);
   const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
   const postTimeIsoString = roundInfo.postTime.toISOString();
 
@@ -360,10 +364,12 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
     nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
   }
 
-  await generateBanners(
-    join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
-    beatmapsets,
-  ).catch(logAndExit);
+  if (outPath != null) {
+    await generateBanners(
+      join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
+      beatmapsets,
+    ).catch(logAndExit);
+  }
 
   if (shouldGenerateTopics) {
     // TODO: probably just pass roundInfo...
@@ -377,9 +383,11 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
     ).catch(logAndExit);
   }
 
-  await generateNews(
-    join(outPath, `news/${roundInfo.postYear}/${roundInfo.newsDirname}.md`),
-    roundInfo,
-    await lovedWeb.getRoundTopicIds(config.lovedRoundId).catch(logAndExit),
-  ).catch(logAndExit);
+  if (outPath != null) {
+    await generateNews(
+      join(outPath, `news/${roundInfo.postYear}/${roundInfo.newsDirname}.md`),
+      roundInfo,
+      await lovedWeb.getRoundTopicIds(config.lovedRoundId).catch(logAndExit),
+    ).catch(logAndExit);
+  }
 })();
