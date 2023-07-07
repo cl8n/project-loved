@@ -1,6 +1,3 @@
-config/
-node_modules/
-output/
-storage/
-error.log
-jpeg-recompress*
+/bin/jpeg-recompress*
+/config/
+/node_modules/
