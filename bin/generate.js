@@ -15,8 +15,14 @@ async function generateBanners(bannersPath, beatmapsets) {
 
   mkdirTreeSync(bannersPath);
 
+  const defaultBgPath = join(__dirname, '../resources/banner-default.png');
+
   await Promise.all(beatmapsets.map((beatmapset) =>
-    createBanners(beatmapset.bgPath, join(bannersPath, beatmapset.id.toString()), beatmapset.title)
+    createBanners(
+      beatmapset.bgPath ?? defaultBgPath,
+      join(bannersPath, beatmapset.id.toString()),
+      beatmapset.title,
+    )
       .then(() => {
         console.log(dim(green(`Created banners for ${beatmapset.title} [#${beatmapset.id}]`)));
       })
@@ -151,9 +157,14 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
   console.log('Uploading topic covers');
 
-  await Promise.all(nominations.map((nomination) =>
-    Forum.storeTopicCover(nomination.beatmapset.bgPath, nominationTopicIds[nomination.id])
-  ));
+  await Promise.all(nominations.map((nomination) => {
+    if (nomination.beatmapset.bgPath != null) {
+      return Forum.storeTopicCover(
+        nomination.beatmapset.bgPath,
+        nominationTopicIds[nomination.id],
+      );
+    }
+  }));
 }
 
 async function generateNews(newsPath, roundInfo, topicIds) {
@@ -316,7 +327,6 @@ function getExtraBeatmapsetInfo(nomination) {
 }
 
 async function loadBeatmapsetBgPaths(beatmapsets) {
-  const defaultBgPath = join(__dirname, '../resources/banner-default.png');
   const dirents = await readdir(join(__dirname, '../config'), { withFileTypes: true });
   const paths = {};
 
@@ -333,7 +343,6 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   for (const beatmapset of beatmapsets) {
     if (paths[beatmapset.id] == null) {
       console.error(yellow(`Missing background image for ${beatmapset.title} [#${beatmapset.id}], using default`));
-      paths[beatmapset.id] = defaultBgPath;
     }
   }
 
