@@ -87,7 +87,7 @@ async function setChatAccessToken() {
     client_id: config.apiClient.id,
     redirect_uri: `http://localhost:${port}`,
     response_type: 'code',
-    scope: 'chat.write',
+    scope: 'chat.write_manage',
     state,
   });
   await open(url.toString());
