@@ -1,10 +1,10 @@
-const bottleneck = require('bottleneck');
 const { dim, green, red, yellow } = require('chalk');
 const fs = require('fs');
 let requestUnwrapped = require('request-promise-native');
 const WebSocket = require('ws');
 const config = require('./config');
 const Gamemode = require('./gamemode');
+const Limiter = require('./Limiter');
 
 const jar = requestUnwrapped.jar();
 jar.setCookie(`__cfduid=${config.cloudflare.id}`, config.osuBaseUrl);
@@ -23,10 +23,7 @@ requestUnwrapped = requestUnwrapped.defaults({
     simple: false
 });
 
-const limiter = new bottleneck({
-    maxConcurrent: 1,
-    minTime: 2500,
-});
+const limiter = new Limiter(2500);
 
 function handleVerification() {
     console.log(yellow('osu! needs you to verify your account. Click the link in the email you received.'));
@@ -76,13 +73,12 @@ const requestWrapped = async function requestWrapped(options) {
 }
 
 let requestCounter = 0;
-const requestUnlogged = limiter.wrap(requestWrapped);
 const request = async function (...args) {
     const n = ++requestCounter;
     console.log(dim(`Making request #${n} to ${args[0].uri}`));
 
     try {
-        const response = await requestUnlogged(...args);
+        const response = await limiter.run(() => requestWrapped(...args));
         console.log(dim(green(`Request #${n} to ${args[0].uri} finished`)));
         return response;
     } catch (error) {

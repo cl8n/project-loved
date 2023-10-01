@@ -1,10 +1,7 @@
-const bottleneck = require('bottleneck');
 const superagent = require('superagent');
+const Limiter = require('./Limiter');
 
-const limiter = new bottleneck({
-    maxConcurrent: 1,
-    minTime: 1000,
-});
+const limiter = new Limiter(1000);
 
 module.exports = class Discord {
     static maxEmbeds = 10;
@@ -56,7 +53,7 @@ module.exports = class Discord {
             }
         }
 
-        await limiter.schedule(async () => {
+        await limiter.run(async () => {
             await superagent
                 .post(this.#webhook)
                 .send({

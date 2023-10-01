@@ -1,4 +1,3 @@
-const bottleneck = require('bottleneck');
 const { green, red, yellow } = require('chalk');
 const { randomBytes } = require('crypto');
 const { createServer } = require('http');
@@ -7,51 +6,57 @@ const superagent = require('superagent');
 const { URLSearchParams, URL } = require('url');
 const { inspect } = require('util');
 const config = require('./config');
+const Limiter = require('./Limiter');
 
 let chatAccessToken;
+const limiter = new Limiter(1000);
 const port = 18888;
 
-function revokeChatAccessToken() {
+function runApiRequestFn(requestFn) {
   if (chatAccessToken == null) {
     throw 'Chat access token not set';
   }
 
-  return superagent
-    .delete(`${config.osuBaseUrl}/api/v2/oauth/tokens/current`)
-    .auth(chatAccessToken, { type: 'bearer' })
-    .then(() => {
-      console.log(green('Revoked chat access token'));
-      chatAccessToken = undefined;
-    })
-    .catch(() => console.error(red('Failed to revoke chat access token')));
+  return limiter.run(requestFn);
+}
+
+function revokeChatAccessToken() {
+  return runApiRequestFn(
+    () => superagent
+      .delete(`${config.osuBaseUrl}/api/v2/oauth/tokens/current`)
+      .auth(chatAccessToken, { type: 'bearer' })
+      .then(() => {
+        console.log(green('Revoked chat access token'));
+        chatAccessToken = undefined;
+      })
+      .catch(() => console.error(red('Failed to revoke chat access token'))),
+  );
 }
 
 function sendChatAnnouncement(userIds, name, description, message) {
-  if (chatAccessToken == null) {
-    throw 'Chat access token not set';
-  }
+  return runApiRequestFn(
+    () => superagent
+      .post(`${config.osuBaseUrl}/api/v2/chat/channels`)
+      .auth(chatAccessToken, { type: 'bearer' })
+      .send({
+        channel: { name, description },
+        message,
+        target_ids: userIds,
+        type: 'ANNOUNCE',
+      })
+      .then(() => console.log(green(`Sent chat announcement to ${userIds.join(', ')}`)))
+      .catch((error) => {
+        const message = `Failed to send chat announcement to ${userIds.join(', ')}:`;
 
-  return superagent
-    .post(`${config.osuBaseUrl}/api/v2/chat/channels`)
-    .auth(chatAccessToken, { type: 'bearer' })
-    .send({
-      channel: { name, description },
-      message,
-      target_ids: userIds,
-      type: 'ANNOUNCE',
-    })
-    .then(() => console.log(green(`Sent chat announcement to ${userIds.join(', ')}`)))
-    .catch((error) => {
-      const message = `Failed to send chat announcement to ${userIds.join(', ')}:`;
-
-      if (error.status === 404 || error.status === 422) {
-        console.error(red(message + '\n  One or more recipients not found'));
-      } else {
-        console.error(red(message));
-        console.error(inspect(error, false, 1, true));
-        process.exit(1);
-      }
-    });
+        if (error.status === 404 || error.status === 422) {
+          console.error(red(message + '\n  One or more recipients not found'));
+        } else {
+          console.error(red(message));
+          console.error(inspect(error, false, 1, true));
+          process.exit(1);
+        }
+      }),
+  );
 }
 
 async function setChatAccessToken() {
@@ -111,13 +116,8 @@ async function setChatAccessToken() {
   console.log(green('Chat access token set'));
 }
 
-const limiter = new bottleneck({
-  maxConcurrent: 1,
-  minTime: 1250,
-});
-
 module.exports = {
   revokeChatAccessToken,
-  sendChatAnnouncement: limiter.wrap(sendChatAnnouncement),
+  sendChatAnnouncement,
   setChatAccessToken,
 };
