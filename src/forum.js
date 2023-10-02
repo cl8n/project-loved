@@ -17,7 +17,7 @@ function handleVerification() {
     return new Promise(resolve => {
         ws.on('message', data => {
             try {
-                if (JSON.parse(data).event === 'verified') {
+                if (JSON.parse(data.toString()).event === 'verified') {
                     ws.close();
                     resolve();
                 }
