@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { inspect } from 'node:util';
 import chalk from 'chalk';
 
@@ -80,21 +80,6 @@ export function minOf(array, key) {
     const reducer = (prev, curr) => prev[key] < curr[key] ? prev : curr;
 
     return array.reduce(reducer)[key];
-}
-
-export function mkdirTreeSync(dir) {
-    if (existsSync(dir))
-        return;
-
-    try {
-        mkdirSync(dir);
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            mkdirTreeSync(dirname(dir));
-            mkdirTreeSync(dir);
-        } else
-            throw error;
-    }
 }
 
 export function pushUnique(array, values, sameFn) {

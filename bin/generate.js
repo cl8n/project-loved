@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
 import '../src/force-color.js';
-import { readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import chalk from 'chalk';
 import config from '../src/config.js';
 import Discord from '../src/Discord.js';
 import Forum from '../src/forum.js';
 import Ruleset from '../src/Ruleset.js';
-import { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate, videoHtml } from '../src/helpers.js';
+import { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, textFromTemplate, videoHtml } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
 import createBanners from '../src/createBanners.js';
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.log('Generating beatmapset banners');
 
-  mkdirTreeSync(bannersPath);
+  await mkdir(bannersPath, { recursive: true });
 
   await Promise.all(beatmapsets.map((beatmapset) =>
     createBanners(
@@ -234,8 +234,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
     }));
   }
 
-  mkdirTreeSync(dirname(newsPath));
-
+  await mkdir(dirname(newsPath), { recursive: true });
   await writeFile(newsPath, textFromTemplate(newsTemplate, {
     AUTHOR: roundInfo.newsAuthorName,
     DATE: roundInfo.postDateString,
