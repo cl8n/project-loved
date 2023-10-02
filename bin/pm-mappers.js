@@ -7,8 +7,8 @@ import config from '../src/config.js';
 import { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
 
-const guestTemplate = loadTextResource('chat-nomination-guest-template.md');
-const hostTemplate = loadTextResource('chat-nomination-template.md');
+const guestTemplate = await loadTextResource('chat-nomination-guest-template.md');
+const hostTemplate = await loadTextResource('chat-nomination-template.md');
 
 async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
     if (nominations.length === 0)

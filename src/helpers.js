@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inspect } from 'node:util';
 import chalk from 'chalk';
@@ -51,7 +51,7 @@ export function joinList(array) {
 }
 
 export function loadTextResource(basename) {
-    return readFileSync(join('resources', basename), 'utf8');
+    return readFile(join('resources', basename), 'utf8');
 }
 
 export function logAndExit(error) {

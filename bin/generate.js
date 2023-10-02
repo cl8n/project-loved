@@ -56,10 +56,10 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
   if (error)
     throw new Error();
 
-  const discordBeatmapsetTemplate = loadTextResource('discord-template-beatmap.md');
-  const mainTopicTemplate = loadTextResource('main-thread-template.bbcode');
-  const mainTopicBeatmapsetTemplate = loadTextResource('main-thread-template-beatmap.bbcode');
-  const votingPostTemplate = loadTextResource('voting-thread-template.bbcode');
+  const discordBeatmapsetTemplate = await loadTextResource('discord-template-beatmap.md');
+  const mainTopicTemplate = await loadTextResource('main-thread-template.bbcode');
+  const mainTopicBeatmapsetTemplate = await loadTextResource('main-thread-template-beatmap.bbcode');
+  const votingPostTemplate = await loadTextResource('voting-thread-template.bbcode');
   const discordBeatmapsets = {};
   const mainTopicBodies = {};
   const nominationTopicBodies = {};
@@ -174,9 +174,9 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 
   const gameModeSectionStrings = [];
   const gameModesPresent = [];
-  const newsGameModeTemplate = loadTextResource('news-post-template-mode.md');
-  const newsNominationTemplate = loadTextResource('news-post-template-beatmap.md');
-  const newsTemplate = loadTextResource('news-post-template.md');
+  const newsGameModeTemplate = await loadTextResource('news-post-template-mode.md');
+  const newsNominationTemplate = await loadTextResource('news-post-template-beatmap.md');
+  const newsTemplate = await loadTextResource('news-post-template.md');
 
   for (const gameMode of Ruleset.all()) {
     const extraInfo = roundInfo.extraGameModeInfo[gameMode.id];
