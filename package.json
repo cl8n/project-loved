@@ -11,7 +11,7 @@
     "setup": "npm install && node bin/setup.js"
   },
   "engines": {
-    "node": ">=14.21.3"
+    "node": ">=16"
   },
   "dependencies": {
     "canvas": "^2.11.2",
