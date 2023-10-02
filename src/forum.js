@@ -1,29 +1,9 @@
 const { dim, green, red, yellow } = require('chalk');
-const fs = require('fs');
-let requestUnwrapped = require('request-promise-native');
+const superagent = require('superagent');
 const WebSocket = require('ws');
 const config = require('./config');
 const Gamemode = require('./gamemode');
 const Limiter = require('./Limiter');
-
-const jar = requestUnwrapped.jar();
-jar.setCookie(`__cfduid=${config.cloudflare.id}`, config.osuBaseUrl);
-jar.setCookie(`cf_clearance=${config.cloudflare.clearance}`, config.osuBaseUrl);
-jar.setCookie(`osu_session=${config.session}`, config.osuBaseUrl);
-jar.setCookie(`XSRF-TOKEN=${config.csrf}`, config.osuBaseUrl);
-requestUnwrapped = requestUnwrapped.defaults({
-    baseUrl: config.osuBaseUrl,
-    method: 'POST',
-    followRedirect: false,
-    headers: {
-        'User-Agent': config.userAgent,
-        'X-CSRF-TOKEN': config.csrf
-    },
-    jar: jar,
-    simple: false
-});
-
-const limiter = new Limiter(2500);
 
 function handleVerification() {
     console.log(yellow('osu! needs you to verify your account. Click the link in the email you received.'));
@@ -46,73 +26,96 @@ function handleVerification() {
     });
 }
 
-const requestWrapped = async function requestWrapped(options) {
-    const response = await requestUnwrapped({
-        ...options,
-        resolveWithFullResponse: true
-    });
+const cookieHeader = Object.entries({
+    __cfduid: config.cloudflare.id,
+    cf_clearance: config.cloudflare.clearance,
+    osu_session: config.session,
+    'XSRF-TOKEN': config.csrf,
+})
+    .map(([key, value]) => `${key}=${value}`)
+    .join('; ');
+const limiter = new Limiter(2500);
+async function requestBase(superagentModifier) {
+    const response = await limiter.run(async () => await superagentModifier(
+        superagent
+            .ok((response) => response.status < 300 || response.status === 401)
+            .redirects(0)
+            .set('Cookie', cookieHeader)
+            .set('User-Agent', config.userAgent)
+            .set('X-CSRF-TOKEN', config.csrf),
+    ));
 
-    switch (response.statusCode) {
-        case 401:
-            if (!response.body.includes('<h1 class="user-verification'))
-                throw 'Authentication failed';
+    if (response.status === 401) {
+        if (!response.text?.includes('<h1 class="user-verification')) {
+            throw 'Authentication failed';
+        }
 
-            await handleVerification();
-            return await requestWrapped(options);
-        case 403:
-            throw 'Authorization failed';
-        case 404:
-            throw 'Not found';
-        case 413:
-            throw 'File too large';
-        case 500:
-            throw 'Server error';
+        await handleVerification();
+        return await requestBase(superagentModifier);
     }
-
-    return options.resolveWithFullResponse ? response : response.body;
 }
 
 let requestCounter = 0;
-const request = async function (...args) {
-    const n = ++requestCounter;
-    console.log(dim(`Making request #${n} to ${args[0].uri}`));
+async function request(options) {
+    const superagentModifier = (superagent) => {
+        if (options.attach != null) {
+            superagent = superagent.attach(...options.attach);
+        }
 
-    try {
-        const response = await limiter.run(() => requestWrapped(...args));
-        console.log(dim(green(`Request #${n} to ${args[0].uri} finished`)));
-        return response;
-    } catch (error) {
-        console.error(dim(red(`Request #${n} to ${args[0].uri} failed: ${error}`)));
-        throw error;
-    }
+        if (options.field != null) {
+            superagent = superagent.field(...options.field);
+        }
+
+        if (options.qs != null) {
+            superagent = superagent.query(options.qs);
+        }
+
+        if (options.accept != null) {
+            superagent = superagent.accept(options.accept);
+        }
+
+        return superagent.request(options.method ?? 'POST', config.osuBaseUrl + options.uri);
+    };
+
+    const n = ++requestCounter;
+    console.log(dim(`Making request #${n} to ${options.uri}`));
+
+    return requestBase(superagentModifier)
+        .then((response) => {
+            console.log(dim(green(`Request #${n} to ${options.uri} finished`)));
+            return response;
+        })
+        .catch((error) => {
+            console.error(dim(red(`Request #${n} to ${options.uri} failed: ${error}`)));
+            throw error;
+        });
 }
 
 module.exports.storeTopicCover = async function (filename, topicId) {
-    const body = await request({
+    const { body } = await request({
         uri: '/community/forums/topic-covers',
-        formData: {
-            cover_file: fs.createReadStream(filename),
-            topic_id: topicId,
-        }
+        attach: ['cover_file', filename],
+        field: ['topic_id', topicId],
+        accept: 'json',
     });
 
-    return JSON.parse(body).id;
+    return body.id;
 }
 
-module.exports.pinTopic = function (topicId, type = 'pin') {
+module.exports.pinTopic = async function (topicId, type = 'pin') {
     const pin = [false, 'pin', 'announce'].indexOf(type);
 
     if (pin === -1)
         throw 'Invalid pin type';
 
-    return request({
+    await request({
         uri: `/community/forums/topics/${topicId}/pin`,
         qs: { pin }
     });
 }
 
-module.exports.lockTopic = function (topicId) {
-    return request({
+module.exports.lockTopic = async function (topicId) {
+    await request({
         uri: `/community/forums/topics/${topicId}/lock`,
         qs: {
             lock: 1
@@ -121,9 +124,10 @@ module.exports.lockTopic = function (topicId) {
 }
 
 module.exports.getModeTopics = async function (forumId) {
-    let body = await request({
+    let { body } = await request({
         uri: `/community/forums/${forumId}`,
-        method: 'GET'
+        method: 'GET',
+        accept: 'html',
     });
 
     const topicIdRegex = new RegExp(`href="${config.osuBaseUrl.replace(/\./g, '\\.')}/community/forums/topics/(\\d+)\\?start=unread"`);
@@ -146,8 +150,8 @@ module.exports.getModeTopics = async function (forumId) {
     return topics;
 }
 
-module.exports.watchTopic = function (topicId, watch = true) {
-    return request({
+module.exports.watchTopic = async function (topicId, watch = true) {
+    await request({
         uri: `/community/forums/topic-watches/${topicId}`,
         method: 'PUT',
         qs: {
