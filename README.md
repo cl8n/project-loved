@@ -2,8 +2,8 @@ This project contains the tools required to generate announcements, forum thread
 
 ## Dependencies
 
-- [Node.js](https://nodejs.org/en/download/) 12+
-- [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive/releases)
+- [Node.js](https://nodejs.org/en/download/) 14.21.3+
+- [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive/releases) 2.1.1+
   - Download the jpeg-archive binaries and place jpeg-recompress(.exe) in `bin`.
 
 ## Usage
@@ -12,7 +12,7 @@ A typical round of Project Loved involves:
 
 - Messaging mappers of nominated mapsets: `npm run messages`
 - Creating a news post: `npm run news -- <osu-wiki folder>`
-- Opening forum polls and updating the news post: `npm run news:forum -- <osu-wiki folder>`
+- Opening forum polls and optionally updating the news post: `npm run news:forum [-- <osu-wiki folder>]`
 - Posting results when forum polls have concluded: `npm run results`
 
 ### Setup
