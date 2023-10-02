@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import '../src/force-color.js';
 import chalk from 'chalk';
 import { revokeChatAccessToken, sendChatAnnouncement, setChatAccessToken } from '../src/chat.js';

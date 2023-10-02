@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import '../src/force-color.js';
 import open from 'open';
 import config from '../src/config.js';

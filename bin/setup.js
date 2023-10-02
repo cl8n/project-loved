@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import '../src/force-color.js';
 import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
 import chalk from 'chalk';

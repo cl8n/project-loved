@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import '../src/force-color.js';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
