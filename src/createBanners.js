@@ -6,11 +6,11 @@ import { formatPercent } from './helpers.js';
 import { createHash } from 'node:crypto';
 
 registerFont(
-  join(__dirname, '../resources/Torus-Regular.otf'),
+  'resources/Torus-Regular.otf',
   { family: 'Torus' },
 );
 registerFont(
-  join(__dirname, '../resources/FontAwesome5-FreeSolid.otf'),
+  'resources/FontAwesome5-FreeSolid.otf',
   { family: 'Font Awesome 5 Free' },
 );
 
@@ -26,14 +26,13 @@ function writeBannerCache() {
 let jpegRecompressFilename;
 async function getJpegRecompressFilename() {
   if (jpegRecompressFilename == null) {
-    const binDir = join(__dirname, '../bin');
-    const dirEnts = await readdir(binDir, { withFileTypes: true });
+    const dirEnts = await readdir('bin', { withFileTypes: true });
     const exeDirEnt = dirEnts.find(
       (dirEnt) => dirEnt.isFile() && dirEnt.name.includes('jpeg-recompress'),
     );
 
     if (exeDirEnt != null) {
-      jpegRecompressFilename = join(binDir, exeDirEnt.name);
+      jpegRecompressFilename = join('bin', exeDirEnt.name);
     } else {
       throw 'jpeg-recompress must be in bin/ to generate images';
     }
@@ -46,7 +45,7 @@ const overlayImages = {};
 async function loadOverlayImage(scale) {
   if (overlayImages[scale] == null) {
     const filename = `voting-overlay${scale > 1 ? `@${scale}x` : ''}.png`;
-    overlayImages[scale] = await loadImage(join(__dirname, '../resources', filename));
+    overlayImages[scale] = await loadImage(join('resources', filename));
   }
 
   return overlayImages[scale];

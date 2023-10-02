@@ -20,7 +20,7 @@ for (const beatmapsetId of beatmapsetIdSet) {
   superagent
     .get(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/fullsize.jpg?${cacheKey}`)
     .then((response) => {
-      writeFile(join(__dirname, '../config', `${beatmapsetId}.jpg`), response.body);
+      writeFile(join('config', `${beatmapsetId}.jpg`), response.body);
     })
     .catch((error) => {
       if (typeof error === 'object' && (error.status === 403 || error.status === 404)) {

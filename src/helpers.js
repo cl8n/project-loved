@@ -51,7 +51,7 @@ export function joinList(array) {
 }
 
 export function loadTextResource(basename) {
-    return readFileSync(join(__dirname, '../resources', basename), 'utf8');
+    return readFileSync(join('resources', basename), 'utf8');
 }
 
 export function logAndExit(error) {

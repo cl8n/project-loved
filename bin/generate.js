@@ -17,11 +17,9 @@ async function generateBanners(bannersPath, beatmapsets) {
 
   mkdirTreeSync(bannersPath);
 
-  const defaultBgPath = join(__dirname, '../resources/banner-default.png');
-
   await Promise.all(beatmapsets.map((beatmapset) =>
     createBanners(
-      beatmapset.bgPath ?? defaultBgPath,
+      beatmapset.bgPath ?? 'resources/banner-default.png',
       join(bannersPath, beatmapset.id.toString()),
       beatmapset.title,
     )
@@ -329,7 +327,7 @@ function getExtraBeatmapsetInfo(nomination) {
 }
 
 async function loadBeatmapsetBgPaths(beatmapsets) {
-  const dirents = await readdir(join(__dirname, '../config'), { withFileTypes: true });
+  const dirents = await readdir('config', { withFileTypes: true });
   const paths = {};
 
   for (const dirent of dirents) {
@@ -339,7 +337,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
     const filenameMatch = dirent.name.match(/(\d+)\.(?:jpeg|jpg|png)/i);
 
     if (filenameMatch != null)
-      paths[parseInt(filenameMatch[1])] = join(__dirname, '../config', filenameMatch[0]);
+      paths[parseInt(filenameMatch[1])] = join('config', filenameMatch[0]);
   }
 
   for (const beatmapset of beatmapsets) {
