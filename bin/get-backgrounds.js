@@ -19,9 +19,7 @@ const cacheKey = Math.floor(Date.now() / 1000);
 for (const beatmapsetId of beatmapsetIdSet) {
   superagent
     .get(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/fullsize.jpg?${cacheKey}`)
-    .then((response) => {
-      writeFile(join('config', `${beatmapsetId}.jpg`), response.body);
-    })
+    .then((response) => writeFile(join('config', `${beatmapsetId}.jpg`), response.body))
     .catch((error) => {
       if (typeof error === 'object' && (error.status === 403 || error.status === 404)) {
         console.error(chalk.yellow(`Beatmapset #${beatmapsetId} does not have a background`));
