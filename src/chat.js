@@ -1,4 +1,4 @@
-const { green, red, yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const { randomBytes } = require('crypto');
 const { createServer } = require('http');
 const open = require('open');
@@ -26,10 +26,10 @@ function revokeChatAccessToken() {
       .delete(`${config.osuBaseUrl}/api/v2/oauth/tokens/current`)
       .auth(chatAccessToken, { type: 'bearer' })
       .then(() => {
-        console.log(green('Revoked chat access token'));
+        console.log(chalk.green('Revoked chat access token'));
         chatAccessToken = undefined;
       })
-      .catch(() => console.error(red('Failed to revoke chat access token'))),
+      .catch(() => console.error(chalk.red('Failed to revoke chat access token'))),
   );
 }
 
@@ -44,14 +44,14 @@ function sendChatAnnouncement(userIds, name, description, message) {
         target_ids: userIds,
         type: 'ANNOUNCE',
       })
-      .then(() => console.log(green(`Sent chat announcement to ${userIds.join(', ')}`)))
+      .then(() => console.log(chalk.green(`Sent chat announcement to ${userIds.join(', ')}`)))
       .catch((error) => {
         const message = `Failed to send chat announcement to ${userIds.join(', ')}:`;
 
         if (error.status === 404 || error.status === 422) {
-          console.error(red(message + '\n  One or more recipients not found'));
+          console.error(chalk.red(message + '\n  One or more recipients not found'));
         } else {
-          console.error(red(message));
+          console.error(chalk.red(message));
           console.error(inspect(error, false, 1, true));
           process.exit(1);
         }
@@ -73,7 +73,7 @@ async function setChatAccessToken() {
 
         reject();
       } else {
-        console.log(green('Authorization complete'));
+        console.log(chalk.green('Authorization complete'));
         res.writeHead(200);
         res.write('You may close this page and return to the terminal\n');
 
@@ -85,7 +85,7 @@ async function setChatAccessToken() {
     }).listen(port);
   });
 
-  console.log(yellow('Waiting for authorization in browser'));
+  console.log(chalk.yellow('Waiting for authorization in browser'));
 
   const url = new URL(`${config.osuBaseUrl}/oauth/authorize`);
   url.search = new URLSearchParams({
@@ -98,7 +98,7 @@ async function setChatAccessToken() {
   await open(url.toString());
 
   const authCode = await authCodePromise.catch(() => {
-    console.error(red('Authorization failed'));
+    console.error(chalk.red('Authorization failed'));
     process.exit(1);
   });
   const tokenResponse = await superagent
@@ -113,7 +113,7 @@ async function setChatAccessToken() {
 
   chatAccessToken = tokenResponse.body.access_token;
 
-  console.log(green('Chat access token set'));
+  console.log(chalk.green('Chat access token set'));
 }
 
 module.exports = {

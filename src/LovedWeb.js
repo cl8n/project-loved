@@ -1,4 +1,4 @@
-const { dim, red, yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const superagent = require('superagent');
 const config = require('./config');
 const GameMode = require('./gamemode');
@@ -8,7 +8,7 @@ const interopVersion = '8';
 
 function handleLovedWebError(error) {
     if (typeof error === 'object' && error.response != null && error.response.body != null && error.response.body.error != null) {
-        console.error(red(`[loved.sh] ${error.response.body.error}`));
+        console.error(chalk.red(`[loved.sh] ${error.response.body.error}`));
 
         if (error.response.body.error === 'Unsupported program version') {
             process.exit(1);
@@ -45,7 +45,7 @@ module.exports = class LovedWeb {
             const gameModeInfo = round.game_modes[gameMode.integer];
 
             if (!gameModeInfo.nominations_locked)
-                console.error(yellow(`${gameMode.longName} nominations are not locked on loved.sh`));
+                console.error(chalk.yellow(`${gameMode.longName} nominations are not locked on loved.sh`));
 
             extraGameModeInfo[gameMode.integer] = {
                 descriptionAuthors: [],
@@ -56,13 +56,13 @@ module.exports = class LovedWeb {
             };
 
             if (resultsPostIds[gameMode.integer] == null)
-                console.error(yellow(`${gameMode.longName} last round results post is not set`));
+                console.error(chalk.yellow(`${gameMode.longName} last round results post is not set`));
         }
 
         for (const nomination of nominations) {
             for (const creator of nomination.beatmapset_creators) {
                 if (creator.id >= 4294000000) {
-                    console.error(yellow(`Creator ${creator.name} on nomination #${nomination.id} has placeholder ID (#${creator.id})`));
+                    console.error(chalk.yellow(`Creator ${creator.name} on nomination #${nomination.id} has placeholder ID (#${creator.id})`));
                 }
             }
 
@@ -122,7 +122,7 @@ module.exports = class LovedWeb {
     }
 
     createPolls(roundId, mainTopicBodies, nominationTopicBodies) {
-        console.log(dim('[loved.sh] Creating forum polls\n[loved.sh] This may take a few minutes...'));
+        console.log(chalk.dim('[loved.sh] Creating forum polls\n[loved.sh] This may take a few minutes...'));
 
         return this.#request
             .post(`${baseUrl}/news`)
@@ -132,7 +132,7 @@ module.exports = class LovedWeb {
     }
 
     postResults(roundId, mainTopicIds) {
-        console.log(dim('[loved.sh] Posting replies to forum\n[loved.sh] This may take a few minutes...'));
+        console.log(chalk.dim('[loved.sh] Posting replies to forum\n[loved.sh] This may take a few minutes...'));
 
         return this.#request
             .post(`${baseUrl}/results`)

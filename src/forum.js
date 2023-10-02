@@ -1,4 +1,4 @@
-const { dim, green, red, yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const superagent = require('superagent');
 const WebSocket = require('ws');
 const config = require('./config');
@@ -6,7 +6,7 @@ const Gamemode = require('./gamemode');
 const Limiter = require('./Limiter');
 
 function handleVerification() {
-    console.log(yellow('osu! needs you to verify your account. Click the link in the email you received.'));
+    console.log(chalk.yellow('osu! needs you to verify your account. Click the link in the email you received.'));
 
     const ws = new WebSocket(`wss://notify.ppy.sh/?csrf=${config.csrf}`, {
         headers: {
@@ -78,15 +78,15 @@ async function request(options) {
     };
 
     const n = ++requestCounter;
-    console.log(dim(`Making request #${n} to ${options.uri}`));
+    console.log(chalk.dim(`Making request #${n} to ${options.uri}`));
 
     return requestBase(superagentModifier)
         .then((response) => {
-            console.log(dim(green(`Request #${n} to ${options.uri} finished`)));
+            console.log(chalk.dim.green(`Request #${n} to ${options.uri} finished`));
             return response;
         })
         .catch((error) => {
-            console.error(dim(red(`Request #${n} to ${options.uri} failed: ${error}`)));
+            console.error(chalk.dim.red(`Request #${n} to ${options.uri} failed: ${error}`));
             throw error;
         });
 }

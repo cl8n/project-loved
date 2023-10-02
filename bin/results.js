@@ -1,5 +1,5 @@
 require('../src/force-color');
-const { red } = require('chalk');
+const { default: chalk } = require('chalk');
 const { revokeChatAccessToken, sendChatAnnouncement, setChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
 const Discord = require('../src/discord');
@@ -33,7 +33,7 @@ const LovedWeb = require('../src/LovedWeb');
     );
 
     if ((mainTopicIds[gameMode.integer] != null) !== gameModeHasNominations) {
-      console.error(red(`Nominations and main topics do not agree about ${gameMode.longName}'s presence`));
+      console.error(chalk.red(`Nominations and main topics do not agree about ${gameMode.longName}'s presence`));
       error = true;
     }
 

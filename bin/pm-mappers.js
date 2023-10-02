@@ -1,5 +1,5 @@
 require('../src/force-color');
-const { yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const { sendChatAnnouncement, setChatAccessToken, revokeChatAccessToken } = require('../src/chat');
 const config = require('../src/config');
 const { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
@@ -66,7 +66,7 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
 
     const guestCreatorsToMessage = guestCreators.filter((creator) => {
         if (creator.banned || creator.id >= 4294000000) {
-            console.error(yellow(`Skipping chat announcement to banned user ${creator.name}`));
+            console.error(chalk.yellow(`Skipping chat announcement to banned user ${creator.name}`));
             return false;
         }
 

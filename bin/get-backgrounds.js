@@ -1,5 +1,5 @@
 require('../src/force-color');
-const { yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const { writeFile } = require('fs').promises;
 const { join } = require('path');
 const config = require('../src/config');
@@ -21,7 +21,7 @@ const { getOsuBackground } = require('../src/osu-background');
       })
       .catch((error) => {
         if (typeof error === 'object' && (error.status === 403 || error.status === 404)) {
-          console.error(yellow(`Beatmapset #${beatmapsetId} does not have a background`));
+          console.error(chalk.yellow(`Beatmapset #${beatmapsetId} does not have a background`));
         } else {
           logAndExit(error);
         }

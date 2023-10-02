@@ -1,5 +1,5 @@
 require('../src/force-color');
-const { dim, green, red, yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const { readdir, writeFile } = require('fs').promises;
 const { dirname, join } = require('path');
 const config = require('../src/config');
@@ -24,10 +24,10 @@ async function generateBanners(bannersPath, beatmapsets) {
       beatmapset.title,
     )
       .then(() => {
-        console.log(dim(green(`Created banners for ${beatmapset.title} [#${beatmapset.id}]`)));
+        console.log(chalk.dim.green(`Created banners for ${beatmapset.title} [#${beatmapset.id}]`));
       })
       .catch((reason) => {
-        console.error(dim(red(`Failed to create banners for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`)));
+        console.error(chalk.dim.red(`Failed to create banners for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`));
         throw new Error();
       }),
   ));
@@ -41,12 +41,12 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
   // TODO: Check states instead
   for (const nomination of nominations) {
     if (nomination.description == null) {
-      console.error(red(`Missing description for nomination #${nomination.id}`));
+      console.error(chalk.red(`Missing description for nomination #${nomination.id}`));
       error = true;
     }
 
     if (nomination.beatmapset_creators.length === 0) {
-      console.error(red(`Missing creators for nomination #${nomination.id}`));
+      console.error(chalk.red(`Missing creators for nomination #${nomination.id}`));
       error = true;
     }
   }
@@ -183,7 +183,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
       .filter((n) => n.game_mode.integer === gameMode.integer);
 
     if (nominationsForMode.length === 0) {
-      console.log(yellow(`Skipping ${gameMode.longName}, there are no nominations`));
+      console.log(chalk.yellow(`Skipping ${gameMode.longName}, there are no nominations`));
       continue;
     }
 
@@ -203,7 +203,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
       }
 
       if (errors.length > 0) {
-        console.error(yellow(`Skipping nomination #${nomination.id} with ${joinList(errors)}`));
+        console.error(chalk.yellow(`Skipping nomination #${nomination.id} with ${joinList(errors)}`));
         continue;
       }
 
@@ -342,7 +342,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 
   for (const beatmapset of beatmapsets) {
     if (paths[beatmapset.id] == null) {
-      console.error(yellow(`Missing background image for ${beatmapset.title} [#${beatmapset.id}], using default`));
+      console.error(chalk.yellow(`Missing background image for ${beatmapset.title} [#${beatmapset.id}], using default`));
     }
   }
 

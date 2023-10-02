@@ -1,4 +1,4 @@
-const { red } = require('chalk');
+const { default: chalk } = require('chalk');
 const { existsSync, mkdirSync, readFileSync } = require('fs');
 const { dirname, join } = require('path');
 const { inspect } = require('util');
@@ -64,7 +64,7 @@ function logAndExit(error) {
     }
 
     if (errorMessage != null) {
-        console.error(red(errorMessage));
+        console.error(chalk.red(errorMessage));
     }
 
     process.exit(1);

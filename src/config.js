@@ -1,4 +1,4 @@
-const { red, yellow } = require('chalk');
+const { default: chalk } = require('chalk');
 const config = require('../config/config.json');
 
 let errors = '';
@@ -36,17 +36,17 @@ function addError(message) {
 
 for (const configKey of Object.keys(config)) {
   if (unused.includes(configKey)) {
-    addError(yellow(`"${configKey}" is no longer used`));
+    addError(chalk.yellow(`"${configKey}" is no longer used`));
   } else if (moved[configKey] != null) {
-    addError(yellow(`"${configKey}" has been renamed to "${moved[configKey]}"`));
+    addError(chalk.yellow(`"${configKey}" has been renamed to "${moved[configKey]}"`));
   } else if (!expected.includes(configKey)) {
-    addError(red(`Unrecognized option "${configKey}"`));
+    addError(chalk.red(`Unrecognized option "${configKey}"`));
   }
 }
 
 for (const expectedKey of expected) {
   if (config[expectedKey] == null) {
-    addError(red(`"${expectedKey}" is missing`));
+    addError(chalk.red(`"${expectedKey}" is missing`));
   }
 }
 
