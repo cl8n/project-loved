@@ -67,7 +67,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
     .digest('hex');
 
   if (bannerCache[cacheKey]) {
-    return;
+    return false;
   }
 
   const backgroundImage = await loadImage(backgroundPath);
@@ -157,4 +157,5 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 
   bannerCache[cacheKey] = true;
   await writeBannerCache();
+  return true;
 }

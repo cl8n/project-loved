@@ -23,11 +23,13 @@ async function generateBanners(bannersPath, beatmapsets) {
       join(bannersPath, beatmapset.id.toString()),
       beatmapset.title,
     )
-      .then(() => {
-        console.log(chalk.dim.green(`Created banners for ${beatmapset.title} [#${beatmapset.id}]`));
-      })
+      .then((generatedBanners) => console.error(
+        generatedBanners
+          ? chalk.dim.green(`Created banners for "${beatmapset.title}" [#${beatmapset.id}]`)
+          : chalk.dim.yellow(`Skipped creating banners for "${beatmapset.title}" [#${beatmapset.id}]`),
+      ))
       .catch((reason) => {
-        console.error(chalk.dim.red(`Failed to create banners for ${beatmapset.title} [#${beatmapset.id}]:\n${reason}`));
+        console.error(chalk.dim.red(`Failed to create banners for "${beatmapset.title}" [#${beatmapset.id}]:\n${reason}`));
         throw new Error();
       }),
   ));
