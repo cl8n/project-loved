@@ -5,12 +5,12 @@ import { readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import chalk from 'chalk';
 import config from '../src/config.js';
-import Discord from '../src/discord.js';
+import Discord from '../src/Discord.js';
 import Forum from '../src/forum.js';
-import GameMode from '../src/gamemode.js';
+import Ruleset from '../src/Ruleset.js';
 import { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate, videoHtml } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
-import createBanners from '../src/voting-banner.js';
+import createBanners from '../src/createBanners.js';
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.log('Generating beatmapset banners');
@@ -64,11 +64,11 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
   const mainTopicBodies = {};
   const nominationTopicBodies = {};
 
-  for (const gameMode of GameMode.modes()) {
-    const extraInfo = extraGameModeInfo[gameMode.integer];
+  for (const gameMode of Ruleset.all()) {
+    const extraInfo = extraGameModeInfo[gameMode.id];
     const mainTopicBeatmapsets = [];
     const mainTopicTitle = `[${gameMode.longName}] ${roundTitle}`;
-    const nominationsForMode = nominations.filter((n) => n.game_mode.integer === gameMode.integer);
+    const nominationsForMode = nominations.filter((n) => n.game_mode.id === gameMode.id);
 
     if (nominationsForMode.length === 0) {
       continue;
@@ -107,11 +107,11 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
       });
     }
 
-    mainTopicBodies[gameMode.integer] = textFromTemplate(mainTopicTemplate, {
+    mainTopicBodies[gameMode.id] = textFromTemplate(mainTopicTemplate, {
       BEATMAPS: mainTopicBeatmapsets.join('\n\n'),
       CAPTAINS: joinList(extraInfo.nominators.map((n) => `[url=https://osu.ppy.sh/users/${n.id}]${n.name}[/url]`)),
       GAME_MODE_LINK_NAME: gameMode.linkName,
-      RESULTS_POST: `https://osu.ppy.sh/community/forums/posts/${resultsPostIds[gameMode.integer]}`,
+      RESULTS_POST: `https://osu.ppy.sh/community/forums/posts/${resultsPostIds[gameMode.id]}`,
       THRESHOLD: extraInfo.thresholdFormatted,
     });
   }
@@ -128,14 +128,14 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
   console.log('Posting announcements to Discord');
 
-  await Promise.all(GameMode.modes().map(async (gameMode) => {
+  await Promise.all(Ruleset.all().map(async (gameMode) => {
     const discordBeatmapsetStrings = nominations
-      .filter((nomination) => nomination.game_mode.integer === gameMode.integer)
+      .filter((nomination) => nomination.game_mode.id === gameMode.id)
       .map((nomination) => discordBeatmapsets[nomination.id].replace(
         '{{TOPIC_ID}}',
         nominationTopicIds[nomination.id],
       ));
-    const discordWebhook = discordWebhooks[gameMode.integer];
+    const discordWebhook = discordWebhooks[gameMode.id];
 
     if (discordBeatmapsetStrings.length > 0 && discordWebhook != null) {
       let discordMessage = textFromTemplate(config.messages.discordPost, { MAP_COUNT: discordBeatmapsetStrings.length }) + '\n\n';
@@ -178,11 +178,11 @@ async function generateNews(newsPath, roundInfo, topicIds) {
   const newsNominationTemplate = loadTextResource('news-post-template-beatmap.md');
   const newsTemplate = loadTextResource('news-post-template.md');
 
-  for (const gameMode of GameMode.modes()) {
-    const extraInfo = roundInfo.extraGameModeInfo[gameMode.integer];
+  for (const gameMode of Ruleset.all()) {
+    const extraInfo = roundInfo.extraGameModeInfo[gameMode.id];
     const nominationStrings = [];
     const nominationsForMode = roundInfo.allNominations
-      .filter((n) => n.game_mode.integer === gameMode.integer);
+      .filter((n) => n.game_mode.id === gameMode.id);
 
     if (nominationsForMode.length === 0) {
       console.log(chalk.yellow(`Skipping ${gameMode.longName}, there are no nominations`));
@@ -253,7 +253,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 function getExtraBeatmapsetInfo(nomination) {
   const beatmaps = [];
   const beatmapsForMode = nomination.beatmaps
-    .filter((b) => b.game_mode === nomination.game_mode.integer);
+    .filter((b) => b.game_mode === nomination.game_mode.id);
   const excludedDiffNames = [];
   const reverseExclude = beatmapsForMode.filter((b) => b.excluded).length / beatmapsForMode.length > 0.5;
 
@@ -297,7 +297,7 @@ function getExtraBeatmapsetInfo(nomination) {
     const maxSr = maxOf(beatmaps, 'star_rating');
     const minSr = minOf(beatmaps, 'star_rating');
 
-    if (nomination.game_mode.integer === 3) {
+    if (nomination.game_mode.id === 3) {
       const keyModes = [...new Set(beatmaps.map((beatmap) => beatmap.key_mode))]
         .filter((keyMode) => keyMode != null)
         .sort((a, b) => a - b);

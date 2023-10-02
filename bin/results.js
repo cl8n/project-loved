@@ -4,9 +4,9 @@ import '../src/force-color.js';
 import chalk from 'chalk';
 import { revokeChatAccessToken, sendChatAnnouncement, setChatAccessToken } from '../src/chat.js';
 import config from '../src/config.js';
-import Discord from '../src/discord.js';
+import Discord from '../src/Discord.js';
 import Forum from '../src/forum.js';
-import GameMode from '../src/gamemode.js';
+import Ruleset from '../src/Ruleset.js';
 import { escapeMarkdown, formatPercent, joinList, logAndExit } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
 
@@ -28,12 +28,12 @@ let error = false;
 const gameModesPresent = [];
 const mainTopicIds = await Forum.getModeTopics(120);
 
-for (const gameMode of GameMode.modes()) {
+for (const gameMode of Ruleset.all()) {
   const gameModeHasNominations = roundInfo.allNominations.some(
-    (nomination) => nomination.game_mode.integer === gameMode.integer,
+    (nomination) => nomination.game_mode.id === gameMode.id,
   );
 
-  if ((mainTopicIds[gameMode.integer] != null) !== gameModeHasNominations) {
+  if ((mainTopicIds[gameMode.id] != null) !== gameModeHasNominations) {
     console.error(chalk.red(`Nominations and main topics do not agree about ${gameMode.longName}'s presence`));
     error = true;
   }
@@ -56,8 +56,8 @@ for (const nomination of roundInfo.allNominations) {
 }
 
 for (const gameMode of gameModesPresent) {
-  lockAndUnpinPromises.push(Forum.lockTopic(mainTopicIds[gameMode.integer]));
-  lockAndUnpinPromises.push(Forum.pinTopic(mainTopicIds[gameMode.integer], false));
+  lockAndUnpinPromises.push(Forum.lockTopic(mainTopicIds[gameMode.id]));
+  lockAndUnpinPromises.push(Forum.pinTopic(mainTopicIds[gameMode.id], false));
 }
 
 await Promise.all(lockAndUnpinPromises);
@@ -73,8 +73,8 @@ roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
 
 for (const gameMode of gameModesPresent) {
   const nominations = roundInfo.allNominations
-    .filter((nomination) => nomination.game_mode.integer === gameMode.integer);
-  const threshold = roundInfo.extraGameModeInfo[gameMode.integer].threshold;
+    .filter((nomination) => nomination.game_mode.id === gameMode.id);
+  const threshold = roundInfo.extraGameModeInfo[gameMode.id].threshold;
 
   for (const nomination of nominations) {
     nomination.poll.yesRatio = nomination.poll.result_yes
@@ -90,7 +90,7 @@ for (const gameMode of gameModesPresent) {
     }
   }
 
-  const discordWebhook = roundInfo.discordWebhooks[gameMode.integer];
+  const discordWebhook = roundInfo.discordWebhooks[gameMode.id];
 
   if (discordWebhook == null) {
     continue;
@@ -139,7 +139,7 @@ for (const nomination of roundInfo.allNominations) {
 }
 
 for (const gameMode of gameModesPresent) {
-  watchPromises.push(Forum.watchTopic(mainTopicIds[gameMode.integer], false));
+  watchPromises.push(Forum.watchTopic(mainTopicIds[gameMode.id], false));
 }
 
 await Promise.all(watchPromises);

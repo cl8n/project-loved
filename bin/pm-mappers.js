@@ -29,14 +29,14 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
         gameModes.push(nomination.game_mode);
     }
 
-    gameModes.sort((a, b) => a.integer - b.integer);
+    gameModes.sort((a, b) => a.id - b.id);
     const gameModeVars = gameModes.length > 1
         ? {
             GAME_MODES: joinList(gameModes.map((m) => m.longName)),
-            THRESHOLDS: gameModes.map((m) => `- ${m.longName}: **${extraGameModeInfo[m.integer].thresholdFormatted}**`).join('\n'),
+            THRESHOLDS: gameModes.map((m) => `- ${m.longName}: **${extraGameModeInfo[m.id].thresholdFormatted}**`).join('\n'),
         } : {
             GAME_MODE: gameModes[0].longName,
-            THRESHOLD: extraGameModeInfo[gameModes[0].integer].thresholdFormatted,
+            THRESHOLD: extraGameModeInfo[gameModes[0].id].thresholdFormatted,
         };
     const guestCreators = creators
         .filter((creator) => creator.id !== beatmapset.creator_id)

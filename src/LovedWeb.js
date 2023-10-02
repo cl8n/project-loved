@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import superagent from 'superagent';
 import config from './config.js';
-import GameMode from './gamemode.js';
+import Ruleset from './Ruleset.js';
 
 const baseUrl = config.lovedBaseUrl + '/api/local-interop';
 const interopVersion = '8';
@@ -41,13 +41,13 @@ export default class LovedWeb {
         } = response.body;
         const extraGameModeInfo = {};
 
-        for (const gameMode of GameMode.modes()) {
-            const gameModeInfo = round.game_modes[gameMode.integer];
+        for (const gameMode of Ruleset.all()) {
+            const gameModeInfo = round.game_modes[gameMode.id];
 
             if (!gameModeInfo.nominations_locked)
                 console.error(chalk.yellow(`${gameMode.longName} nominations are not locked on loved.sh`));
 
-            extraGameModeInfo[gameMode.integer] = {
+            extraGameModeInfo[gameMode.id] = {
                 descriptionAuthors: [],
                 nominators: [],
                 threshold: gameModeInfo.voting_threshold,
@@ -55,7 +55,7 @@ export default class LovedWeb {
                 video: gameModeInfo.video,
             };
 
-            if (resultsPostIds[gameMode.integer] == null)
+            if (resultsPostIds[gameMode.id] == null)
                 console.error(chalk.yellow(`${gameMode.longName} last round results post is not set`));
         }
 
@@ -66,9 +66,9 @@ export default class LovedWeb {
                 }
             }
 
-            nomination.game_mode = new GameMode(nomination.game_mode);
+            nomination.game_mode = new Ruleset(nomination.game_mode);
 
-            const extras = extraGameModeInfo[nomination.game_mode.integer];
+            const extras = extraGameModeInfo[nomination.game_mode.id];
 
             if (nomination.description_author != null && extras.descriptionAuthors.find((a) => a.id === nomination.description_author.id) == null)
                 extras.descriptionAuthors.push(nomination.description_author);
@@ -84,8 +84,8 @@ export default class LovedWeb {
             nomination.beatmapset.title = nomination.overwrite_title || nomination.beatmapset.title;
         }
 
-        for (const gameMode of GameMode.modes()) {
-            extraGameModeInfo[gameMode.integer].nominators.sort((a, b) => a.name.localeCompare(b.name));
+        for (const gameMode of Ruleset.all()) {
+            extraGameModeInfo[gameMode.id].nominators.sort((a, b) => a.name.localeCompare(b.name));
         }
 
         return {

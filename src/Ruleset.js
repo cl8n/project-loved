@@ -2,18 +2,18 @@ const linkNames = ['osu', 'taiko', 'fruits', 'mania'];
 const longNames = ['osu!', 'osu!taiko', 'osu!catch', 'osu!mania'];
 const shortNames = ['osu', 'taiko', 'catch', 'mania'];
 
-export default class GameMode {
-    #mode;
+export default class Ruleset {
+    #id;
 
-    static modes() {
+    static all() {
         return [0, 1, 2, 3].map(m => new this(m));
     }
 
-    constructor(mode) {
-        if (typeof mode === 'number' && Number.isInteger(mode) && mode >= 0 && mode <= 3)
-            this.#mode = mode;
-        else if (typeof mode === 'string')
-            switch (mode.toLowerCase().trim()) {
+    constructor(rulesetId) {
+        if (typeof rulesetId === 'number' && Number.isInteger(rulesetId) && rulesetId >= 0 && rulesetId <= 3)
+            this.#id = rulesetId;
+        else if (typeof rulesetId === 'string')
+            switch (rulesetId.toLowerCase().trim()) {
                 case '0':
                 case 'osu':
                 case 'osu!':
@@ -21,12 +21,12 @@ export default class GameMode {
                 case 'osu!std':
                 case 'standard':
                 case 'std':
-                    this.#mode = 0;
+                    this.#id = 0;
                     break;
                 case '1':
                 case 'osu!taiko':
                 case 'taiko':
-                    this.#mode = 1;
+                    this.#id = 1;
                     break;
                 case '2':
                 case 'catch':
@@ -35,12 +35,12 @@ export default class GameMode {
                 case 'fruits':
                 case 'osu!catch':
                 case 'osu!ctb':
-                    this.#mode = 2;
+                    this.#id = 2;
                     break;
                 case '3':
                 case 'mania':
                 case 'osu!mania':
-                    this.#mode = 3;
+                    this.#id = 3;
                     break;
                 default:
                     throw new RangeError('The provided mode is not valid');
@@ -49,19 +49,19 @@ export default class GameMode {
             throw new TypeError('The provided mode is neither an integer nor a String');
     }
 
-    get integer() {
-        return this.#mode;
+    get id() {
+        return this.#id;
     }
 
     get linkName() {
-        return linkNames[this.#mode];
+        return linkNames[this.#id];
     }
 
     get longName() {
-        return longNames[this.#mode];
+        return longNames[this.#id];
     }
 
     get shortName() {
-        return shortNames[this.#mode];
+        return shortNames[this.#id];
     }
 }

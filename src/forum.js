@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import superagent from 'superagent';
 import WebSocket from 'ws';
 import config from './config.js';
-import Gamemode from './gamemode.js';
+import Ruleset from './Ruleset.js';
 import Limiter from './Limiter.js';
 
 function handleVerification() {
@@ -140,11 +140,11 @@ export async function getModeTopics(forumId) {
         if (match == null)
             break;
 
-        const mode = new Gamemode(match[1]);
+        const mode = new Ruleset(match[1]);
 
         body = body.substring(match.index + match[0].length);
 
-        topics[mode.integer] = parseInt(body.match(topicIdRegex)[1], 10);
+        topics[mode.id] = parseInt(body.match(topicIdRegex)[1], 10);
     }
 
     return topics;
