@@ -1,5 +1,5 @@
 require('../src/force-color');
-const open = require('open');
+const { default: open } = require('open');
 const config = require('../src/config');
 const { logAndExit } = require('../src/helpers');
 const LovedWeb = require('../src/LovedWeb');

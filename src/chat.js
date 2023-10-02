@@ -1,7 +1,7 @@
 const { default: chalk } = require('chalk');
 const { randomBytes } = require('crypto');
 const { createServer } = require('http');
-const open = require('open');
+const { default: open } = require('open');
 const superagent = require('superagent');
 const { URLSearchParams, URL } = require('url');
 const { inspect } = require('util');

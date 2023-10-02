@@ -16,7 +16,7 @@
   "dependencies": {
     "canvas": "^2.11.2",
     "chalk": "^5.3.0",
-    "open": "^8.2.1",
+    "open": "^9.1.0",
     "superagent": "^8.1.2",
     "ws": "^7.5.3"
   }
