@@ -25,7 +25,7 @@ export function revokeChatAccessToken() {
       .delete(`${config.osuBaseUrl}/api/v2/oauth/tokens/current`)
       .auth(chatAccessToken, { type: 'bearer' })
       .then(() => {
-        console.log(chalk.green('Revoked chat access token'));
+        console.error(chalk.green('Revoked chat access token'));
         chatAccessToken = undefined;
       })
       .catch(() => console.error(chalk.red('Failed to revoke chat access token'))),
@@ -43,7 +43,7 @@ export function sendChatAnnouncement(userIds, name, description, message) {
         target_ids: userIds,
         type: 'ANNOUNCE',
       })
-      .then(() => console.log(chalk.green(`Sent chat announcement to ${userIds.join(', ')}`)))
+      .then(() => console.error(chalk.green(`Sent chat announcement to ${userIds.join(', ')}`)))
       .catch((error) => {
         const message = `Failed to send chat announcement to ${userIds.join(', ')}:`;
 
@@ -72,7 +72,7 @@ export async function setChatAccessToken() {
 
         reject();
       } else {
-        console.log(chalk.green('Authorization complete'));
+        console.error(chalk.green('Authorization complete'));
         res.writeHead(200);
         res.write('You may close this page and return to the terminal\n');
 
@@ -80,11 +80,11 @@ export async function setChatAccessToken() {
       }
 
       res.end();
-      httpsServer.close(() => console.log('Closed authorization callback server'));
+      httpsServer.close(() => console.error('Closed authorization callback server'));
     }).listen(port);
   });
 
-  console.log(chalk.yellow('Waiting for authorization in browser'));
+  console.error(chalk.yellow('Waiting for authorization in browser'));
 
   const url = new URL(`${config.osuBaseUrl}/oauth/authorize`);
   url.search = new URLSearchParams({
@@ -112,5 +112,5 @@ export async function setChatAccessToken() {
 
   chatAccessToken = tokenResponse.body.access_token;
 
-  console.log(chalk.green('Chat access token set'));
+  console.error(chalk.green('Chat access token set'));
 }

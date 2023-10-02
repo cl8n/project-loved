@@ -13,7 +13,7 @@ import LovedWeb from '../src/LovedWeb.js';
 import createBanners from '../src/createBanners.js';
 
 async function generateBanners(bannersPath, beatmapsets) {
-  console.log('Generating beatmapset banners');
+  console.error('Generating beatmapset banners');
 
   await mkdir(bannersPath, { recursive: true });
 
@@ -36,7 +36,7 @@ async function generateBanners(bannersPath, beatmapsets) {
 }
 
 async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeInfo, resultsPostIds, discordWebhooks) {
-  console.log('Generating forum topics');
+  console.error('Generating forum topics');
 
   let error = false;
 
@@ -122,11 +122,11 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
     nominationTopicBodies,
   );
 
-  console.log('Pinning main topics');
+  console.error('Pinning main topics');
 
   await Promise.all(mainTopicIds.map((topicId) => Forum.pinTopic(topicId, 'announce')));
 
-  console.log('Posting announcements to Discord');
+  console.error('Posting announcements to Discord');
 
   await Promise.all(Ruleset.all().map(async (gameMode) => {
     const discordBeatmapsetStrings = nominations
@@ -157,7 +157,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
     }
   }));
 
-  console.log('Uploading topic covers');
+  console.error('Uploading topic covers');
 
   await Promise.all(nominations.map((nomination) => {
     if (nomination.beatmapset.bgPath != null) {
@@ -170,7 +170,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 }
 
 async function generateNews(newsPath, roundInfo, topicIds) {
-  console.log('Generating news post');
+  console.error('Generating news post');
 
   const gameModeSectionStrings = [];
   const gameModesPresent = [];
@@ -185,7 +185,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
       .filter((n) => n.game_mode.id === gameMode.id);
 
     if (nominationsForMode.length === 0) {
-      console.log(chalk.yellow(`Skipping ${gameMode.longName}, there are no nominations`));
+      console.error(chalk.yellow(`Skipping ${gameMode.longName}, there are no nominations`));
       continue;
     }
 

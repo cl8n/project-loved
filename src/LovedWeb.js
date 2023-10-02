@@ -122,7 +122,7 @@ export default class LovedWeb {
     }
 
     createPolls(roundId, mainTopicBodies, nominationTopicBodies) {
-        console.log(chalk.dim('[loved.sh] Creating forum polls\n[loved.sh] This may take a few minutes...'));
+        console.error(chalk.dim('[loved.sh] Creating forum polls\n[loved.sh] This may take a few minutes...'));
 
         return this.#request
             .post(`${baseUrl}/news`)
@@ -132,7 +132,7 @@ export default class LovedWeb {
     }
 
     postResults(roundId, mainTopicIds) {
-        console.log(chalk.dim('[loved.sh] Posting replies to forum\n[loved.sh] This may take a few minutes...'));
+        console.error(chalk.dim('[loved.sh] Posting replies to forum\n[loved.sh] This may take a few minutes...'));
 
         return this.#request
             .post(`${baseUrl}/results`)

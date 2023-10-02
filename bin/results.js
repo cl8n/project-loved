@@ -47,7 +47,7 @@ if (error) {
   process.exit(1);
 }
 
-console.log('Locking and unpinning topics');
+console.error('Locking and unpinning topics');
 
 const lockAndUnpinPromises = [];
 
@@ -62,11 +62,11 @@ for (const gameMode of gameModesPresent) {
 
 await Promise.all(lockAndUnpinPromises);
 
-console.log('Saving poll results');
+console.error('Saving poll results');
 
 await lovedWeb.postResults(config.lovedRoundId, mainTopicIds);
 
-console.log('Posting announcements to Discord');
+console.error('Posting announcements to Discord');
 
 const passedVotingCreatorIds = new Set();
 roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
@@ -119,7 +119,7 @@ for (const gameMode of gameModesPresent) {
   );
 }
 
-console.log('Sending chat announcement to mappers of passed votings');
+console.error('Sending chat announcement to mappers of passed votings');
 
 await setChatAccessToken();
 await sendChatAnnouncement(
@@ -130,7 +130,7 @@ await sendChatAnnouncement(
 );
 await revokeChatAccessToken();
 
-console.log('Removing watches from topics');
+console.error('Removing watches from topics');
 
 const watchPromises = [];
 

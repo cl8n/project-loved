@@ -78,11 +78,11 @@ async function request(options) {
     };
 
     const n = ++requestCounter;
-    console.log(chalk.dim(`Making request #${n} to ${options.uri}`));
+    console.error(chalk.dim(`Making request #${n} to ${options.uri}`));
 
     return requestBase(superagentModifier)
         .then((response) => {
-            console.log(chalk.dim.green(`Request #${n} to ${options.uri} finished`));
+            console.error(chalk.dim.green(`Request #${n} to ${options.uri} finished`));
             return response;
         })
         .catch((error) => {
