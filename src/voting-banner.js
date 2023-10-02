@@ -1,8 +1,8 @@
-const { createCanvas, loadImage, registerFont } = require('canvas');
-const { execFile } = require('child_process');
-const { readdir } = require('fs').promises;
-const { join } = require('path');
-const { formatPercent } = require('./helpers');
+import { execFile } from 'node:child_process';
+import { readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { createCanvas, loadImage, registerFont } from 'canvas';
+import { formatPercent } from './helpers.js';
 
 registerFont(
   join(__dirname, '../resources/Torus-Regular.otf'),
@@ -43,7 +43,7 @@ async function loadOverlayImage(scale) {
   return overlayImages[scale];
 }
 
-module.exports = async function createBanners(backgroundPath, outputPath, title) {
+export default async function createBanners(backgroundPath, outputPath, title) {
   if (!backgroundPath) {
     throw 'Background path not set';
   }

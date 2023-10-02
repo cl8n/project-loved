@@ -1,7 +1,7 @@
-const { default: chalk } = require('chalk');
-const superagent = require('superagent');
-const config = require('./config');
-const GameMode = require('./gamemode');
+import chalk from 'chalk';
+import superagent from 'superagent';
+import config from './config.js';
+import GameMode from './gamemode.js';
 
 const baseUrl = config.lovedBaseUrl + '/api/local-interop';
 const interopVersion = '8';
@@ -18,7 +18,7 @@ function handleLovedWebError(error) {
     throw error;
 }
 
-module.exports = class LovedWeb {
+export default class LovedWeb {
     #request;
 
     constructor(key) {

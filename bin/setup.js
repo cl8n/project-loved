@@ -1,6 +1,6 @@
-require('../src/force-color');
-const { default: chalk } = require('chalk');
-const { copyFileSync, existsSync, mkdirSync } = require('fs');
+import '../src/force-color.js';
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import chalk from 'chalk';
 
 mkdirSync('config', { recursive: true });
 

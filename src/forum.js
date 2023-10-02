@@ -1,9 +1,9 @@
-const { default: chalk } = require('chalk');
-const superagent = require('superagent');
-const WebSocket = require('ws');
-const config = require('./config');
-const Gamemode = require('./gamemode');
-const Limiter = require('./Limiter');
+import chalk from 'chalk';
+import superagent from 'superagent';
+import WebSocket from 'ws';
+import config from './config.js';
+import Gamemode from './gamemode.js';
+import Limiter from './Limiter.js';
 
 function handleVerification() {
     console.log(chalk.yellow('osu! needs you to verify your account. Click the link in the email you received.'));
@@ -91,7 +91,7 @@ async function request(options) {
         });
 }
 
-module.exports.storeTopicCover = async function (filename, topicId) {
+export async function storeTopicCover(filename, topicId) {
     const { body } = await request({
         uri: '/community/forums/topic-covers',
         attach: ['cover_file', filename],
@@ -102,7 +102,7 @@ module.exports.storeTopicCover = async function (filename, topicId) {
     return body.id;
 }
 
-module.exports.pinTopic = async function (topicId, type = 'pin') {
+export async function pinTopic(topicId, type = 'pin') {
     const pin = [false, 'pin', 'announce'].indexOf(type);
 
     if (pin === -1)
@@ -114,7 +114,7 @@ module.exports.pinTopic = async function (topicId, type = 'pin') {
     });
 }
 
-module.exports.lockTopic = async function (topicId) {
+export async function lockTopic(topicId) {
     await request({
         uri: `/community/forums/topics/${topicId}/lock`,
         qs: {
@@ -123,7 +123,7 @@ module.exports.lockTopic = async function (topicId) {
     });
 }
 
-module.exports.getModeTopics = async function (forumId) {
+export async function getModeTopics(forumId) {
     let { body } = await request({
         uri: `/community/forums/${forumId}`,
         method: 'GET',
@@ -150,7 +150,7 @@ module.exports.getModeTopics = async function (forumId) {
     return topics;
 }
 
-module.exports.watchTopic = async function (topicId, watch = true) {
+export async function watchTopic(topicId, watch = true) {
     await request({
         uri: `/community/forums/topic-watches/${topicId}`,
         method: 'PUT',

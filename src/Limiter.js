@@ -1,4 +1,4 @@
-module.exports = class Limiter {
+export default class Limiter {
 	#delayMsBetween;
 	#lastRun = 0;
 	#running = [];

@@ -1,6 +1,7 @@
 {
   "name": "project-loved",
   "private": true,
+  "type": "module",
   "scripts": {
     "maps:download": "node bin/get-backgrounds.js",
     "maps:open": "node bin/open-maps.js",

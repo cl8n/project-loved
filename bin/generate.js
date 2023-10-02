@@ -1,14 +1,14 @@
-require('../src/force-color');
-const { default: chalk } = require('chalk');
-const { readdir, writeFile } = require('fs').promises;
-const { dirname, join } = require('path');
-const config = require('../src/config');
-const Discord = require('../src/discord');
-const Forum = require('../src/forum');
-const GameMode = require('../src/gamemode');
-const { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate, videoHtml } = require('../src/helpers');
-const LovedWeb = require('../src/LovedWeb');
-const createBanners = require('../src/voting-banner');
+import '../src/force-color.js';
+import { readdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import chalk from 'chalk';
+import config from '../src/config.js';
+import Discord from '../src/discord.js';
+import Forum from '../src/forum.js';
+import GameMode from '../src/gamemode.js';
+import { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, mkdirTreeSync, textFromTemplate, videoHtml } from '../src/helpers.js';
+import LovedWeb from '../src/LovedWeb.js';
+import createBanners from '../src/voting-banner.js';
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.log('Generating beatmapset banners');
@@ -349,54 +349,52 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
   return paths;
 }
 
-(async () => {
-  const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-'));
-  const shouldGenerateTopics = process.argv.includes('--threads', 2);
+const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-'));
+const shouldGenerateTopics = process.argv.includes('--threads', 2);
 
-  if (outPath == null && !shouldGenerateTopics) {
-    logAndExit('No output path provided and not generating topics');
-  }
+if (outPath == null && !shouldGenerateTopics) {
+  logAndExit('No output path provided and not generating topics');
+}
 
-  const lovedWeb = new LovedWeb(config.lovedApiKey);
-  const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
-  const postTimeIsoString = roundInfo.postTime.toISOString();
+const lovedWeb = new LovedWeb(config.lovedApiKey);
+const roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
+const postTimeIsoString = roundInfo.postTime.toISOString();
 
-  roundInfo.postDateString = postTimeIsoString.slice(0, 10);
-  roundInfo.postTimeString = postTimeIsoString.slice(11, 19);
-  roundInfo.postYear = postTimeIsoString.slice(0, 4);
-  roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
+roundInfo.postDateString = postTimeIsoString.slice(0, 10);
+roundInfo.postTimeString = postTimeIsoString.slice(11, 19);
+roundInfo.postYear = postTimeIsoString.slice(0, 4);
+roundInfo.newsDirname = `${roundInfo.postDateString}-${roundInfo.title.toLowerCase().replace(/\W+/g, '-')}`;
 
-  const beatmapsets = roundInfo.nominations.map((n) => n.beatmapset);
-  const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsets).catch(logAndExit);
+const beatmapsets = roundInfo.nominations.map((n) => n.beatmapset);
+const beatmapsetBgPaths = await loadBeatmapsetBgPaths(beatmapsets).catch(logAndExit);
 
-  for (const nomination of roundInfo.allNominations) {
-    nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
-  }
+for (const nomination of roundInfo.allNominations) {
+  nomination.beatmapset.bgPath = beatmapsetBgPaths[nomination.beatmapset.id];
+}
 
-  if (outPath != null) {
-    await generateBanners(
-      join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
-      beatmapsets,
-    ).catch(logAndExit);
-  }
+if (outPath != null) {
+  await generateBanners(
+    join(outPath, `wiki/shared/news/${roundInfo.newsDirname}`),
+    beatmapsets,
+  ).catch(logAndExit);
+}
 
-  if (shouldGenerateTopics) {
-    // TODO: probably just pass roundInfo...
-    await generateTopics(
-      lovedWeb,
-      roundInfo.allNominations,
-      roundInfo.title,
-      roundInfo.extraGameModeInfo,
-      roundInfo.resultsPostIds,
-      roundInfo.discordWebhooks,
-    ).catch(logAndExit);
-  }
+if (shouldGenerateTopics) {
+  // TODO: probably just pass roundInfo...
+  await generateTopics(
+    lovedWeb,
+    roundInfo.allNominations,
+    roundInfo.title,
+    roundInfo.extraGameModeInfo,
+    roundInfo.resultsPostIds,
+    roundInfo.discordWebhooks,
+  ).catch(logAndExit);
+}
 
-  if (outPath != null) {
-    await generateNews(
-      join(outPath, `news/${roundInfo.postYear}/${roundInfo.newsDirname}.md`),
-      roundInfo,
-      await lovedWeb.getRoundTopicIds(config.lovedRoundId).catch(logAndExit),
-    ).catch(logAndExit);
-  }
-})();
+if (outPath != null) {
+  await generateNews(
+    join(outPath, `news/${roundInfo.postYear}/${roundInfo.newsDirname}.md`),
+    roundInfo,
+    await lovedWeb.getRoundTopicIds(config.lovedRoundId).catch(logAndExit),
+  ).catch(logAndExit);
+}

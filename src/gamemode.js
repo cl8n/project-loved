@@ -2,7 +2,7 @@ const linkNames = ['osu', 'taiko', 'fruits', 'mania'];
 const longNames = ['osu!', 'osu!taiko', 'osu!catch', 'osu!mania'];
 const shortNames = ['osu', 'taiko', 'catch', 'mania'];
 
-module.exports = class GameMode {
+export default class GameMode {
     #mode;
 
     static modes() {

@@ -1,9 +1,9 @@
-require('../src/force-color');
-const { default: chalk } = require('chalk');
-const { sendChatAnnouncement, setChatAccessToken, revokeChatAccessToken } = require('../src/chat');
-const config = require('../src/config');
-const { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } = require('../src/helpers');
-const LovedWeb = require('../src/LovedWeb');
+import '../src/force-color.js';
+import chalk from 'chalk';
+import { sendChatAnnouncement, setChatAccessToken, revokeChatAccessToken } from '../src/chat.js';
+import config from '../src/config.js';
+import { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } from '../src/helpers.js';
+import LovedWeb from '../src/LovedWeb.js';
 
 const guestTemplate = loadTextResource('chat-nomination-guest-template.md');
 const hostTemplate = loadTextResource('chat-nomination-template.md');
@@ -87,20 +87,18 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
         );
 }
 
-(async () => {
-    const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId).catch(logAndExit);
+const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId).catch(logAndExit);
 
-    if (roundInfo.nominations.length === 0)
-        return;
+if (roundInfo.nominations.length === 0)
+    return;
 
-    await setChatAccessToken();
+await setChatAccessToken();
 
-    for (const nomination of roundInfo.nominations)
-        await sendNotifyPm(
-            roundInfo.allNominations.filter((n) => n.beatmapset_id === nomination.beatmapset_id),
-            roundInfo.extraGameModeInfo,
-            roundInfo.name,
-        );
+for (const nomination of roundInfo.nominations)
+    await sendNotifyPm(
+        roundInfo.allNominations.filter((n) => n.beatmapset_id === nomination.beatmapset_id),
+        roundInfo.extraGameModeInfo,
+        roundInfo.name,
+    );
 
-    await revokeChatAccessToken();
-})();
+await revokeChatAccessToken();

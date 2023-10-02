@@ -1,9 +1,9 @@
-const { default: chalk } = require('chalk');
-const { existsSync, mkdirSync, readFileSync } = require('fs');
-const { dirname, join } = require('path');
-const { inspect } = require('util');
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { inspect } from 'node:util';
+import chalk from 'chalk';
 
-function convertToMarkdown(bbcode) {
+export function convertToMarkdown(bbcode) {
     return bbcode.toString()
         .replace(/\\/g, '\\\\')
         .replace(/\*/g, '\\*')
@@ -24,7 +24,7 @@ function convertToMarkdown(bbcode) {
         .replace(/(?<!\\)\[(.*?[^\\])\](?!\()/g, '\\[$1\\]');
 }
 
-function escapeMarkdown(text) {
+export function escapeMarkdown(text) {
     return text.toString()
         .replace(/\\/g, '\\\\')
         .replace(/\*/g, '\\*')
@@ -35,26 +35,26 @@ function escapeMarkdown(text) {
         .replace(/(?<!\\)\[(.*?[^\\])\](?!\()/g, '\\[$1\\]');
 }
 
-function expandBbcodeRootLinks(text) {
+export function expandBbcodeRootLinks(text) {
     return text.toString()
         .replace(/\[url=\/([^\]]+)\]/g, '[url=https://osu.ppy.sh/$1]');
 }
 
-function formatPercent(number) {
+export function formatPercent(number) {
     return (number * 100).toFixed(2) + '%';
 }
 
-function joinList(array) {
+export function joinList(array) {
     return array.length < 3
         ? array.join(' and ')
         : array.slice(0, -1).join(', ') + ', and ' + array.at(-1);
 }
 
-function loadTextResource(basename) {
+export function loadTextResource(basename) {
     return readFileSync(join(__dirname, '../resources', basename), 'utf8');
 }
 
-function logAndExit(error) {
+export function logAndExit(error) {
     let errorMessage = 'Error occurred';
 
     if (typeof error === 'string') {
@@ -70,19 +70,19 @@ function logAndExit(error) {
     process.exit(1);
 }
 
-function maxOf(array, key) {
+export function maxOf(array, key) {
     const reducer = (prev, curr) => prev[key] > curr[key] ? prev : curr;
 
     return array.reduce(reducer)[key];
 }
 
-function minOf(array, key) {
+export function minOf(array, key) {
     const reducer = (prev, curr) => prev[key] < curr[key] ? prev : curr;
 
     return array.reduce(reducer)[key];
 }
 
-function mkdirTreeSync(dir) {
+export function mkdirTreeSync(dir) {
     if (existsSync(dir))
         return;
 
@@ -97,13 +97,13 @@ function mkdirTreeSync(dir) {
     }
 }
 
-function pushUnique(array, values, sameFn) {
+export function pushUnique(array, values, sameFn) {
     for (const value of values)
         if (array.find((value2) => sameFn(value, value2)) == null)
             array.push(value);
 }
 
-function textFromTemplate(template, vars) {
+export function textFromTemplate(template, vars) {
     return template
         .replace(/<\?(.+?)\?>/gs, (_, script) => {
             let result = eval(script);
@@ -114,7 +114,7 @@ function textFromTemplate(template, vars) {
         .trim();
 }
 
-function videoHtml(videoIdOrLink) {
+export function videoHtml(videoIdOrLink) {
     if (typeof videoIdOrLink !== 'string') {
         return null;
     }
@@ -133,19 +133,3 @@ function videoHtml(videoIdOrLink) {
     // YouTube video ID
     return `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoIdOrLink}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 }
-
-module.exports = {
-    convertToMarkdown,
-    escapeMarkdown,
-    expandBbcodeRootLinks,
-    formatPercent,
-    joinList,
-    loadTextResource,
-    logAndExit,
-    maxOf,
-    minOf,
-    mkdirTreeSync,
-    pushUnique,
-    textFromTemplate,
-    videoHtml,
-};

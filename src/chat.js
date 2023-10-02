@@ -1,12 +1,11 @@
-const { default: chalk } = require('chalk');
-const { randomBytes } = require('crypto');
-const { createServer } = require('http');
-const { default: open } = require('open');
-const superagent = require('superagent');
-const { URLSearchParams, URL } = require('url');
-const { inspect } = require('util');
-const config = require('./config');
-const Limiter = require('./Limiter');
+import { randomBytes } from 'node:crypto';
+import { createServer } from 'node:http';
+import { inspect } from 'node:util';
+import chalk from 'chalk';
+import open from 'open';
+import superagent from 'superagent';
+import config from './config.js';
+import Limiter from './Limiter.js';
 
 let chatAccessToken;
 const limiter = new Limiter(1000);
@@ -20,7 +19,7 @@ function runApiRequestFn(requestFn) {
   return limiter.run(requestFn);
 }
 
-function revokeChatAccessToken() {
+export function revokeChatAccessToken() {
   return runApiRequestFn(
     () => superagent
       .delete(`${config.osuBaseUrl}/api/v2/oauth/tokens/current`)
@@ -33,7 +32,7 @@ function revokeChatAccessToken() {
   );
 }
 
-function sendChatAnnouncement(userIds, name, description, message) {
+export function sendChatAnnouncement(userIds, name, description, message) {
   return runApiRequestFn(
     () => superagent
       .post(`${config.osuBaseUrl}/api/v2/chat/channels`)
@@ -59,7 +58,7 @@ function sendChatAnnouncement(userIds, name, description, message) {
   );
 }
 
-async function setChatAccessToken() {
+export async function setChatAccessToken() {
   const state = randomBytes(12).toString('base64url');
   const authCodePromise = new Promise((resolve, reject) => {
     const httpsServer = createServer((req, res) => {
@@ -115,9 +114,3 @@ async function setChatAccessToken() {
 
   console.log(chalk.green('Chat access token set'));
 }
-
-module.exports = {
-  revokeChatAccessToken,
-  sendChatAnnouncement,
-  setChatAccessToken,
-};

@@ -1,9 +1,9 @@
-const superagent = require('superagent');
-const Limiter = require('./Limiter');
+import superagent from 'superagent';
+import Limiter from './Limiter.js';
 
 const limiter = new Limiter(1000);
 
-module.exports = class Discord {
+export default class Discord {
     static maxEmbeds = 10;
     static maxEmbedTitleLength = 256;
     static maxLength = 2000;

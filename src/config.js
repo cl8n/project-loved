@@ -1,5 +1,6 @@
-const { default: chalk } = require('chalk');
-const config = require('../config/config.json');
+import chalk from 'chalk';
+import config from '../config/config.json' assert { type: 'json' };
+import defaultConfig from '../resources/info.json' assert { type: 'json' };
 
 let errors = '';
 const expected = [
@@ -58,7 +59,4 @@ if (errors.length > 0) {
 config.lovedBaseUrl = config.lovedBaseUrl.replace(/\/+$/, '');
 config.osuBaseUrl = config.osuBaseUrl.replace(/\/+$/, '');
 
-module.exports = {
-  ...require('../resources/info.json'),
-  ...config,
-};
+export default { ...defaultConfig, ...config };
