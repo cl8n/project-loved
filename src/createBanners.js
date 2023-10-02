@@ -1,8 +1,9 @@
 import { execFile } from 'node:child_process';
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, loadImage, registerFont } from 'canvas';
 import { formatPercent } from './helpers.js';
+import { createHash } from 'node:crypto';
 
 registerFont(
   join(__dirname, '../resources/Torus-Regular.otf'),
@@ -13,9 +14,16 @@ registerFont(
   { family: 'Font Awesome 5 Free' },
 );
 
-let jpegRecompressFilename;
-const overlayImages = {};
+let bannerCache;
+async function getBannerCache() {
+  return bannerCache ??= JSON.parse(await readFile('config/banner-cache.json', 'utf8'));
+}
 
+function writeBannerCache() {
+  return writeFile('config/banner-cache.json', JSON.stringify(bannerCache));
+}
+
+let jpegRecompressFilename;
 async function getJpegRecompressFilename() {
   if (jpegRecompressFilename == null) {
     const binDir = join(__dirname, '../bin');
@@ -34,6 +42,7 @@ async function getJpegRecompressFilename() {
   return jpegRecompressFilename;
 }
 
+const overlayImages = {};
 async function loadOverlayImage(scale) {
   if (overlayImages[scale] == null) {
     const filename = `voting-overlay${scale > 1 ? `@${scale}x` : ''}.png`;
@@ -50,6 +59,16 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 
   if (!outputPath) {
     throw 'Output path not set';
+  }
+
+  const bannerCache = await getBannerCache();
+  const createBannersVersion = 1;
+  const cacheKey = createHash('md5')
+    .update(`${createBannersVersion}|${backgroundPath}|${outputPath}|${title}`)
+    .digest('hex');
+
+  if (bannerCache[cacheKey]) {
+    return;
   }
 
   const backgroundImage = await loadImage(backgroundPath);
@@ -136,4 +155,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
       jpegRecompress.stdin.on('error', () => {});
     });
   }
+
+  bannerCache[cacheKey] = true;
+  await writeBannerCache();
 }
