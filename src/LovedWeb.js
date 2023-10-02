@@ -1,10 +1,10 @@
-const { dim, green, red, yellow } = require('chalk');
+const { dim, red, yellow } = require('chalk');
 const superagent = require('superagent');
 const config = require('./config');
 const GameMode = require('./gamemode');
 
 const baseUrl = config.lovedBaseUrl + '/api/local-interop';
-const interopVersion = '7';
+const interopVersion = '8';
 
 function handleLovedWebError(error) {
     if (typeof error === 'object' && error.response != null && error.response.body != null && error.response.body.error != null) {
