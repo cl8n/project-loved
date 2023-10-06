@@ -7,12 +7,8 @@ const baseUrl = config.lovedBaseUrl + '/api/local-interop';
 const interopVersion = '8';
 
 function handleLovedWebError(error) {
-    if (typeof error === 'object' && error.response != null && error.response.body != null && error.response.body.error != null) {
-        console.error(chalk.red(`[loved.sh] ${error.response.body.error}`));
-
-        if (error.response.body.error === 'Unsupported program version') {
-            process.exit(1);
-        }
+    if (typeof error === 'object' && error.response?.body?.error != null) {
+        throw new Error(`[loved.sh] ${error.response.body.error}`);
     }
 
     throw error;

@@ -60,10 +60,10 @@ export function logAndExit(error) {
     if (typeof error === 'string') {
         errorMessage = error;
     } else if (error instanceof Error) {
-        errorMessage = error.message ? inspect(error) : null;
+        errorMessage = error.message.startsWith('[loved.sh]') ? error.message : inspect(error);
     }
 
-    if (errorMessage != null) {
+    if (errorMessage) {
         console.error(chalk.red(errorMessage));
     }
 
