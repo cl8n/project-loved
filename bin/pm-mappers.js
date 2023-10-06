@@ -92,7 +92,7 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
 const roundInfo = await new LovedWeb(config.lovedApiKey).getRoundInfo(config.lovedRoundId).catch(logAndExit);
 
 if (roundInfo.nominations.length === 0)
-    return;
+    process.exit();
 
 await setChatAccessToken();
 
