@@ -35,15 +35,15 @@ const cookieHeader = Object.entries({
     .map(([key, value]) => `${key}=${value}`)
     .join('; ');
 const limiter = new Limiter(2500);
+const agent = superagent
+    .agent()
+    .ok((response) => response.status < 300 || response.status === 401)
+    .redirects(0)
+    .set('Cookie', cookieHeader)
+    .set('User-Agent', config.userAgent)
+    .set('X-CSRF-TOKEN', config.csrf);
 async function requestBase(superagentModifier) {
-    const response = await limiter.run(async () => await superagentModifier(
-        superagent
-            .ok((response) => response.status < 300 || response.status === 401)
-            .redirects(0)
-            .set('Cookie', cookieHeader)
-            .set('User-Agent', config.userAgent)
-            .set('X-CSRF-TOKEN', config.csrf),
-    ));
+    const response = await limiter.run(async () => await superagentModifier(agent));
 
     if (response.status === 401) {
         if (!response.text?.includes('<h1 class="user-verification')) {
@@ -53,11 +53,15 @@ async function requestBase(superagentModifier) {
         await handleVerification();
         return await requestBase(superagentModifier);
     }
+
+    return response;
 }
 
 let requestCounter = 0;
 async function request(options) {
     const superagentModifier = (superagent) => {
+        superagent = superagent[options.method ?? 'post'](config.osuBaseUrl + options.uri);
+
         if (options.attach != null) {
             superagent = superagent.attach(...options.attach);
         }
@@ -74,7 +78,7 @@ async function request(options) {
             superagent = superagent.accept(options.accept);
         }
 
-        return superagent.request(options.method ?? 'POST', config.osuBaseUrl + options.uri);
+        return superagent;
     };
 
     const n = ++requestCounter;
@@ -124,9 +128,9 @@ export async function lockTopic(topicId) {
 }
 
 export async function getModeTopics(forumId) {
-    let { body } = await request({
+    let { text: body } = await request({
         uri: `/community/forums/${forumId}`,
-        method: 'GET',
+        method: 'get',
         accept: 'html',
     });
 
@@ -153,7 +157,7 @@ export async function getModeTopics(forumId) {
 export async function watchTopic(topicId, watch = true) {
     await request({
         uri: `/community/forums/topic-watches/${topicId}`,
-        method: 'PUT',
+        method: 'put',
         qs: {
             state: watch ? 'watching_mail' : 'not_watching'
         }
