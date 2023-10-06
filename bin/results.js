@@ -11,7 +11,7 @@ import { escapeMarkdown, formatPercent, joinList, logAndExit } from '../src/help
 import LovedWeb from '../src/LovedWeb.js';
 
 const lovedWeb = new LovedWeb(config.lovedApiKey);
-let roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
+let roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
 
 const now = new Date();
 for (const nomination of roundInfo.allNominations) {
@@ -26,7 +26,7 @@ for (const nomination of roundInfo.allNominations) {
 
 let error = false;
 const gameModesPresent = [];
-const mainTopicIds = await getModeTopics(120);
+const mainTopicIds = await getModeTopics(120).catch(logAndExit);
 
 for (const gameMode of Ruleset.all()) {
   const gameModeHasNominations = roundInfo.allNominations.some(
@@ -60,16 +60,16 @@ for (const gameMode of gameModesPresent) {
   lockAndUnpinPromises.push(pinTopic(mainTopicIds[gameMode.id], false));
 }
 
-await Promise.all(lockAndUnpinPromises);
+await Promise.all(lockAndUnpinPromises).catch(logAndExit);
 
 console.error('Saving poll results');
 
-await lovedWeb.postResults(config.lovedRoundId, mainTopicIds);
+await lovedWeb.postResults(config.lovedRoundId, mainTopicIds).catch(logAndExit);
 
 console.error('Posting announcements to Discord');
 
 const passedVotingCreatorIds = new Set();
-roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId);
+roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);
 
 for (const gameMode of gameModesPresent) {
   const nominations = roundInfo.allNominations
@@ -116,19 +116,19 @@ for (const gameMode of gameModesPresent) {
           url: `https://osu.ppy.sh/beatmapsets/${nomination.beatmapset.id}#${nomination.game_mode.linkName}`,
         };
       }),
-  );
+  ).catch(logAndExit);
 }
 
 console.error('Sending chat announcement to mappers of passed votings');
 
-await setChatAccessToken();
+await setChatAccessToken().catch(logAndExit);
 await sendChatAnnouncement(
   [...passedVotingCreatorIds],
   'Project Loved result',
   'Your map passed Loved voting!',
   'Congratulations, your map passed voting in the last round of Project Loved! It will be moved to the Loved category soon.',
-);
-await revokeChatAccessToken();
+).catch(logAndExit);
+await revokeChatAccessToken().catch(logAndExit);
 
 console.error('Removing watches from topics');
 
@@ -142,4 +142,4 @@ for (const gameMode of gameModesPresent) {
   watchPromises.push(watchTopic(mainTopicIds[gameMode.id], false));
 }
 
-await Promise.all(watchPromises);
+await Promise.all(watchPromises).catch(logAndExit);
