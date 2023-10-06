@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, loadImage, registerFont } from 'canvas';
@@ -15,12 +16,14 @@ registerFont(
 );
 
 let bannerCache;
-async function getBannerCache() {
-  return bannerCache ??= JSON.parse(await readFile('config/banner-cache.json', 'utf8'));
+async function loadBannerCache() {
+  bannerCache ??= await readFile('config/banner-cache', 'utf8')
+    .then((contents) => new Set(contents.split('\n')))
+    .catch(() => new Set());
 }
 
 function writeBannerCache() {
-  return writeFile('config/banner-cache.json', JSON.stringify(bannerCache));
+  return writeFile('config/banner-cache', [...bannerCache.values()].join('\n'));
 }
 
 let jpegRecompressFilename;
@@ -60,17 +63,23 @@ export default async function createBanners(backgroundPath, outputPath, title) {
     throw 'Output path not set';
   }
 
-  const bannerCache = await getBannerCache();
-  const createBannersVersion = 1;
+  const backgroundBuffer = await readFile(backgroundPath);
   const cacheKey = createHash('md5')
-    .update(`${createBannersVersion}|${backgroundPath}|${outputPath}|${title}`)
+    .update('1') // version identifier for image creation algorithm
+    .update(backgroundBuffer)
+    .update(title)
     .digest('hex');
 
-  if (bannerCache[cacheKey]) {
+  await loadBannerCache();
+  if (
+    bannerCache.has(cacheKey) &&
+    existsSync(`${outputPath}.jpg`) &&
+    existsSync(`${outputPath}@2x.jpg`)
+  ) {
     return false;
   }
 
-  const backgroundImage = await loadImage(backgroundPath);
+  const backgroundImage = await loadImage(backgroundBuffer);
   const unscaledWidth = 670;
   const unscaledHeight = 200;
 
@@ -155,7 +164,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
     });
   }
 
-  bannerCache[cacheKey] = true;
+  bannerCache.add(cacheKey);
   await writeBannerCache();
   return true;
 }
