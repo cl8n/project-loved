@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { revokeChatAccessToken, sendChatAnnouncement, setChatAccessToken } from '../src/chat.js';
 import config from '../src/config.js';
 import Discord from '../src/Discord.js';
-import Forum from '../src/forum.js';
+import { getModeTopics, lockTopic, pinTopic, watchTopic } from '../src/forum.js';
 import Ruleset from '../src/Ruleset.js';
 import { escapeMarkdown, formatPercent, joinList, logAndExit } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
@@ -26,7 +26,7 @@ for (const nomination of roundInfo.allNominations) {
 
 let error = false;
 const gameModesPresent = [];
-const mainTopicIds = await Forum.getModeTopics(120);
+const mainTopicIds = await getModeTopics(120);
 
 for (const gameMode of Ruleset.all()) {
   const gameModeHasNominations = roundInfo.allNominations.some(
@@ -52,12 +52,12 @@ console.error('Locking and unpinning topics');
 const lockAndUnpinPromises = [];
 
 for (const nomination of roundInfo.allNominations) {
-  lockAndUnpinPromises.push(Forum.lockTopic(nomination.poll.topic_id));
+  lockAndUnpinPromises.push(lockTopic(nomination.poll.topic_id));
 }
 
 for (const gameMode of gameModesPresent) {
-  lockAndUnpinPromises.push(Forum.lockTopic(mainTopicIds[gameMode.id]));
-  lockAndUnpinPromises.push(Forum.pinTopic(mainTopicIds[gameMode.id], false));
+  lockAndUnpinPromises.push(lockTopic(mainTopicIds[gameMode.id]));
+  lockAndUnpinPromises.push(pinTopic(mainTopicIds[gameMode.id], false));
 }
 
 await Promise.all(lockAndUnpinPromises);
@@ -135,11 +135,11 @@ console.error('Removing watches from topics');
 const watchPromises = [];
 
 for (const nomination of roundInfo.allNominations) {
-  watchPromises.push(Forum.watchTopic(nomination.poll.topic_id, false));
+  watchPromises.push(watchTopic(nomination.poll.topic_id, false));
 }
 
 for (const gameMode of gameModesPresent) {
-  watchPromises.push(Forum.watchTopic(mainTopicIds[gameMode.id], false));
+  watchPromises.push(watchTopic(mainTopicIds[gameMode.id], false));
 }
 
 await Promise.all(watchPromises);

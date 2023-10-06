@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import chalk from 'chalk';
 import config from '../src/config.js';
 import Discord from '../src/Discord.js';
-import Forum from '../src/forum.js';
+import { pinTopic, storeTopicCover } from '../src/forum.js';
 import Ruleset from '../src/Ruleset.js';
 import { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, textFromTemplate, videoHtml } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
@@ -124,7 +124,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
   console.error('Pinning main topics');
 
-  await Promise.all(mainTopicIds.map((topicId) => Forum.pinTopic(topicId, 'announce')));
+  await Promise.all(mainTopicIds.map((topicId) => pinTopic(topicId, 'announce')));
 
   console.error('Posting announcements to Discord');
 
@@ -161,7 +161,7 @@ async function generateTopics(lovedWeb, nominations, roundTitle, extraGameModeIn
 
   await Promise.all(nominations.map((nomination) => {
     if (nomination.beatmapset.bgPath != null) {
-      return Forum.storeTopicCover(
+      return storeTopicCover(
         nomination.beatmapset.bgPath,
         nominationTopicIds[nomination.id],
       );
