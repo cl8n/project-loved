@@ -1,6 +1,8 @@
+import { readFile } from 'node:fs/promises';
 import chalk from 'chalk';
-import config from '../config/config.json' assert { type: 'json' };
-import defaultConfig from '../resources/info.json' assert { type: 'json' };
+
+const config = JSON.parse(await readFile('config/config.json', 'utf8'));
+const defaultConfig = JSON.parse(await readFile('resources/info.json', 'utf8'));
 
 let errors = '';
 const expected = [
