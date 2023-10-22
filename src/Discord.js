@@ -1,7 +1,7 @@
 import superagent from 'superagent';
 import Limiter from './Limiter.js';
 
-const limiter = new Limiter(1000);
+const limiter = new Limiter(2000);
 
 export default class Discord {
     static maxEmbeds = 10;
