@@ -10,10 +10,6 @@ registerFont(
   'resources/Torus-Regular.otf',
   { family: 'Torus' },
 );
-registerFont(
-  'resources/FontAwesome5-FreeSolid.otf',
-  { family: 'Font Awesome 5 Free' },
-);
 
 let bannerCache;
 async function loadBannerCache() {
@@ -65,7 +61,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 
   const backgroundBuffer = await readFile(backgroundPath);
   const cacheKey = createHash('md5')
-    .update('1') // version identifier for image creation algorithm
+    .update('2') // version identifier for image creation algorithm
     .update(backgroundBuffer)
     .update(title)
     .digest('hex');
@@ -115,16 +111,14 @@ export default async function createBanners(backgroundPath, outputPath, title) {
     );
     context.drawImage(await loadOverlayImage(scale), 0, 0);
 
-    // Common text options
+    // Draw title text
     context.fillStyle = '#fff';
+    context.font = `${21 * scale}px Torus`;
     context.shadowBlur = 3 * scale;
     context.shadowColor = 'rgba(0, 0, 0, 0.4)';
     context.shadowOffsetY = 3 * scale;
     context.textAlign = 'right';
     context.textBaseline = 'bottom';
-
-    // Draw title text
-    context.font = `${21 * scale}px Torus`;
     context.fillText(title, width - 16 * scale, height - 31 * scale);
 
     // Check for overflowing title text
@@ -134,13 +128,6 @@ export default async function createBanners(backgroundPath, outputPath, title) {
     if (titleOverflow > 0) {
       throw `Title is ${formatPercent(titleOverflow)} wider than the available space`;
     }
-
-    // Draw link text
-    const fontSize = `${12.5 * scale}px `;
-    context.font = fontSize + '"Font Awesome 5 Free Solid"';
-    context.fillText('', width - 125 * scale, height - 13 * scale);
-    context.font = fontSize + 'Torus';
-    context.fillText('Click here to vote!', width - 16 * scale, height - 13 * scale);
 
     // Render to JPEG
     const jpegStream = canvas.createJPEGStream({ chromaSubsampling: false, quality: 1 });
