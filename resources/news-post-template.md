@@ -2,6 +2,7 @@
 layout: post
 title: "{{TITLE}}"
 date: {{DATE}} {{TIME}} +0000
+series: Project Loved
 ---
 
 {{HEADER}}
