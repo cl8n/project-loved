@@ -47,7 +47,7 @@ export default async function tryUpdate(force = false) {
 	if (update) {
 		spawnSync('git', ['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
 
-		console.error(chalk.dim(`Updated to ${spawnSync('git', ['show', '--format=%h', 'HEAD']).stdout.toString().trim()}`));
+		console.error(chalk.dim(`Updated to ${spawnSync('git', ['show', '--format=%h', '--no-patch', 'HEAD']).stdout.toString().trim()}`));
 
 		spawnSync('npm', ['install'], { stdio: 'ignore' });
 
