@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
+import { platform } from 'node:os';
 import chalk from 'chalk';
 
 const updateCachePath = 'config/update-cache';
@@ -21,7 +22,11 @@ export default async function tryUpdate(force = false) {
 	// Check execute permission for git and npm
 	if (
 		spawnSync('git', ['--version']).error != null ||
-		spawnSync('npm', ['--version']).error != null
+		// This and further npm commands go through a shell because Windows cannot
+		// properly spawn npm.cmd due to a security patch in node
+		// <https://github.com/nodejs/node/issues/3675>
+		// <https://github.com/nodejs/node/issues/52554>
+		spawnSync('npm', ['--version'], { shell: platform() === 'win32' }).error != null
 	) {
 		console.error(chalk.yellow('Skipping update check: missing git or npm'));
 		return;
@@ -49,7 +54,7 @@ export default async function tryUpdate(force = false) {
 
 		console.error(chalk.dim(`Updated to ${spawnSync('git', ['show', '--format=%h', '--no-patch', 'HEAD']).stdout.toString().trim()}`));
 
-		spawnSync('npm', ['install'], { stdio: 'ignore' });
+		spawnSync('npm', ['install'], { shell: platform() === 'win32', stdio: 'ignore' });
 
 		console.error(chalk.dim('Installed/upgraded node packages'));
 	} else {
