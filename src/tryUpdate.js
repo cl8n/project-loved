@@ -66,7 +66,7 @@ export default async function tryUpdate(force = false) {
 
 	// Restart program
 	if (update) {
-		console.error(chalk.dim.yellow('Restarting...'));
+		console.error(chalk.dim.yellow('Restarting...\n'));
 
 		spawnSync(process.argv[0], process.argv.slice(1), { stdio: 'inherit' });
 		process.exit();
