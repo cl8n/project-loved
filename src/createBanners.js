@@ -61,7 +61,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 
   const backgroundBuffer = await readFile(backgroundPath);
   const cacheKey = createHash('md5')
-    .update('2') // version identifier for image creation algorithm
+    .update('3') // version identifier for image creation algorithm
     .update(backgroundBuffer)
     .update(title)
     .digest('hex');

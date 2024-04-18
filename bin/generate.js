@@ -20,7 +20,7 @@ async function generateBanners(bannersPath, beatmapsets) {
 
   await Promise.all(beatmapsets.map((beatmapset) =>
     createBanners(
-      beatmapset.bgPath ?? 'resources/banner-default.png',
+      beatmapset.bgPath ?? 'resources/voting-default-background.jpg',
       join(bannersPath, beatmapset.id.toString()),
       beatmapset.title,
     )
