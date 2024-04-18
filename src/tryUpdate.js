@@ -28,7 +28,7 @@ export default async function tryUpdate(force = false) {
 	}
 
 	// Check repository status
-	if (spawnSync('git', ['branch', '--show-current']).stdout.toString() !== 'master') {
+	if (spawnSync('git', ['branch', '--show-current']).stdout.toString().trim() !== 'master') {
 		console.error(chalk.yellow('Skipping update check: branch not set to master'));
 		return;
 	}
@@ -47,7 +47,7 @@ export default async function tryUpdate(force = false) {
 	if (update) {
 		spawnSync('git', ['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
 
-		console.error(chalk.dim(`Updated to ${spawnSync('git', ['show', '--format=%h', 'HEAD']).stdout.toString()}`));
+		console.error(chalk.dim(`Updated to ${spawnSync('git', ['show', '--format=%h', 'HEAD']).stdout.toString().trim()}`));
 
 		spawnSync('npm', ['install'], { stdio: 'ignore' });
 
