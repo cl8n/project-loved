@@ -8,6 +8,9 @@ import superagent from 'superagent';
 import config from '../src/config.js';
 import { logAndExit } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
+import tryUpdate from '../src/tryUpdate.js';
+
+await tryUpdate();
 
 const roundInfo = await new LovedWeb(config.lovedApiKey)
   .getRoundInfo(config.lovedRoundId)

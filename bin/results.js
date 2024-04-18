@@ -9,6 +9,9 @@ import { getModeTopics, lockTopic, pinTopic, watchTopic } from '../src/forum.js'
 import Ruleset from '../src/Ruleset.js';
 import { escapeMarkdown, formatPercent, joinList, logAndExit } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
+import tryUpdate from '../src/tryUpdate.js';
+
+await tryUpdate();
 
 const lovedWeb = new LovedWeb(config.lovedApiKey);
 let roundInfo = await lovedWeb.getRoundInfo(config.lovedRoundId).catch(logAndExit);

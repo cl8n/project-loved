@@ -6,6 +6,9 @@ import { sendChatAnnouncement, setChatAccessToken, revokeChatAccessToken } from 
 import config from '../src/config.js';
 import { escapeMarkdown, joinList, loadTextResource, logAndExit, textFromTemplate, pushUnique } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
+import tryUpdate from '../src/tryUpdate.js';
+
+await tryUpdate();
 
 const guestTemplate = await loadTextResource('chat-nomination-guest-template.md');
 const hostTemplate = await loadTextResource('chat-nomination-template.md');

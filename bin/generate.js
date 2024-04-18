@@ -11,6 +11,7 @@ import Ruleset from '../src/Ruleset.js';
 import { convertToMarkdown, escapeMarkdown, expandBbcodeRootLinks, joinList, loadTextResource, logAndExit, maxOf, minOf, textFromTemplate, videoHtml } from '../src/helpers.js';
 import LovedWeb from '../src/LovedWeb.js';
 import createBanners from '../src/createBanners.js';
+import tryUpdate from '../src/tryUpdate.js';
 
 async function generateBanners(bannersPath, beatmapsets) {
   console.error('Generating beatmapset banners');
@@ -350,6 +351,8 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 
 const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-'));
 const shouldGenerateTopics = process.argv.includes('--threads', 2);
+
+await tryUpdate(shouldGenerateTopics);
 
 if (outPath == null && !shouldGenerateTopics) {
   logAndExit('No output path provided and not generating topics');

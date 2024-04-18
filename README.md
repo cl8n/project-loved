@@ -5,6 +5,7 @@ This project contains the tools required to generate announcements, forum thread
 - [Node.js](https://nodejs.org/en/download/) 16+
 - [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive/releases) 2.1.1+
   - Download the jpeg-archive binaries and place jpeg-recompress(.exe) in `bin`.
+- [git](https://git-scm.com/) (optional, for auto-updating the repository when running commands)
 
 ## Usage
 
