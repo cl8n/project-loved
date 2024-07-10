@@ -12,7 +12,7 @@
     "setup": "npm install && node bin/setup.js"
   },
   "engines": {
-    "node": ">=16"
+    "node": "18"
   },
   "dependencies": {
     "canvas": "2.10.2",
