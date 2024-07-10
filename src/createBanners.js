@@ -22,24 +22,6 @@ function writeBannerCache() {
   return writeFile('config/banner-cache', [...bannerCache.values()].join('\n'));
 }
 
-let jpegRecompressFilename;
-async function getJpegRecompressFilename() {
-  if (jpegRecompressFilename == null) {
-    const dirEnts = await readdir('bin', { withFileTypes: true });
-    const exeDirEnt = dirEnts.find(
-      (dirEnt) => dirEnt.isFile() && dirEnt.name.includes('jpeg-recompress'),
-    );
-
-    if (exeDirEnt != null) {
-      jpegRecompressFilename = join('bin', exeDirEnt.name);
-    } else {
-      throw 'jpeg-recompress must be in bin/ to generate images';
-    }
-  }
-
-  return jpegRecompressFilename;
-}
-
 const overlayImages = {};
 async function loadOverlayImage(scale) {
   if (overlayImages[scale] == null) {
@@ -131,10 +113,9 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 
     // Render to JPEG
     const jpegStream = canvas.createJPEGStream({ chromaSubsampling: false, quality: 1 });
-    const jpegRecompressFilename = await getJpegRecompressFilename();
 
     await new Promise((resolve, reject) => {
-      const jpegRecompress = execFile(jpegRecompressFilename, [
+      const jpegRecompress = execFile('config/jpeg-recompress', [
         '--accurate',
         '--strip',
         '-',

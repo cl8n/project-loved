@@ -1,11 +1,36 @@
 import { spawnSync } from 'node:child_process';
+import { createWriteStream, existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { platform } from 'node:process';
 import chalk from 'chalk';
+import superagent from 'superagent';
 
+const jpegRecompressPath = 'config/jpeg-recompress';
+const jpegRecompressUrl = `https://loved.sh/local-interop/jpeg-recompress-${platform}`;
 const updateCachePath = 'config/update-cache';
 
+function installJpegRecompress() {
+	if (existsSync(jpegRecompressPath)) {
+		return;
+	}
+
+	console.error(chalk.dim(`Downloading jpeg-recompress... (${jpegRecompressUrl})`));
+
+	return new Promise((resolve, reject) => {
+		superagent
+			.get(jpegRecompressUrl)
+			.on('error', reject)
+			.on('end', () => {
+				console.error(chalk.dim.green(`Installed jpeg-recompress to ${jpegRecompressPath}`));
+				resolve();
+			})
+			.pipe(createWriteStream(jpegRecompressPath, { mode: 0o755 }));
+	});
+}
+
 export default async function tryUpdate(force = false) {
+	await installJpegRecompress();
+
 	// Don't check for updates more than once every 6 hours
 	if (!force) {
 		const updateCache = await readFile(updateCachePath, 'utf8').catch(() => '0');
