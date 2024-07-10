@@ -52,11 +52,11 @@ export default async function tryUpdate(force = false) {
 	if (update) {
 		spawnSync('git', ['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
 
-		console.error(chalk.dim(`Updated to ${spawnSync('git', ['show', '--format=%h', '--no-patch', 'HEAD']).stdout.toString().trim()}`));
+		console.error(chalk.dim.green(`Updated to ${spawnSync('git', ['show', '--format=%h', '--no-patch', 'HEAD']).stdout.toString().trim()}`));
 
 		spawnSync('npm', ['install'], { shell: platform === 'win32', stdio: 'ignore' });
 
-		console.error(chalk.dim('Installed/upgraded node packages'));
+		console.error(chalk.dim.green('Installed/upgraded node packages'));
 	} else {
 		console.error(chalk.dim('No update found'));
 	}
