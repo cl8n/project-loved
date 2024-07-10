@@ -33,7 +33,7 @@ export default async function tryUpdate(force = false) {
 	}
 
 	// Check repository status
-	if (spawnSync('git', ['branch', '--show-current']).stdout.toString().trim() !== 'master') {
+	if (spawnSync('git', ['symbolic-ref', '--short', 'HEAD']).stdout.toString().trim() !== 'master') {
 		console.error(chalk.yellow('Skipping update check: branch not set to master'));
 		return;
 	}
