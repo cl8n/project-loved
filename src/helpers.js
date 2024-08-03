@@ -94,6 +94,7 @@ export function pushUnique(array, values, sameFn) {
 export function textFromTemplate(template, vars) {
 	return template
 		.replace(/<\?(.+?)\?>/gs, (_, script) => {
+			// biome-ignore lint/security/noGlobalEval: Naive template system
 			const result = eval(script);
 
 			return result == null ? '' : result;

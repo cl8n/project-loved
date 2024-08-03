@@ -63,26 +63,26 @@ async function requestBase(superagentModifier) {
 
 let requestCounter = 0;
 async function request(options) {
-	const superagentModifier = (superagent) => {
-		superagent = superagent[options.method ?? 'post'](config.osuBaseUrl + options.uri);
+	const superagentModifier = (baseSuperagent) => {
+		let newSuperagent = baseSuperagent[options.method ?? 'post'](config.osuBaseUrl + options.uri);
 
 		if (options.attach != null) {
-			superagent = superagent.attach(...options.attach);
+			newSuperagent = newSuperagent.attach(...options.attach);
 		}
 
 		if (options.field != null) {
-			superagent = superagent.field(...options.field);
+			newSuperagent = newSuperagent.field(...options.field);
 		}
 
 		if (options.qs != null) {
-			superagent = superagent.query(options.qs);
+			newSuperagent = newSuperagent.query(options.qs);
 		}
 
 		if (options.accept != null) {
-			superagent = superagent.accept(options.accept);
+			newSuperagent = newSuperagent.accept(options.accept);
 		}
 
-		return superagent;
+		return newSuperagent;
 	};
 
 	const n = ++requestCounter;
