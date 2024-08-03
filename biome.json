@@ -1,0 +1,22 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"formatter": {
+		"formatWithErrors": true,
+		"lineWidth": 100
+	},
+	"linter": {
+		"rules": {
+			"recommended": true,
+			"style": {
+				"useBlockStatements": "error",
+				"useTemplate": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"jsxQuoteStyle": "single",
+			"quoteStyle": "single"
+		}
+	}
+}
