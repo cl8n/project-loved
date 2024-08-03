@@ -113,7 +113,9 @@ export async function storeTopicCover(filename, topicId) {
 export async function pinTopic(topicId, type = 'pin') {
 	const pin = [false, 'pin', 'announce'].indexOf(type);
 
-	if (pin === -1) throw 'Invalid pin type';
+	if (pin === -1) {
+		throw 'Invalid pin type';
+	}
 
 	await request({
 		uri: `/community/forums/topics/${topicId}/pin`,
@@ -146,13 +148,15 @@ export async function getModeTopics(forumId) {
 	while (true) {
 		const match = body.match(/\[(osu![a-z]*)\] Project Loved: /);
 
-		if (match == null) break;
+		if (match == null) {
+			break;
+		}
 
 		const mode = new Ruleset(match[1]);
 
 		body = body.substring(match.index + match[0].length);
 
-		topics[mode.id] = parseInt(body.match(topicIdRegex)[1], 10);
+		topics[mode.id] = Number.parseInt(body.match(topicIdRegex)[1], 10);
 	}
 
 	return topics;

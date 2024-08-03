@@ -20,8 +20,9 @@ export default class Discord {
 			content.length > Discord.maxLength &&
 			embeds != null &&
 			embeds.length > Discord.maxEmbeds
-		)
-			throw new Error(`Discord message content and embeds are too long`);
+		) {
+			throw new Error('Discord message content and embeds are too long');
+		}
 
 		if (content != null && content.length > Discord.maxLength) {
 			await this.post(username, content.slice(0, Discord.maxLength), embeds);

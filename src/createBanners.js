@@ -73,7 +73,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 	const unscaledBackgroundImageX = (unscaledWidth - unscaledBackgroundImageWidth) / 2;
 	const unscaledBackgroundImageY = (unscaledHeight - unscaledBackgroundImageHeight) / 2;
 
-	for (let scale of [1, 2]) {
+	for (const scale of [1, 2]) {
 		const width = unscaledWidth * scale;
 		const height = unscaledHeight * scale;
 		const canvas = createCanvas(width, height);
@@ -116,8 +116,11 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 				'config/jpeg-recompress',
 				['--accurate', '--strip', '-', outputPath + (scale > 1 ? `@${scale}x` : '') + '.jpg'],
 				(error, _, stderr) => {
-					if (error) reject(`jpeg-recompress exited with code ${error.code}:\n${stderr}`);
-					else resolve();
+					if (error) {
+						reject(`jpeg-recompress exited with code ${error.code}:\n${stderr}`);
+					} else {
+						resolve();
+					}
 				},
 			);
 

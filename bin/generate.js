@@ -80,7 +80,9 @@ async function generateTopics(
 		}
 	}
 
-	if (error) throw new Error();
+	if (error) {
+		throw new Error();
+	}
 
 	const discordBeatmapsetTemplate = await loadTextResource('discord-template-beatmap.md');
 	const mainTopicTemplate = await loadTextResource('main-thread-template.bbcode');
@@ -330,19 +332,24 @@ function getExtraBeatmapsetInfo(nomination) {
 		beatmapsForMode.filter((b) => b.excluded).length / beatmapsForMode.length > 0.5;
 
 	for (const beatmap of beatmapsForMode) {
-		if (reverseExclude != beatmap.excluded) {
+		if (reverseExclude !== beatmap.excluded) {
 			const versionMatch = beatmap.version.match(/(?:\[\d+K\] )?(.+)/i);
 
-			if (versionMatch == null)
+			if (versionMatch == null) {
 				throw `Excluded beatmap version match failed for nomination #${nomination.id}`;
+			}
 
 			excludedDiffNames.push(`[${versionMatch[1]}]`);
 		}
 
-		if (!beatmap.excluded) beatmaps.push(beatmap);
+		if (!beatmap.excluded) {
+			beatmaps.push(beatmap);
+		}
 	}
 
-	if (beatmaps.length === 0) throw `No beatmaps for nomination #${nomination.id}`;
+	if (beatmaps.length === 0) {
+		throw `No beatmaps for nomination #${nomination.id}`;
+	}
 
 	// TODO: should be done on website
 	beatmaps.sort((a, b) => a.star_rating - b.star_rating).sort((a, b) => a.key_mode - b.key_mode);
@@ -354,8 +361,11 @@ function getExtraBeatmapsetInfo(nomination) {
 	const lengthSeconds = (maxLength % 60).toString().padStart(2, '0');
 	let info = '';
 
-	if (minBpm === maxBpm) info += minBpm;
-	else info += `${minBpm} – ${maxBpm}`;
+	if (minBpm === maxBpm) {
+		info += minBpm;
+	} else {
+		info += `${minBpm} – ${maxBpm}`;
+	}
 
 	info += ` BPM, ${lengthMinutes}:${lengthSeconds} | `;
 
@@ -398,11 +408,15 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 	const paths = {};
 
 	for (const dirent of dirents) {
-		if (!dirent.isFile()) continue;
+		if (!dirent.isFile()) {
+			continue;
+		}
 
 		const filenameMatch = dirent.name.match(/(\d+)\.(?:jpeg|jpg|png)/i);
 
-		if (filenameMatch != null) paths[parseInt(filenameMatch[1])] = join('config', filenameMatch[0]);
+		if (filenameMatch != null) {
+			paths[Number.parseInt(filenameMatch[1])] = join('config', filenameMatch[0]);
+		}
 	}
 
 	for (const beatmapset of beatmapsets) {

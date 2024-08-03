@@ -15,5 +15,6 @@ const roundInfo = await new LovedWeb(config.lovedApiKey)
 const beatmapsetIds = roundInfo.nominations.map((n) => n.beatmapset_id);
 const beatmapsetIdSet = new Set(beatmapsetIds);
 
-for (const beatmapsetId of beatmapsetIdSet)
+for (const beatmapsetId of beatmapsetIdSet) {
 	await open(`https://osu.ppy.sh/beatmapsets/${beatmapsetId}`);
+}

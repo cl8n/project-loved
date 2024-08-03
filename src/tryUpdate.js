@@ -34,7 +34,7 @@ export default async function tryUpdate(force = false) {
 	// Don't check for updates more than once every 6 hours
 	if (!force) {
 		const updateCache = await readFile(updateCachePath, 'utf8').catch(() => '0');
-		const lastUpdateTime = parseInt(updateCache, 10);
+		const lastUpdateTime = Number.parseInt(updateCache, 10);
 
 		if (!Number.isNaN(lastUpdateTime) && Date.now() - lastUpdateTime < 1000 * 60 * 60 * 6) {
 			return;

@@ -84,14 +84,17 @@ export function minOf(array, key) {
 }
 
 export function pushUnique(array, values, sameFn) {
-	for (const value of values)
-		if (array.find((value2) => sameFn(value, value2)) == null) array.push(value);
+	for (const value of values) {
+		if (array.find((value2) => sameFn(value, value2)) == null) {
+			array.push(value);
+		}
+	}
 }
 
 export function textFromTemplate(template, vars) {
 	return template
 		.replace(/<\?(.+?)\?>/gs, (_, script) => {
-			let result = eval(script);
+			const result = eval(script);
 
 			return result == null ? '' : result;
 		})

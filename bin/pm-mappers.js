@@ -21,7 +21,9 @@ const guestTemplate = await loadTextResource('chat-nomination-guest-template.md'
 const hostTemplate = await loadTextResource('chat-nomination-template.md');
 
 async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
-	if (nominations.length === 0) throw 'No nominations provided';
+	if (nominations.length === 0) {
+		throw 'No nominations provided';
+	}
 
 	const beatmapset = nominations[0].beatmapset;
 	const creators = [];
@@ -90,7 +92,7 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
 		return true;
 	});
 
-	if (guestCreatorsToMessage.length > 0)
+	if (guestCreatorsToMessage.length > 0) {
 		await sendChatAnnouncement(
 			guestCreatorsToMessage.map((user) => user.id),
 			'Project Loved guest nomination',
@@ -102,21 +104,25 @@ async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
 				TITLE: escapeMarkdown(beatmapset.original_title),
 			}),
 		);
+	}
 }
 
 const roundInfo = await new LovedWeb(config.lovedApiKey)
 	.getRoundInfo(config.lovedRoundId)
 	.catch(logAndExit);
 
-if (roundInfo.nominations.length === 0) process.exit();
+if (roundInfo.nominations.length === 0) {
+	process.exit();
+}
 
 await setChatAccessToken();
 
-for (const nomination of roundInfo.nominations)
+for (const nomination of roundInfo.nominations) {
 	await sendNotifyPm(
 		roundInfo.allNominations.filter((n) => n.beatmapset_id === nomination.beatmapset_id),
 		roundInfo.extraGameModeInfo,
 		roundInfo.name,
 	);
+}
 
 await revokeChatAccessToken();

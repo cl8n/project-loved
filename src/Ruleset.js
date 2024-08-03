@@ -6,7 +6,7 @@ export default class Ruleset {
 	#id;
 
 	static all() {
-		return [0, 1, 2, 3].map((m) => new this(m));
+		return [0, 1, 2, 3].map((m) => new Ruleset(m));
 	}
 
 	constructor(rulesetId) {
@@ -15,9 +15,9 @@ export default class Ruleset {
 			Number.isInteger(rulesetId) &&
 			rulesetId >= 0 &&
 			rulesetId <= 3
-		)
+		) {
 			this.#id = rulesetId;
-		else if (typeof rulesetId === 'string')
+		} else if (typeof rulesetId === 'string') {
 			switch (rulesetId.toLowerCase().trim()) {
 				case '0':
 				case 'osu':
@@ -50,7 +50,9 @@ export default class Ruleset {
 				default:
 					throw new RangeError('The provided mode is not valid');
 			}
-		else throw new TypeError('The provided mode is neither an integer nor a String');
+		} else {
+			throw new TypeError('The provided mode is neither an integer nor a String');
+		}
 	}
 
 	get id() {

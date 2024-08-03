@@ -40,8 +40,9 @@ export default class LovedWeb {
 		for (const gameMode of Ruleset.all()) {
 			const gameModeInfo = round.game_modes[gameMode.id];
 
-			if (!gameModeInfo.nominations_locked)
+			if (!gameModeInfo.nominations_locked) {
 				console.error(chalk.yellow(`${gameMode.longName} nominations are not locked on loved.sh`));
+			}
 
 			extraGameModeInfo[gameMode.id] = {
 				descriptionAuthors: [],
@@ -51,8 +52,9 @@ export default class LovedWeb {
 				video: gameModeInfo.video,
 			};
 
-			if (resultsPostIds[gameMode.id] == null)
+			if (resultsPostIds[gameMode.id] == null) {
 				console.error(chalk.yellow(`${gameMode.longName} last round results post is not set`));
+			}
 		}
 
 		for (const nomination of nominations) {
@@ -73,12 +75,14 @@ export default class LovedWeb {
 			if (
 				nomination.description_author != null &&
 				extras.descriptionAuthors.find((a) => a.id === nomination.description_author.id) == null
-			)
+			) {
 				extras.descriptionAuthors.push(nomination.description_author);
+			}
 
 			for (const nominator of nomination.nominators) {
-				if (extras.nominators.find((n) => n.id === nominator.id) == null)
+				if (extras.nominators.find((n) => n.id === nominator.id) == null) {
 					extras.nominators.push(nominator);
+				}
 			}
 
 			nomination.beatmapset.original_artist = nomination.beatmapset.artist;
