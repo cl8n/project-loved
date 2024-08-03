@@ -1,6 +1,6 @@
 {
-    "messages": {
-        "discordPost": "@everyone {{MAP_COUNT}} new maps have been nominated for Loved, check them out and cast your votes!",
-        "discordResults": "@everyone Results from the polls are in! The maps that passed voting will be moved to Loved soon."
-    }
+	"messages": {
+		"discordPost": "@everyone {{MAP_COUNT}} new maps have been nominated for Loved, check them out and cast your votes!",
+		"discordResults": "@everyone Results from the polls are in! The maps that passed voting will be moved to Loved soon."
+	}
 }

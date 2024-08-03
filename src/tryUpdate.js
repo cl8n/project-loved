@@ -36,10 +36,7 @@ export default async function tryUpdate(force = false) {
 		const updateCache = await readFile(updateCachePath, 'utf8').catch(() => '0');
 		const lastUpdateTime = parseInt(updateCache, 10);
 
-		if (
-			!Number.isNaN(lastUpdateTime) &&
-			Date.now() - lastUpdateTime < 1000 * 60 * 60 * 6
-		) {
+		if (!Number.isNaN(lastUpdateTime) && Date.now() - lastUpdateTime < 1000 * 60 * 60 * 6) {
 			return;
 		}
 	}
@@ -77,7 +74,11 @@ export default async function tryUpdate(force = false) {
 	if (update) {
 		spawnSync('git', ['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
 
-		console.error(chalk.dim.green(`Updated to ${spawnSync('git', ['show', '--format=%h', '--no-patch', 'HEAD']).stdout.toString().trim()}`));
+		console.error(
+			chalk.dim.green(
+				`Updated to ${spawnSync('git', ['show', '--format=%h', '--no-patch', 'HEAD']).stdout.toString().trim()}`,
+			),
+		);
 
 		spawnSync('npm', ['install'], { shell: platform === 'win32', stdio: 'ignore' });
 

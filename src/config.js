@@ -6,56 +6,56 @@ const defaultConfig = JSON.parse(await readFile('resources/info.json', 'utf8'));
 
 let errors = '';
 const expected = [
-  'apiClient',
-  'cloudflare',
-  'csrf',
-  'lovedApiKey',
-  'lovedBaseUrl',
-  'lovedRoundId',
-  'osuBaseUrl',
-  'pollStartGuess',
-  'session',
-  'userAgent',
+	'apiClient',
+	'cloudflare',
+	'csrf',
+	'lovedApiKey',
+	'lovedBaseUrl',
+	'lovedRoundId',
+	'osuBaseUrl',
+	'pollStartGuess',
+	'session',
+	'userAgent',
 ];
 const moved = { lovedShInterOpKey: 'lovedApiKey' };
 const unused = [
-  'captains',
-  'csrfOld',
-  'date',
-  'discord',
-  'month',
-  'osuApiKey',
-  'resultsPost',
-  'sessionOld',
-  'time',
-  'title',
-  'username',
-  'videos',
+	'captains',
+	'csrfOld',
+	'date',
+	'discord',
+	'month',
+	'osuApiKey',
+	'resultsPost',
+	'sessionOld',
+	'time',
+	'title',
+	'username',
+	'videos',
 ];
 
 function addError(message) {
-  errors += `  ${message}\n`;
+	errors += `  ${message}\n`;
 }
 
 for (const configKey of Object.keys(config)) {
-  if (unused.includes(configKey)) {
-    addError(chalk.yellow(`"${configKey}" is no longer used`));
-  } else if (moved[configKey] != null) {
-    addError(chalk.yellow(`"${configKey}" has been renamed to "${moved[configKey]}"`));
-  } else if (!expected.includes(configKey)) {
-    addError(chalk.red(`Unrecognized option "${configKey}"`));
-  }
+	if (unused.includes(configKey)) {
+		addError(chalk.yellow(`"${configKey}" is no longer used`));
+	} else if (moved[configKey] != null) {
+		addError(chalk.yellow(`"${configKey}" has been renamed to "${moved[configKey]}"`));
+	} else if (!expected.includes(configKey)) {
+		addError(chalk.red(`Unrecognized option "${configKey}"`));
+	}
 }
 
 for (const expectedKey of expected) {
-  if (config[expectedKey] == null) {
-    addError(chalk.red(`"${expectedKey}" is missing`));
-  }
+	if (config[expectedKey] == null) {
+		addError(chalk.red(`"${expectedKey}" is missing`));
+	}
 }
 
 if (errors.length > 0) {
-  process.stderr.write('Errors in config:\n' + errors);
-  process.exit(1);
+	process.stderr.write('Errors in config:\n' + errors);
+	process.exit(1);
 }
 
 config.lovedBaseUrl = config.lovedBaseUrl.replace(/\/+$/, '');

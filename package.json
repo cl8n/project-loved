@@ -1,27 +1,27 @@
 {
-  "name": "project-loved",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "maps:download": "node bin/get-backgrounds.js",
-    "maps:open": "node bin/open-maps.js",
-    "messages": "node bin/pm-mappers.js",
-    "news": "node bin/generate.js",
-    "news:forum": "node bin/generate.js --threads",
-    "results": "node bin/results.js",
-    "setup": "npm install && node bin/setup.js"
-  },
-  "engines": {
-    "node": "18"
-  },
-  "dependencies": {
-    "canvas": "2.10.2",
-    "chalk": "^5.3.0",
-    "open": "^10.1.0",
-    "superagent": "^9.0.2",
-    "ws": "^8.18.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.8.3"
-  }
+	"name": "project-loved",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"maps:download": "node bin/get-backgrounds.js",
+		"maps:open": "node bin/open-maps.js",
+		"messages": "node bin/pm-mappers.js",
+		"news": "node bin/generate.js",
+		"news:forum": "node bin/generate.js --threads",
+		"results": "node bin/results.js",
+		"setup": "npm install && node bin/setup.js"
+	},
+	"engines": {
+		"node": "18"
+	},
+	"dependencies": {
+		"canvas": "2.10.2",
+		"chalk": "^5.3.0",
+		"open": "^10.1.0",
+		"superagent": "^9.0.2",
+		"ws": "^8.18.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3"
+	}
 }

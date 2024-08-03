@@ -51,10 +51,9 @@ export default class Limiter {
 		this.#running.push(item);
 
 		while (Date.now() - this.#lastRun < this.#delayMsBetween) {
-			await new Promise((resolve) => setTimeout(
-				resolve,
-				this.#delayMsBetween - (Date.now() - this.#lastRun),
-			));
+			await new Promise((resolve) =>
+				setTimeout(resolve, this.#delayMsBetween - (Date.now() - this.#lastRun)),
+			);
 		}
 
 		this.#lastRun = Date.now();
