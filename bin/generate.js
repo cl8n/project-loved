@@ -329,7 +329,7 @@ function getExtraBeatmapsetInfo(nomination) {
 	);
 	const excludedDiffNames = [];
 	const reverseExclude =
-		beatmapsForMode.filter((b) => b.excluded).length / beatmapsForMode.length > 0.5;
+		+(beatmapsForMode.filter((b) => b.excluded).length / beatmapsForMode.length > 0.5);
 
 	for (const beatmap of beatmapsForMode) {
 		if (reverseExclude !== beatmap.excluded) {
