@@ -34,7 +34,6 @@ const cookieHeader = Object.entries({
 	__cfduid: config.cloudflare.id,
 	cf_clearance: config.cloudflare.clearance,
 	osu_session: config.session,
-	'XSRF-TOKEN': config.csrf,
 })
 	.map(([key, value]) => `${key}=${value}`)
 	.join('; ');
