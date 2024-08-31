@@ -26,16 +26,18 @@ A typical round of Project Loved involves:
 | :-- | :-- |
 | `apiClient.id` | API client ID for chat announcements |
 | `apiClient.secret` | API client secret for chat announcements |
-| `cloudflare.id` | https://osu.ppy.sh's `__cfduid` cookie |
-| `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie |
-| `csrf` | https://osu.ppy.sh's `XSRF-TOKEN` cookie |
+| `cloudflare.id` | https://osu.ppy.sh's `__cfduid` cookie (may be blank) |
+| `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie (may be blank) |
+| `csrf` | The result of `document.querySelector('[name=csrf-token]').content` on any https://osu.ppy.sh page |
 | `lovedApiKey` | API key for https://loved.sh |
 | `lovedBaseUrl` | Base URL for https://loved.sh |
 | `lovedRoundId` | ID of the round on https://loved.sh |
 | `osuBaseUrl` | Base URL for https://osu.ppy.sh |
 | `pollStartGuess` | Guess for when the polls will be published. Used in PMs |
 | `session` | https://osu.ppy.sh's `osu_session` cookie |
-| `userAgent` | `User-Agent` header of the browser used to obtain Cloudflare cookies |
+| `userAgent` | `User-Agent` header |
+
+Cloudflare, CSRF, session, and user agent options are used to spoof a normal session on the osu! website. This is used for the few cases where the public API doesn't support all of the actions of this program, for example moderating the Loved forum. Understand that this data is enough to give complete access to your account and don't run this program if you don't fully trust it.
 
 When creating the API client for chat announcements, set the "Application Callback URL" field to `http://localhost:18888`.
 
