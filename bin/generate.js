@@ -36,7 +36,7 @@ async function generateBanners(bannersPath, beatmapsets) {
 			createBanners(
 				beatmapset.bgPath ?? 'resources/voting-default-background.jpg',
 				join(bannersPath, beatmapset.id.toString()),
-				beatmapset.title,
+				config.bannerTitleOverrides[beatmapset.id] ?? beatmapset.title,
 			)
 				.then((generatedBanners) =>
 					console.error(

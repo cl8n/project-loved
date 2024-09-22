@@ -7,6 +7,7 @@ const defaultConfig = JSON.parse(await readFile('resources/info.json', 'utf8'));
 let errors = '';
 const expected = [
 	'apiClient',
+	'bannerTitleOverrides',
 	'cloudflare',
 	'csrf',
 	'lovedApiKey',
@@ -51,6 +52,14 @@ for (const expectedKey of expected) {
 	if (config[expectedKey] == null) {
 		addError(chalk.red(`"${expectedKey}" is missing`));
 	}
+}
+
+if (
+	config.bannerTitleOverrides == null ||
+	typeof config.bannerTitleOverrides !== 'object' ||
+	Object.values(config.bannerTitleOverrides).some((title) => typeof title !== 'string')
+) {
+	addError(chalk.red('Invalid format for bannerTitleOverrides (map of beatmapset IDs to titles)'));
 }
 
 if (errors.length > 0) {

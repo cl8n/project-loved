@@ -106,7 +106,7 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 
 		if (titleOverflow > 0) {
 			throw new NoTraceError(
-				`Title is ${formatPercent(titleOverflow)} wider than the available space`,
+				`Title is ${formatPercent(titleOverflow)} wider than the available space. Add a banner title override for this map in config.json`,
 			);
 		}
 

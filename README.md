@@ -26,6 +26,7 @@ A typical round of Project Loved involves:
 | :-- | :-- |
 | `apiClient.id` | API client ID for chat announcements |
 | `apiClient.secret` | API client secret for chat announcements |
+| `bannerTitleOverrides.<id>` | Alternate beatmapset title for banner images |
 | `cloudflare.id` | https://osu.ppy.sh's `__cfduid` cookie (may be blank) |
 | `cloudflare.clearance` | https://osu.ppy.sh's `cf_clearance` cookie (may be blank) |
 | `csrf` | The result of `document.querySelector('[name=csrf-token]').content` on any https://osu.ppy.sh page |

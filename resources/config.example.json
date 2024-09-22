@@ -3,6 +3,7 @@
 		"id": "",
 		"secret": ""
 	},
+	"bannerTitleOverrides": {},
 	"cloudflare": {
 		"id": "",
 		"clearance": ""
