@@ -171,42 +171,42 @@ async function generateTopics(
 
 	console.error('Posting announcements to Discord');
 
-	await Promise.all(
-		Ruleset.all().map(async (gameMode) => {
-			const discordBeatmapsetStrings = nominations
-				.filter((nomination) => nomination.game_mode.id === gameMode.id)
-				.map((nomination) =>
-					discordBeatmapsets[nomination.id].replace(
-						'{{TOPIC_ID}}',
-						nominationTopicIds[nomination.id],
-					),
-				);
-			const discordWebhook = discordWebhooks[gameMode.id];
+	for (const gameMode of Ruleset.all()) {
+		const discordBeatmapsetStrings = nominations
+			.filter((nomination) => nomination.game_mode.id === gameMode.id)
+			.map((nomination) =>
+				discordBeatmapsets[nomination.id].replace(
+					'{{TOPIC_ID}}',
+					nominationTopicIds[nomination.id],
+				),
+			);
+		const discordWebhook = discordWebhooks[gameMode.id];
 
-			if (discordBeatmapsetStrings.length > 0 && discordWebhook != null) {
-				let discordMessage =
-					textFromTemplate(config.messages.discordPost, {
-						MAP_COUNT: discordBeatmapsetStrings.length,
-					}) + '\n\n';
-				const sendMessage = (message) =>
-					new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, message.trim());
+		if (discordBeatmapsetStrings.length === 0 || discordWebhook == null) {
+			continue;
+		}
 
-				for (const beatmapsetString of discordBeatmapsetStrings) {
-					const newMessage = discordMessage + beatmapsetString + '\n\n';
+		let discordMessage =
+			textFromTemplate(config.messages.discordPost, {
+				MAP_COUNT: discordBeatmapsetStrings.length,
+			}) + '\n\n';
+		const sendMessage = (message) =>
+			new Discord(discordWebhook).post(`Project Loved: ${gameMode.longName}`, message.trim());
 
-					if (newMessage.length > Discord.maxLength) {
-						await sendMessage(discordMessage);
-						discordMessage = beatmapsetString + '\n\n';
-						continue;
-					}
+		for (const beatmapsetString of discordBeatmapsetStrings) {
+			const newMessage = discordMessage + beatmapsetString + '\n\n';
 
-					discordMessage = newMessage;
-				}
-
+			if (newMessage.length > Discord.maxLength) {
 				await sendMessage(discordMessage);
+				discordMessage = beatmapsetString + '\n\n';
+				continue;
 			}
-		}),
-	);
+
+			discordMessage = newMessage;
+		}
+
+		await sendMessage(discordMessage);
+	}
 
 	console.error('Uploading topic covers');
 
