@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, loadImage, registerFont } from 'canvas';
-import { formatPercent } from './helpers.js';
+import { NoTraceError, formatPercent } from './helpers.js';
 
 registerFont('resources/Torus-Regular.otf', { family: 'Torus' });
 
@@ -31,11 +31,11 @@ async function loadOverlayImage(scale) {
 
 export default async function createBanners(backgroundPath, outputPath, title) {
 	if (!backgroundPath) {
-		throw 'Background path not set';
+		throw new Error('Background path not set');
 	}
 
 	if (!outputPath) {
-		throw 'Output path not set';
+		throw new Error('Output path not set');
 	}
 
 	const backgroundBuffer = await readFile(backgroundPath);
@@ -105,7 +105,9 @@ export default async function createBanners(backgroundPath, outputPath, title) {
 		const titleOverflow = context.measureText(title).width / titleMaxWidth - 1;
 
 		if (titleOverflow > 0) {
-			throw `Title is ${formatPercent(titleOverflow)} wider than the available space`;
+			throw new NoTraceError(
+				`Title is ${formatPercent(titleOverflow)} wider than the available space`,
+			);
 		}
 
 		// Render to JPEG

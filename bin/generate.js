@@ -11,11 +11,13 @@ import config from '../src/config.js';
 import createBanners from '../src/createBanners.js';
 import { pinTopic, storeTopicCover } from '../src/forum.js';
 import {
+	NoTraceError,
 	convertToMarkdown,
 	escapeMarkdown,
 	expandBbcodeRootLinks,
 	joinList,
 	loadTextResource,
+	log,
 	logAndExit,
 	maxOf,
 	minOf,
@@ -39,17 +41,18 @@ async function generateBanners(bannersPath, beatmapsets) {
 				.then((generatedBanners) =>
 					console.error(
 						chalk.dim.green(
-							`${generatedBanners ? 'Created' : 'Using cached'} banners for "${beatmapset.title}" [#${beatmapset.id}]`,
+							`${generatedBanners ? 'Created' : 'Using cached'} banners for ${chalk.underline(beatmapset.title)} [#${beatmapset.id}]`,
 						),
 					),
 				)
-				.catch((reason) => {
+				.catch((error) => {
 					console.error(
 						chalk.dim.red(
-							`Failed to create banners for "${beatmapset.title}" [#${beatmapset.id}]:\n${reason}`,
+							`Failed to create banners for ${chalk.underline(beatmapset.title)} [#${beatmapset.id}]:`,
 						),
 					);
-					throw new Error();
+					log(error);
+					throw new NoTraceError();
 				}),
 		),
 	);
@@ -81,7 +84,7 @@ async function generateTopics(
 	}
 
 	if (error) {
-		throw new Error();
+		throw new NoTraceError();
 	}
 
 	const discordBeatmapsetTemplate = await loadTextResource('discord-template-beatmap.md');
@@ -341,7 +344,7 @@ function getExtraBeatmapsetInfo(nomination) {
 			const versionMatch = beatmap.version.match(/(?:\[\d+K\] )?(.+)/i);
 
 			if (versionMatch == null) {
-				throw `Excluded beatmap version match failed for nomination #${nomination.id}`;
+				throw new Error(`Excluded beatmap version match failed for nomination #${nomination.id}`);
 			}
 
 			excludedDiffNames.push(`[${versionMatch[1]}]`);
@@ -353,7 +356,7 @@ function getExtraBeatmapsetInfo(nomination) {
 	}
 
 	if (beatmaps.length === 0) {
-		throw `No beatmaps for nomination #${nomination.id}`;
+		throw new NoTraceError(`No beatmaps for nomination #${nomination.id}`);
 	}
 
 	// TODO: should be done on website
@@ -428,7 +431,7 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 		if (paths[beatmapset.id] == null) {
 			console.error(
 				chalk.yellow(
-					`Missing background image for ${beatmapset.title} [#${beatmapset.id}], using default`,
+					`Missing background image for ${chalk.underline(beatmapset.title)} [#${beatmapset.id}], using default`,
 				),
 			);
 		}

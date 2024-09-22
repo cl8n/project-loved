@@ -2,13 +2,14 @@ import chalk from 'chalk';
 import superagent from 'superagent';
 import Ruleset from './Ruleset.js';
 import config from './config.js';
+import { NoTraceError } from './helpers.js';
 
 const baseUrl = config.lovedBaseUrl + '/api/local-interop';
 const interopVersion = '8';
 
 function handleLovedWebError(error) {
 	if (typeof error === 'object' && error.response?.body?.error != null) {
-		throw new Error(`[loved.sh] ${error.response.body.error}`);
+		throw new NoTraceError(`[loved.sh] ${error.response.body.error}`);
 	}
 
 	throw error;

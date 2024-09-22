@@ -6,6 +6,7 @@ import open from 'open';
 import superagent from 'superagent';
 import Limiter from './Limiter.js';
 import config from './config.js';
+import { NoTraceError } from './helpers.js';
 
 let chatAccessToken;
 const limiter = new Limiter(1000);
@@ -13,7 +14,7 @@ const port = 18888;
 
 function runApiRequestFn(requestFn) {
 	if (chatAccessToken == null) {
-		throw 'Chat access token not set';
+		throw new Error('Chat access token not set');
 	}
 
 	return limiter.run(requestFn);
@@ -28,7 +29,9 @@ export function revokeChatAccessToken() {
 				console.error(chalk.green('Revoked chat access token'));
 				chatAccessToken = undefined;
 			})
-			.catch(() => console.error(chalk.red('Failed to revoke chat access token'))),
+			.catch(() => {
+				throw new NoTraceError('Failed to revoke chat access token');
+			}),
 	);
 }
 
@@ -97,8 +100,7 @@ export async function setChatAccessToken() {
 	await open(url.toString());
 
 	const authCode = await authCodePromise.catch(() => {
-		console.error(chalk.red('Authorization failed'));
-		process.exit(1);
+		throw new NoTraceError('Authorization failed');
 	});
 	const tokenResponse = await superagent.post(`${config.osuBaseUrl}/oauth/token`).send({
 		client_id: config.apiClient.id,

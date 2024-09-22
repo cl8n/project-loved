@@ -22,7 +22,7 @@ const hostTemplate = await loadTextResource('chat-nomination-template.md');
 
 async function sendNotifyPm(nominations, extraGameModeInfo, roundName) {
 	if (nominations.length === 0) {
-		throw 'No nominations provided';
+		throw new Error('No nominations provided');
 	}
 
 	const beatmapset = nominations[0].beatmapset;
@@ -115,14 +115,14 @@ if (roundInfo.nominations.length === 0) {
 	process.exit();
 }
 
-await setChatAccessToken();
+await setChatAccessToken().catch(logAndExit);
 
 for (const nomination of roundInfo.nominations) {
 	await sendNotifyPm(
 		roundInfo.allNominations.filter((n) => n.beatmapset_id === nomination.beatmapset_id),
 		roundInfo.extraGameModeInfo,
 		roundInfo.name,
-	);
+	).catch(logAndExit);
 }
 
-await revokeChatAccessToken();
+await revokeChatAccessToken().catch(logAndExit);

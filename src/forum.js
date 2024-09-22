@@ -1,9 +1,12 @@
+import { appendFileSync } from 'node:fs';
+import { inspect } from 'node:util';
 import chalk from 'chalk';
 import superagent from 'superagent';
 import WebSocket from 'ws';
 import Limiter from './Limiter.js';
 import Ruleset from './Ruleset.js';
 import config from './config.js';
+import { NoTraceError } from './helpers.js';
 
 function handleVerification() {
 	console.log(
@@ -50,7 +53,7 @@ async function requestBase(superagentModifier) {
 
 	if (response.status === 401) {
 		if (!response.text?.includes('<h1 class="user-verification')) {
-			throw 'Authentication failed';
+			throw new NoTraceError('Authentication failed');
 		}
 
 		await handleVerification();
@@ -93,7 +96,20 @@ async function request(options) {
 			return response;
 		})
 		.catch((error) => {
-			console.error(chalk.dim.red(`Request #${n} to ${options.uri} failed: ${error}`));
+			const requestLogFilename = 'request-log.txt';
+			const requestLogEntry =
+				`########## ${(options.method ?? 'post').toUpperCase()} ${config.osuBaseUrl}${options.uri}\n` +
+				`########## ${new Date().toISOString()}\n` +
+				`${inspect(error)}\n\n`;
+
+			appendFileSync(requestLogFilename, requestLogEntry);
+
+			console.error(
+				chalk.dim.red(
+					`Request #${n} to ${options.uri} failed. See ${requestLogFilename} for more details`,
+				),
+			);
+
 			throw error;
 		});
 }
@@ -113,7 +129,7 @@ export async function pinTopic(topicId, type = 'pin') {
 	const pin = [false, 'pin', 'announce'].indexOf(type);
 
 	if (pin === -1) {
-		throw 'Invalid pin type';
+		throw new Error('Invalid pin type');
 	}
 
 	await request({

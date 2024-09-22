@@ -55,19 +55,24 @@ export function loadTextResource(basename) {
 	return readFile(join('resources', basename), 'utf8');
 }
 
-export function logAndExit(error) {
+export class NoTraceError extends Error {}
+
+export function log(error) {
 	let errorMessage = 'Error occurred';
 
 	if (typeof error === 'string') {
 		errorMessage = error;
 	} else if (error instanceof Error) {
-		errorMessage = error.message.startsWith('[loved.sh]') ? error.message : inspect(error);
+		errorMessage = error instanceof NoTraceError ? error.message : inspect(error);
 	}
 
 	if (errorMessage) {
 		console.error(chalk.red(errorMessage));
 	}
+}
 
+export function logAndExit(error) {
+	log(error);
 	process.exit(1);
 }
 
