@@ -108,6 +108,20 @@ export function textFromTemplate(template, vars) {
 		.trim();
 }
 
+export function videoDiscord(videoIdOrLink) {
+	if (typeof videoIdOrLink !== 'string') {
+		return null;
+	}
+
+	// MP4 video link
+	if (videoIdOrLink.startsWith('http')) {
+		return videoIdOrLink;
+	}
+
+	// YouTube video ID
+	return `https://www.youtube.com/watch?v=${videoIdOrLink}`;
+}
+
 export function videoHtml(videoIdOrLink) {
 	if (typeof videoIdOrLink !== 'string') {
 		return null;

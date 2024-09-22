@@ -22,6 +22,7 @@ import {
 	maxOf,
 	minOf,
 	textFromTemplate,
+	videoDiscord,
 	videoHtml,
 } from '../src/helpers.js';
 import tryUpdate from '../src/tryUpdate.js';
@@ -159,7 +160,7 @@ async function generateTopics(
 		});
 	}
 
-	const { mainTopicIds, nominationTopicIds } = await lovedWeb.createPolls(
+	const { mainTopicIds, mainTopicIdsMap, nominationTopicIds } = await lovedWeb.createPolls(
 		config.lovedRoundId,
 		mainTopicBodies,
 		nominationTopicBodies,
@@ -206,6 +207,13 @@ async function generateTopics(
 		}
 
 		await sendMessage(discordMessage);
+		await sendMessage(
+			[
+				`**[Click here to download all of this round's picks!](<${encodeURI(packUrl(roundTitle, gameMode))}>)**`,
+				`[Click here to view the main forum topic!](<https://osu.ppy.sh/community/forums/topics/${mainTopicIdsMap[gameMode.id]}>)`,
+				videoDiscord(extraGameModeInfo[gameMode.id].video) ?? '',
+			].join('\n\n'),
+		);
 	}
 
 	console.error('Uploading topic covers');
@@ -235,7 +243,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 		const nominationsForMode = roundInfo.allNominations.filter(
 			(n) => n.game_mode.id === gameMode.id,
 		);
-		packUrls[gameMode.id] = encodeURI(packUrl(roundInfo, gameMode));
+		packUrls[gameMode.id] = encodeURI(packUrl(roundInfo.title, gameMode));
 
 		if (nominationsForMode.length === 0) {
 			console.error(chalk.yellow(`Skipping ${gameMode.longName}, there are no nominations`));
@@ -444,12 +452,12 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 	return paths;
 }
 
-function packUrl(roundInfo, ruleset) {
+function packUrl(roundTitle, ruleset) {
 	// TODO shouldn't be here and will be wrong if any modes or rounds are skipped
 	const packNumber = (config.lovedRoundId - 109 + 1) * 4 - ruleset.id;
 
 	// TODO don't use round title
-	const title = config.lovedRoundId === 111 ? 'Project Loved: September 2024' : roundInfo.title;
+	const title = config.lovedRoundId === 111 ? 'Project Loved: September 2024' : roundTitle;
 
 	return `https://packs.ppy.sh/LR${packNumber} - ${title} (${ruleset.longName}).zip`;
 }
