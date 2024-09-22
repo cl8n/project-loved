@@ -227,6 +227,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 	const newsGameModeTemplate = await loadTextResource('news-post-template-mode.md');
 	const newsNominationTemplate = await loadTextResource('news-post-template-beatmap.md');
 	const newsTemplate = await loadTextResource('news-post-template.md');
+	const packUrls = {};
 
 	for (const gameMode of Ruleset.all()) {
 		const extraInfo = roundInfo.extraGameModeInfo[gameMode.id];
@@ -234,6 +235,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 		const nominationsForMode = roundInfo.allNominations.filter(
 			(n) => n.game_mode.id === gameMode.id,
 		);
+		packUrls[gameMode.id] = encodeURI(packUrl(roundInfo, gameMode));
 
 		if (nominationsForMode.length === 0) {
 			console.error(chalk.yellow(`Skipping ${gameMode.longName}, there are no nominations`));
@@ -302,6 +304,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 					extraInfo.descriptionAuthors.length === 1 ? extraInfo.descriptionAuthors[0].id : null,
 				MODE_LONG: gameMode.longName,
 				NOMINATIONS: nominationStrings.join('\n\n'),
+				PACK_URL: packUrls[gameMode.id],
 				VIDEO: videoHtml(extraInfo.video),
 			}),
 		);
@@ -318,6 +321,7 @@ async function generateNews(newsPath, roundInfo, topicIds) {
 			INTRO: roundInfo.intro,
 			NOMINATIONS: gameModeSectionStrings.join('\n\n'),
 			OUTRO: roundInfo.outro,
+			PACK_URLS: packUrls,
 			TIME: roundInfo.postTimeString,
 			TITLE: roundInfo.title,
 			VIDEO: videoHtml(roundInfo.video),
@@ -438,6 +442,16 @@ async function loadBeatmapsetBgPaths(beatmapsets) {
 	}
 
 	return paths;
+}
+
+function packUrl(roundInfo, ruleset) {
+	// TODO shouldn't be here and will be wrong if any modes or rounds are skipped
+	const packNumber = (config.lovedRoundId - 109 + 1) * 4 - ruleset.id;
+
+	// TODO don't use round title
+	const title = config.lovedRoundId === 111 ? 'Project Loved: September 2024' : roundInfo.title;
+
+	return `https://packs.ppy.sh/LR${packNumber} - ${title} (${ruleset.longName}).zip`;
 }
 
 const outPath = process.argv.slice(2).find((arg) => !arg.startsWith('-'));

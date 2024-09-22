@@ -21,7 +21,11 @@ ${vars.VIDEO}`
 
 ### Navigation
 
-<? vars.GAME_MODES.map((m) => `- [${m.longName}](#${m.longName})`).join('\n') ?>
+<?
+vars.GAME_MODES.map(
+	(m) => `- **[${m.longName}](#${m.longName})** ([Download pack](${vars.PACK_URLS[m.id]}))`,
+).join('\n')
+?>
 
 {{NOMINATIONS}}
 
