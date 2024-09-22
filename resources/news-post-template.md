@@ -12,11 +12,6 @@ if (vars.INTRO) {
 `
 
 ${vars.INTRO}`
-} ?><?
-if (vars.VIDEO) {
-`
-
-${vars.VIDEO}`
 } ?>
 
 ### Navigation
@@ -25,7 +20,14 @@ ${vars.VIDEO}`
 vars.GAME_MODES.map(
 	(m) => `- **[${m.longName}](#${m.longName})** ([Download pack](${vars.PACK_URLS[m.id]}))`,
 ).join('\n')
-?>
+?><?
+if (vars.VIDEO) {
+`
+
+## Summary
+
+${vars.VIDEO}`
+} ?>
 
 {{NOMINATIONS}}
 
