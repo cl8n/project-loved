@@ -1,7 +1,7 @@
+import RateLimiter from '@cl8n/rate-limiter';
 import superagent from 'superagent';
-import Limiter from './Limiter.js';
 
-const limiter = new Limiter(2000);
+const limiter = new RateLimiter(2000);
 
 export default class Discord {
 	static maxEmbeds = 10;

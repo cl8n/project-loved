@@ -1,9 +1,9 @@
 import { appendFileSync } from 'node:fs';
 import { inspect } from 'node:util';
+import RateLimiter from '@cl8n/rate-limiter';
 import chalk from 'chalk';
 import superagent from 'superagent';
 import WebSocket from 'ws';
-import Limiter from './Limiter.js';
 import Ruleset from './Ruleset.js';
 import config from './config.js';
 import { NoTraceError } from './helpers.js';
@@ -40,7 +40,7 @@ const cookieHeader = Object.entries({
 })
 	.map(([key, value]) => `${key}=${value}`)
 	.join('; ');
-const limiter = new Limiter(2500);
+const limiter = new RateLimiter(2500);
 const agent = superagent
 	.agent()
 	.ok((response) => response.status < 300 || response.status === 401)

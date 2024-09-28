@@ -1,15 +1,15 @@
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import { inspect } from 'node:util';
+import RateLimiter from '@cl8n/rate-limiter';
 import chalk from 'chalk';
 import open from 'open';
 import superagent from 'superagent';
-import Limiter from './Limiter.js';
 import config from './config.js';
 import { NoTraceError } from './helpers.js';
 
 let chatAccessToken;
-const limiter = new Limiter(1000);
+const limiter = new RateLimiter(1000);
 const port = 18888;
 
 function runApiRequestFn(requestFn) {
