@@ -148,32 +148,42 @@ export async function lockTopic(topicId) {
 }
 
 export async function getModeTopics(forumId) {
-	throw new Error("Ask clayton to fix this, it doesn't work right now");
-
 	let { text: body } = await request({
 		uri: `/community/forums/${forumId}`,
 		method: 'get',
 		accept: 'html',
 	});
 
-	const topicIdRegex = new RegExp(
-		`href="${config.osuBaseUrl.replace(/\./g, '\\.')}/community/forums/topics/(\\d+)"`,
-	);
+	const pinnedTopicsStartMatch = body.match(/<h2(?:>|\s[^>]*>)\s*Pinned Topics\s*<\/h2>/);
+	const pinnedTopicsEndMatch = body.match(/<div\s[^>]*id="topics"/);
+
+	if (pinnedTopicsStartMatch == null || pinnedTopicsEndMatch == null) {
+		throw new Error('Unexpected HTML: Cannot find start or end of pinned topic layout');
+	}
+
+	body = body.slice(pinnedTopicsStartMatch.index, pinnedTopicsEndMatch.index);
+
+	let foundTopics = false;
 	const topics = {};
-	body = body.substring(body.indexOf('Pinned Topics'), body.indexOf('id="topics"'));
 
 	while (true) {
-		const match = body.match(/\[(osu![a-z]*)\] Project Loved: /);
+		const topicLinkMatch = body.match(
+			/<a\s[^>]*href="[^"]*\/community\/forums\/topics\/(\d+)"[^>]*>\s*\[(osu![a-z]*)\] Project Loved: /,
+		);
 
-		if (match == null) {
+		if (topicLinkMatch == null) {
 			break;
 		}
 
-		const mode = new Ruleset(match[1]);
+		const ruleset = new Ruleset(topicLinkMatch[2]);
 
-		body = body.substring(match.index + match[0].length);
+		body = body.slice(topicLinkMatch.index + topicLinkMatch[0].length);
+		foundTopics = true;
+		topics[ruleset.id] = Number.parseInt(topicLinkMatch[1], 10);
+	}
 
-		topics[mode.id] = Number.parseInt(body.match(topicIdRegex)[1], 10);
+	if (!foundTopics) {
+		throw new Error('Unexpected HTML: Cannot find any pinned topics');
 	}
 
 	return topics;
