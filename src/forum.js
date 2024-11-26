@@ -155,7 +155,7 @@ export async function getModeTopics(forumId) {
 	});
 
 	const topicIdRegex = new RegExp(
-		`href="${config.osuBaseUrl.replace(/\./g, '\\.')}/community/forums/topics/(\\d+)\\?start=unread"`,
+		`href="${config.osuBaseUrl.replace(/\./g, '\\.')}/community/forums/topics/(\\d+)"`,
 	);
 	const topics = {};
 	body = body.substring(body.indexOf('Pinned Topics'), body.indexOf('id="topics"'));
