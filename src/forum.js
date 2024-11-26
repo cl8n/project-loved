@@ -148,6 +148,8 @@ export async function lockTopic(topicId) {
 }
 
 export async function getModeTopics(forumId) {
+	throw new Error("Ask clayton to fix this, it doesn't work right now");
+
 	let { text: body } = await request({
 		uri: `/community/forums/${forumId}`,
 		method: 'get',
